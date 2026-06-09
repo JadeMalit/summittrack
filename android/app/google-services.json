@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "785993329168",
+    "project_id": "summittrack-10481",
+    "storage_bucket": "summittrack-10481.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:785993329168:android:e62297fd24d49b3b1cf895",
+        "android_client_info": {
+          "package_name": "com.example.summittrack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBobG-HXLwhvyXFQaczZY1vdU-Kas7ExNo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
