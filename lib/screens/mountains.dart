@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';  // To get current user
 import '../services/data_service.dart';
-import 'mountain_detail_screen.dart';
+import 'mountain_screen_resolver.dart';
 
 class MountainsScreen extends StatelessWidget {
   const MountainsScreen({super.key});
@@ -74,13 +74,7 @@ class MountainsScreen extends StatelessWidget {
                       subtitle: Text(
                           'Elevation: ${mountain.elevation}m, Location: ${mountain.location}'),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                MountainDetailScreen(mountain: mountain),
-                          ),
-                        );
+                        openMountainScreen(context, mountain);
                       },
                     ),
                   );

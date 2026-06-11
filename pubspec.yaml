@@ -38,6 +38,9 @@ dependencies:
   firebase_storage: ^11.6.0
   google_fonts: ^6.2.1
   http: ^1.2.2
+  image_picker: ^1.1.2
+  shared_preferences: ^2.3.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -64,6 +67,7 @@ flutter:
     - assets/images/singin.jpg
     - assets/images/logo.jpg
     - assets/images/register.jpg
+    - assets/images/mt apo.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
