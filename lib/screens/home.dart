@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'mountains.dart';
-import 'mt_apo.dart'; 
+
+import '../ButtonFunction/navbar_button_function.dart';
+import '../TrailData/mountain.dart';
+import '../services/data_service.dart';
+import 'mountain_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,12 +14,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int selectedIndex = 0;
+  int selectedIndex = homeNavbarIndex;
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final name = user?.displayName ?? "Hiker";
+    final mountains = DataService.getMountains()
+        .where((mountain) =>
+            mountain.name == 'Mt. Apo' || mountain.name == 'Mt. Pulag')
+        .toList();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -69,7 +74,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       IconButton(
                         onPressed: () async {
                           await FirebaseAuth.instance.signOut();
-                          Navigator.pop(context);
                         },
                         icon: const Icon(
                           Icons.logout,
@@ -171,21 +175,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     const EdgeInsets.symmetric(horizontal: 15),
                 children: [
 
-                  /// MT APO
-                  mountainCard(
-                    context,
-                    "Mt. Apo",
-                    "assets/images/apo.jpg",
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  /// MT PULAG
-                  mountainCard(
-                    context,
-                    "Mt. Pulag",
-                    "assets/images/pulag.jpg",
-                  ),
+                  for (var index = 0; index < mountains.length; index++) ...[
+                    if (index > 0) const SizedBox(height: 15),
+                    mountainCard(
+                      context,
+                      mountains[index],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -197,9 +193,26 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectedIndex,
         onTap: (index) {
-          setState(() {
-            selectedIndex = index;
-          });
+          handleNavbarButtonTap(
+            context,
+            index,
+            onHomeSelected: () {
+              if (!mounted) {
+                return;
+              }
+
+              setState(() {
+                selectedIndex = homeNavbarIndex;
+              });
+            },
+            onWeatherSelected: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Weather screen is not available yet.'),
+                ),
+              );
+            },
+          );
         },
         selectedItemColor: Colors.green[800],
         unselectedItemColor: Colors.black54,
@@ -232,16 +245,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// 🔥 MOUNTAIN CARD
   Widget mountainCard(
-      BuildContext context,
-      String title,
-      String imagePath,
-      ) {
+    BuildContext context,
+    Mountain mountain,
+  ) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
+        Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => const MtApoScreen(),
+            builder: (_) => MountainDetailScreen(mountain: mountain),
           ),
         );
       },
@@ -262,7 +273,9 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
                 image: DecorationImage(
-                  image: AssetImage(imagePath),
+                  image: AssetImage(
+                    mountain.imageAsset ?? 'assets/images/apo.jpg',
+                  ),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -279,7 +292,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
 
                     Text(
-                      title,
+                      mountain.name,
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,

@@ -33,6 +33,36 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    (async function () {
+      const host = window.location.hostname;
+      const isLocalhost =
+        host === 'localhost' ||
+        host === '127.0.0.1' ||
+        host === '[::1]';
+
+      if (isLocalhost) {
+        if ('serviceWorker' in navigator) {
+          try {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(
+              registrations.map((registration) => registration.unregister()),
+            );
+          } catch (_) {}
+        }
+
+        if ('caches' in window) {
+          try {
+            const cacheKeys = await caches.keys();
+            await Promise.all(cacheKeys.map((key) => caches.delete(key)));
+          } catch (_) {}
+        }
+      }
+
+      const flutterBootstrap = document.createElement('script');
+      flutterBootstrap.src = 'flutter_bootstrap.js';
+      document.body.appendChild(flutterBootstrap);
+    })();
+  </script>
 </body>
 </html>

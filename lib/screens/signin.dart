@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart'; // add this
-import 'signup.dart';
-import 'home.dart';
+import '../app_routes.dart';
 
 class SignInScreen extends StatefulWidget {
-  const SignInScreen({super.key});
+  const SignInScreen({super.key, this.redirectTo = AppRoutes.home});
+
+  final String redirectTo;
 
   @override
   State<SignInScreen> createState() => _SignInScreenState();
@@ -18,6 +19,7 @@ class _SignInScreenState extends State<SignInScreen>
 
   bool loading = false;
   bool hidePass = true;
+  String? errorMessage;
 
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
@@ -32,20 +34,20 @@ class _SignInScreenState extends State<SignInScreen>
       duration: const Duration(milliseconds: 800),
     );
 
-    _fadeAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    );
+    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.2),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
+    errorMessage = null;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).clearSnackBars();
+    });
   }
 
   @override
@@ -56,35 +58,74 @@ class _SignInScreenState extends State<SignInScreen>
     super.dispose();
   }
 
+  void _clearError() {
+    if (errorMessage == null || !mounted) return;
+
+    setState(() => errorMessage = null);
+    ScaffoldMessenger.of(context).clearSnackBars();
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+
+    setState(() => errorMessage = message);
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
   Future<void> signIn() async {
+    if (loading) return;
+
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    FocusScope.of(context).unfocus();
+    _clearError();
+
+    if (email.isEmpty || password.isEmpty) {
+      _showError("Please enter your email and password.");
+      return;
+    }
+
     try {
       setState(() => loading = true);
 
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
+        email: email,
+        password: password,
       );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed(
+        AppRoutes.resolveRedirectTarget(widget.redirectTo),
       );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login failed: $e")),
-      );
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'invalid-credential' ||
+          e.code == 'wrong-password' ||
+          e.code == 'user-not-found' ||
+          e.code == 'invalid-email') {
+        _showError("Incorrect email or password.");
+      } else if (e.code == 'network-request-failed') {
+        _showError(
+          "Unable to sign in right now. Please check your internet connection.",
+        );
+      } else {
+        _showError("Unable to sign in right now. Please try again.");
+      }
+    } catch (_) {
+      _showError("Unable to sign in right now. Please try again.");
     } finally {
-      setState(() => loading = false);
+      if (mounted) {
+        setState(() => loading = false);
+      }
     }
   }
 
   InputDecoration _inputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.poppins(
-        color: Colors.grey[600],
-        fontSize: 16,
-      ),
+      hintStyle: GoogleFonts.poppins(color: Colors.grey[600], fontSize: 16),
       filled: true,
       fillColor: Colors.white.withOpacity(0.9),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
@@ -115,7 +156,7 @@ class _SignInScreenState extends State<SignInScreen>
         height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("assets/images/signin.jpg"),
+            image: AssetImage("assets/images/singin.jpg"),
             fit: BoxFit.cover,
           ),
         ),
@@ -131,7 +172,7 @@ class _SignInScreenState extends State<SignInScreen>
                       FadeTransition(
                         opacity: _fadeAnimation,
                         child: Image.asset(
-                          "assets/images/logo.png",
+                          "assets/images/logo.jpg",
                           height: 150,
                         ),
                       ),
@@ -175,6 +216,7 @@ class _SignInScreenState extends State<SignInScreen>
                         position: _slideAnimation,
                         child: TextField(
                           controller: emailController,
+                          onChanged: (_) => _clearError(),
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -203,6 +245,7 @@ class _SignInScreenState extends State<SignInScreen>
                         position: _slideAnimation,
                         child: TextField(
                           controller: passwordController,
+                          onChanged: (_) => _clearError(),
                           obscureText: hidePass,
                           style: GoogleFonts.poppins(
                             fontSize: 16,
@@ -210,19 +253,20 @@ class _SignInScreenState extends State<SignInScreen>
                           ),
                           decoration: _inputDecoration("Enter your password")
                               .copyWith(
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                hidePass
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    hidePass
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                  ),
+                                  onPressed: () {
+                                    _clearError();
+                                    setState(() {
+                                      hidePass = !hidePass;
+                                    });
+                                  },
+                                ),
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  hidePass = !hidePass;
-                                });
-                              },
-                            ),
-                          ),
                         ),
                       ),
 
@@ -261,32 +305,9 @@ class _SignInScreenState extends State<SignInScreen>
                           ),
                           GestureDetector(
                             onTap: () {
-                              Navigator.push(
+                              Navigator.pushNamed(
                                 context,
-                                PageRouteBuilder(
-                                  pageBuilder: (context, animation, secondaryAnimation) => 
-                                      const SignUpScreen(),
-                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                    // 1. Sliding configuration (Right to Left)
-                                    const beginOffset = Offset(1.0, 0.0);
-                                    const endOffset = Offset.zero;
-                                    const curve = Curves.easeInOutCubic;
-                                    
-                                    final tween = Tween(begin: beginOffset, end: endOffset)
-                                        .chain(CurveTween(curve: curve));
-                                    final offsetAnimation = animation.drive(tween);
-
-                                    // 2. Combining Slide with Fade for a smoother transition
-                                    return SlideTransition(
-                                      position: offsetAnimation,
-                                      child: FadeTransition(
-                                        opacity: animation,
-                                        child: child,
-                                      ),
-                                    );
-                                  },
-                                  transitionDuration: const Duration(milliseconds: 400),
-                                ),
+                                AppRoutes.signupWithRedirect(widget.redirectTo),
                               );
                             },
                             child: Text(
@@ -318,7 +339,7 @@ class _SignInScreenState extends State<SignInScreen>
                                   borderRadius: BorderRadius.circular(30),
                                 ),
                               ),
-                              onPressed: signIn,
+                              onPressed: loading ? null : signIn,
                               child: Text(
                                 "LOGIN",
                                 style: GoogleFonts.poppins(

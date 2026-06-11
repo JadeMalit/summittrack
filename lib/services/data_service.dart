@@ -1,4 +1,4 @@
-import '../models/mountain.dart';
+import '../TrailData/mountain.dart';
 
 class DataService {
   static List<Mountain> getMountains() {
@@ -7,15 +7,35 @@ class DataService {
         name: 'Mt. Apo',
         region: 'Mindanao',
         elevation: 2954,
-        location: 'Davao',
-        description: 'The country\'s highest peak, offering diverse ecosystems and a challenging multi-day climb.',
+        location:
+            'Mindanao, Philippines, between Davao City, Davao del Sur, and Cotabato',
+        description:
+            'Mt. Apo is the highest mountain in the Philippines, offering diverse ecosystems, sulfur vents, forests, and a challenging multi-day climb.',
+        slope: 'Steep, rugged, and challenging',
+        trails: const [
+          'Sta. Cruz / Sibulan Trail',
+          'Kapatagan Trails',
+          'Kidapawan Trail',
+          'Magpet Trail',
+          'Bansalan Trail',
+        ],
+        imageAsset: 'assets/images/apo.jpg',
       ),
       Mountain(
         name: 'Mt. Pulag',
         region: 'Luzon',
-        elevation: 2922,
-        location: 'Benguet',
-        description: 'Famous for its "sea of clouds" sunrise, accessible via beginner-friendly trails like Ambangeg.',
+        elevation: 2928,
+        location: 'Benguet, Philippines',
+        description:
+            'Mt. Pulag is known for its sea of clouds, grassland summit, cold weather, and scenic highland trails.',
+        slope: 'Moderate to challenging depending on the trail',
+        trails: const [
+          'Ambangeg Trail',
+          'Akiki Trail',
+          'Tawangan Trail',
+          'Ambaguio Trail',
+        ],
+        imageAsset: 'assets/images/pulag.jpg',
       ),
       Mountain(
         name: 'Mt. Mayon',

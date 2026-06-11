@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/mountain.dart';
+import '../TrailData/mountain.dart';
+import '../app_routes.dart';
 
 class MountainDetailScreen extends StatelessWidget {
   final Mountain mountain;
@@ -19,11 +20,22 @@ class MountainDetailScreen extends StatelessWidget {
           children: [
 
             /// 🖼 HEADER IMAGE (placeholder for now)
-            Container(
-              height: 200,
+            SizedBox(
+              height: 220,
               width: double.infinity,
-              color: Colors.green[200],
-              child: const Icon(Icons.terrain, size: 100, color: Colors.white),
+              child: mountain.imageAsset == null
+                  ? Container(
+                      color: Colors.green[200],
+                      child: const Icon(
+                        Icons.terrain,
+                        size: 100,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Image.asset(
+                      mountain.imageAsset!,
+                      fit: BoxFit.cover,
+                    ),
             ),
 
             Padding(
@@ -45,6 +57,7 @@ class MountainDetailScreen extends StatelessWidget {
                   Text("Region: ${mountain.region}"),
                   Text("Location: ${mountain.location}"),
                   Text("Elevation: ${mountain.elevation} meters"),
+                  Text("Slope: ${mountain.slope}"),
 
                   const SizedBox(height: 20),
 
@@ -56,6 +69,28 @@ class MountainDetailScreen extends StatelessWidget {
                   Text(mountain.description),
 
                   const SizedBox(height: 30),
+
+                  /// TRAILS
+                  const Text("Trails",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  if (mountain.trails.isEmpty)
+                    const Text("Trail details will be added soon.")
+                  else
+                    for (final trail in mountain.trails) ...[
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.hiking),
+                        label: Text(trail),
+                        onPressed: () => _openTrail(context, mountain, trail),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            minimumSize: const Size(double.infinity, 48)),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+
+                  const SizedBox(height: 20),
 
                   /// ACTION BUTTONS
                   ElevatedButton.icon(
@@ -91,6 +126,22 @@ class MountainDetailScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _openTrail(BuildContext context, Mountain mountain, String trail) {
+    if (mountain.name == 'Mt. Apo' && trail == 'Sta. Cruz / Sibulan Trail') {
+      Navigator.of(context).pushNamed(
+        AppRoutes.trail(
+          AppRoutes.mtApoMountainId,
+          AppRoutes.staCruzTrailId,
+        ),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$trail details will be added soon.')),
     );
   }
 }

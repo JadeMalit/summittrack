@@ -4,6 +4,9 @@ class Mountain {
   final int elevation; // meters
   final String location; // province / city
   final String description; // short hiking info
+  final String slope;
+  final List<String> trails;
+  final String? imageAsset;
 
   Mountain({
     required this.name,
@@ -11,5 +14,8 @@ class Mountain {
     required this.elevation,
     required this.location,
     required this.description,
+    this.slope = 'Not specified',
+    this.trails = const [],
+    this.imageAsset,
   });
 }

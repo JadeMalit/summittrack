@@ -1,53 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';  // To get current user
+import '../services/data_service.dart';
 import 'mountain_detail_screen.dart';
-
-// Mountain class definition
-class Mountain {
-  final String name;
-  final String region;
-  final int elevation;
-  final String location;
-  final String description;
-
-  Mountain({
-    required this.name,
-    required this.region,
-    required this.elevation,
-    required this.location,
-    required this.description,
-  });
-}
 
 class MountainsScreen extends StatelessWidget {
   const MountainsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Sample list of mountains
-    List<Mountain> mountains = [
-      Mountain(
-        name: 'Mt. Pulag',
-        region: 'Luzon',
-        elevation: 2926,
-        location: 'Benguet',
-        description: 'A popular hiking spot with great views and a sea of clouds.',
-      ),
-      Mountain(
-        name: 'Mt. Apo',
-        region: 'Mindanao',
-        elevation: 2956,
-        location: 'Davao',
-        description: 'The highest peak in the Philippines, known for its challenging trail.',
-      ),
-      Mountain(
-        name: 'Mt. Batulao',
-        region: 'Luzon',
-        elevation: 811,
-        location: 'Batangas',
-        description: 'An easy hike with scenic views and amazing landscapes.',
-      ),
-    ];
+    final mountains = DataService.getMountains();
 
     // Get current user from FirebaseAuth
     final User? user = FirebaseAuth.instance.currentUser;
@@ -113,7 +74,13 @@ class MountainsScreen extends StatelessWidget {
                       subtitle: Text(
                           'Elevation: ${mountain.elevation}m, Location: ${mountain.location}'),
                       onTap: () {
-                        // Add navigation to MountainDetailScreen if needed
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                MountainDetailScreen(mountain: mountain),
+                          ),
+                        );
                       },
                     ),
                   );

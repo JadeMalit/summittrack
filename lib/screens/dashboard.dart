@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../models/mountain.dart';
+import '../services/data_service.dart';
 import 'mountain_detail_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -12,29 +12,12 @@ class DashboardScreen extends StatelessWidget {
     final User? user = FirebaseAuth.instance.currentUser;
     final String userName = user?.displayName ?? 'Hiker';
 
-    final List<Mountain> mountains = [
-      Mountain(
-        name: 'Mt. Pulag',
-        region: 'Luzon',
-        elevation: 2926,
-        location: 'Benguet',
-        description: 'Famous sa sea of clouds, malamig, at scenic views.',
-      ),
-      Mountain(
-        name: 'Mt. Batulao',
-        region: 'Luzon',
-        elevation: 811,
-        location: 'Batangas',
-        description: 'Beginner-friendly, magandang ridge views.',
-      ),
-      Mountain(
-        name: 'Mt. Pinatubo',
-        region: 'Luzon',
-        elevation: 1486,
-        location: 'Zambales / Tarlac / Pampanga',
-        description: 'Crater lake hike, usually may 4x4 + trekking.',
-      ),
-    ];
+    final mountains = DataService.getMountains()
+        .where((mountain) =>
+            mountain.name == 'Mt. Pulag' ||
+            mountain.name == 'Mt. Batulao' ||
+            mountain.name == 'Mt. Pinatubo')
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
