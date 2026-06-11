@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'weather.dart';
 import '../ButtonFunction/navbar_button_function.dart';
 import '../TrailData/mountain.dart';
 import '../services/data_service.dart';
@@ -205,13 +205,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 selectedIndex = homeNavbarIndex;
               });
             },
-            onWeatherSelected: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Weather screen is not available yet.'),
-                ),
-              );
-            },
+           onWeatherSelected: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => const WeatherScreen(),
+    ),
+  );
+},
           );
         },
         selectedItemColor: Colors.green[800],
