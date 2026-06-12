@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -11,7 +13,7 @@ class MtApoScreen extends StatelessWidget {
   static const _cardColor = Color(0xFFF4EFE5);
   static const _buttonColor = Color(0xFFB98914);
   static const _buttonShadow = Color(0xFF6A4A09);
-  static const _headerImage = 'assets/images/apo.jpg';
+  static const _headerImage = 'assets/images/mt apo.jpg';
 
   @override
   Widget build(BuildContext context) {
@@ -52,20 +54,8 @@ class MtApoScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _backgroundColor,
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF47633A),
-        foregroundColor: Colors.white,
-        centerTitle: true,
-        title: Text(
-          'Mt. Apo',
-          style: GoogleFonts.fredoka(
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.8,
-          ),
-        ),
-      ),
       body: SafeArea(
-        top: false,
+        top: true,
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 24),
           child: Column(
@@ -112,11 +102,7 @@ class MtApoScreen extends StatelessWidget {
                           'Its slope is steep, rugged, and challenging, with some trails having rocky and forested terrain. This makes it suitable for experienced hikers.',
                     ),
                     const SizedBox(height: 18),
-                    for (
-                      var index = 0;
-                      index < trailButtons.length;
-                      index++
-                    ) ...[
+                    for (var index = 0; index < trailButtons.length; index++) ...[
                       if (index > 0) ...[
                         const SizedBox(height: 10),
                         const Divider(
@@ -130,6 +116,10 @@ class MtApoScreen extends StatelessWidget {
                     ],
                   ],
                 ),
+              ),
+              const SizedBox(height: 22),
+              _BottomBackButton(
+                onTap: () => Navigator.of(context).maybePop(),
               ),
             ],
           ),
@@ -145,64 +135,146 @@ class MtApoScreen extends StatelessWidget {
   }
 }
 
-class _HeroHeader extends StatelessWidget {
+class _HeroHeader extends StatefulWidget {
   const _HeroHeader({required this.imageAsset, required this.title});
 
   final String imageAsset;
   final String title;
 
   @override
+  State<_HeroHeader> createState() => _HeroHeaderState();
+}
+
+class _HeroHeaderState extends State<_HeroHeader>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(30),
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          SizedBox(
-            height: 245,
-            width: double.infinity,
-            child: Image.asset(imageAsset, fit: BoxFit.cover),
-          ),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.06),
-                    Colors.black.withOpacity(0.25),
-                    Colors.black.withOpacity(0.55),
-                  ],
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        final t = _controller.value;
+        final shift = (t * 2.0) - 1.0;
+        final glow = 0.50 + (0.20 * (0.5 + 0.5 * math.sin(t * math.pi * 2)));
+        final gradient = LinearGradient(
+          begin: Alignment(-1.0 + shift, -0.2),
+          end: Alignment(1.0 - shift, 0.2),
+          colors: const [
+            Color(0xFF0A2D08),
+            Color(0xFF13400E),
+            Color(0xFF1F5B14),
+            Color(0xFF13400E),
+            Color(0xFF0A2D08),
+          ],
+          stops: const [0.0, 0.28, 0.5, 0.72, 1.0],
+        );
+
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              SizedBox(
+                height: 245,
+                width: double.infinity,
+                child: Image.asset(widget.imageAsset, fit: BoxFit.cover),
+              ),
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.06),
+                        Colors.black.withOpacity(0.25),
+                        Colors.black.withOpacity(0.55),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.lilitaOne(
-                fontSize: 42,
-                color: const Color(0xFF58FF42),
-                letterSpacing: 1.1,
-                shadows: const [
-                  Shadow(
-                    color: Color(0xFF0B3906),
-                    blurRadius: 16,
-                    offset: Offset(0, 2),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+                child: ShaderMask(
+                  blendMode: BlendMode.srcIn,
+                  shaderCallback: (bounds) => gradient.createShader(bounds),
+                  child: Text(
+                    widget.title,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.lilitaOne(
+                      fontSize: 42,
+                      color: Colors.white,
+                      letterSpacing: 1.1,
+                      shadows: [
+                        Shadow(
+                          color: Color.fromRGBO(7, 45, 5, glow),
+                          blurRadius: 18,
+                          offset: const Offset(0, 2),
+                        ),
+                        const Shadow(
+                          color: Colors.black87,
+                          blurRadius: 4,
+                          offset: Offset(1.5, 1.5),
+                        ),
+                      ],
+                    ),
                   ),
-                  Shadow(
-                    color: Colors.black87,
-                    blurRadius: 4,
-                    offset: Offset(1.5, 1.5),
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        );
+      },
+    );
+  }
+}
+
+class _BottomBackButton extends StatelessWidget {
+  const _BottomBackButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFD0554F),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        child: Text(
+          'Back',
+          style: GoogleFonts.fredoka(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            fontStyle: FontStyle.italic,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

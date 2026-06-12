@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../services/data_service.dart';
-import 'mountain_detail_screen.dart';
+import 'mountain_screen_resolver.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -54,12 +54,7 @@ class DashboardScreen extends StatelessWidget {
             subtitle: Text('${m.location} • ${m.elevation} m'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => MountainDetailScreen(mountain: m),
-                ),
-              );
+              openMountainScreen(context, m);
             },
           );
         },

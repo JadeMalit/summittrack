@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../TrailData/mountain.dart';
 import '../app_routes.dart';
+import 'mt_apo.dart';
 
 class MountainDetailScreen extends StatelessWidget {
   final Mountain mountain;
@@ -9,6 +10,10 @@ class MountainDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (mountain.name == 'Mt. Apo') {
+      return const MtApoScreen();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(mountain.name),
