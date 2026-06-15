@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../TrailData/Sta.Cruz details.dart';
 import 'foldable_trail_checklist_card.dart';
+import 'lets_hike_calendar_weather_modal.dart';
 
 class TrailDetailScreen extends StatelessWidget {
   const TrailDetailScreen({
@@ -634,11 +635,20 @@ class _LetsHikeButton extends StatelessWidget {
           ],
         ),
         child: ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
+            final selectedDate = await showLetsHikeCalendarWeatherModal(
+              context: context,
+              trailName: trailName,
+            );
+
+            if (selectedDate == null || !context.mounted) {
+              return;
+            }
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  'Let\'s Hike for $trailName is ready for the next front-end step.',
+                  'Hike date confirmed: ${_formatHikeDate(selectedDate)}',
                 ),
               ),
             );
@@ -662,6 +672,25 @@ class _LetsHikeButton extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatHikeDate(DateTime date) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 }
 
