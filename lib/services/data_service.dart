@@ -1,4 +1,4 @@
-import '../TrailData/mountain.dart';
+import '../data/trail_data/mountain.dart';
 
 class DataService {
   static List<Mountain> getMountains() {
@@ -42,56 +42,64 @@ class DataService {
         region: 'Luzon',
         elevation: 2462,
         location: 'Albay',
-        description: 'Known for its iconic perfect cone shape; offers stunning views from nearby trails like Mayon Skyline.',
+        description:
+            'Known for its iconic perfect cone shape; offers stunning views from nearby trails like Mayon Skyline.',
       ),
       Mountain(
         name: 'Mt. Batulao',
         region: 'Luzon',
         elevation: 761,
         location: 'Batangas',
-        description: 'A popular beginner hike with rolling hills and great views, perfect for a day trip.',
+        description:
+            'A popular beginner hike with rolling hills and great views, perfect for a day trip.',
       ),
       Mountain(
         name: 'Mt. Ulap',
         region: 'Luzon',
         elevation: 1826,
         location: 'Itogon, Benguet',
-        description: 'Easily accessible from Manila, known for its scenic ridges and panoramic vistas.',
+        description:
+            'Easily accessible from Manila, known for its scenic ridges and panoramic vistas.',
       ),
       Mountain(
         name: 'Mt. Daraitan',
         region: 'Luzon',
         elevation: 700,
         location: 'Rizal',
-        description: 'Offers a mix of river trekking and mountain climbing with beautiful limestone formations.',
+        description:
+            'Offers a mix of river trekking and mountain climbing with beautiful limestone formations.',
       ),
       Mountain(
         name: 'Mt. Maculot',
         region: 'Luzon',
         elevation: 706,
         location: 'Batangas',
-        description: 'Features the famous "Rocky Trail" leading to stunning views of Taal Volcano.',
+        description:
+            'Features the famous "Rocky Trail" leading to stunning views of Taal Volcano.',
       ),
       Mountain(
         name: 'Mt. Pico de Loro',
         region: 'Luzon',
         elevation: 688,
         location: 'Cavite/Batangas',
-        description: 'Known for its distinctive "Parrot\'s Beak" monolith, a challenging but rewarding climb.',
+        description:
+            'Known for its distinctive "Parrot\'s Beak" monolith, a challenging but rewarding climb.',
       ),
       Mountain(
         name: 'Mt. Pinatubo',
         region: 'Luzon',
         elevation: 1486,
         location: 'Pampanga/Zambales',
-        description: 'Hike to the crater lake of this active volcano for a unique landscape.',
+        description:
+            'Hike to the crater lake of this active volcano for a unique landscape.',
       ),
       Mountain(
         name: 'Mt. Guiting-Guiting',
         region: 'Visayas',
         elevation: 2058,
         location: 'Romblon',
-        description: 'A major challenge for experienced hikers, known for its jagged ridges and demanding trails.',
+        description:
+            'A major challenge for experienced hikers, known for its jagged ridges and demanding trails.',
       ),
     ];
   }

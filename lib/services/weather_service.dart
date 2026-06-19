@@ -38,28 +38,28 @@ class WeatherService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      
+
       return {
         "location": {"name": data["name"]},
         "current": {
           "temp_c": data["main"]["temp"],
           "humidity": data["main"]["humidity"],
           "wind_kph": (data["wind"]["speed"] * 3.6).toStringAsFixed(1),
-          "condition": {"text": data["weather"][0]["description"]}
+          "condition": {"text": data["weather"][0]["description"]},
         },
         "forecast": {
           "forecastday": [
             {
-              "day": {
-                "daily_chance_of_rain": data["clouds"]["all"] 
-              }
-            }
-          ]
-        }
+              "day": {"daily_chance_of_rain": data["clouds"]["all"]},
+            },
+          ],
+        },
       };
     }
 
     // Binago para ibalik ang mas malinis na error message
-    throw Exception("City/Mountain info not found in API. (Code: ${response.statusCode})");
+    throw Exception(
+      "City/Mountain info not found in API. (Code: ${response.statusCode})",
+    );
   }
 }

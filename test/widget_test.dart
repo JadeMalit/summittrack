@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:summittrack/main.dart';
+import '../lib/main.dart';
 
 void main() {
   testWidgets('SummitTrack app renders sign in screen', (WidgetTester tester) async {

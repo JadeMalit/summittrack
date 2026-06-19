@@ -1,0 +1,1117 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+import '../../../core/routing/mountain_screen_resolver.dart';
+import '../../../data/trail_data/mountain.dart';
+import '../../../services/data_service.dart';
+import '../widgets/pre_hike_header_card.dart';
+import '../../hike/screens/weather.dart';
+import '../../navigation/button_functions/navbar_button_function.dart';
+import '../../navigation/widgets/animated_nav_icon.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  static const Color _darkGreen = Color(0xFF0B6623);
+  static const Color _mediumGreen = Color(0xFF2E7D32);
+  static const Color _lightGreen = Color(0xFFE8F5E9);
+  static const Color _textPrimary = Color(0xFF182319);
+  static const Color _textSecondary = Color(0xFF5C6B5D);
+
+  late final List<Mountain> _allMountains;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  int selectedIndex = homeNavbarIndex;
+  int _navTapSequence = 0;
+  int _lastTappedNavIndex = homeNavbarIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _allMountains = List<Mountain>.unmodifiable(DataService.getMountains());
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<Mountain> get _filteredMountains {
+    if (_searchQuery.isEmpty) {
+      return _allMountains;
+    }
+
+    return _allMountains.where((mountain) {
+      return _normalizeSearchTerm(mountain.name).contains(_searchQuery);
+    }).toList();
+  }
+
+  void _handleSearchChanged(String value) {
+    final normalizedQuery = _normalizeSearchTerm(value);
+
+    if (normalizedQuery == _searchQuery) {
+      return;
+    }
+
+    setState(() {
+      _searchQuery = normalizedQuery;
+    });
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+
+    if (_searchQuery.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      _searchQuery = '';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mountains = _filteredMountains;
+    final hasActiveSearch = _searchQuery.isNotEmpty;
+    final resultCountLabel = mountains.length == 1
+        ? '1 mountain'
+        : '${mountains.length} mountains';
+
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 238, 238, 238),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFF1F8F1), Color(0xFFFFFFFF), Color(0xFFF7FBF7)],
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: [
+              SliverToBoxAdapter(
+                child: PreHikeHeaderCard(
+                  onLogout: () async {
+                    await FirebaseAuth.instance.signOut();
+                  },
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: _StatsSection(
+                    darkGreen: _darkGreen,
+                    mediumGreen: _mediumGreen,
+                    lightGreen: _lightGreen,
+                    textPrimary: _textPrimary,
+                    textSecondary: _textSecondary,
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 18)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _SearchSection(
+                    controller: _searchController,
+                    onChanged: _handleSearchChanged,
+                    onClear: _clearSearch,
+                    showClearButton: _searchController.text.trim().isNotEmpty,
+                    lightGreen: _lightGreen,
+                    mediumGreen: _mediumGreen,
+                    textSecondary: _textSecondary,
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 26, 20, 14),
+                  child: _SectionHeading(
+                    title: 'Explore Mountains',
+                    subtitle: hasActiveSearch
+                        ? 'Showing $resultCountLabel from the mountains available in the app.'
+                        : 'Browse all available mountains and open their trail details.',
+                    darkGreen: _darkGreen,
+                    textSecondary: _textSecondary,
+                  ),
+                ),
+              ),
+              if (mountains.isEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                    child: _EmptyMountainState(
+                      hasActiveSearch: hasActiveSearch,
+                      darkGreen: _darkGreen,
+                      mediumGreen: _mediumGreen,
+                      lightGreen: _lightGreen,
+                      textPrimary: _textPrimary,
+                      textSecondary: _textSecondary,
+                    ),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: index == mountains.length - 1 ? 0 : 16,
+                        ),
+                        child: _MountainCard(
+                          key: ValueKey(mountains[index].name),
+                          index: index,
+                          mountain: mountains[index],
+                          darkGreen: _darkGreen,
+                          mediumGreen: _mediumGreen,
+                          lightGreen: _lightGreen,
+                          textPrimary: _textPrimary,
+                          textSecondary: _textSecondary,
+                          onTap: () {
+                            openMountainScreen(context, mountains[index]);
+                          },
+                        ),
+                      );
+                    }, childCount: mountains.length),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: _HomeBottomNavigationBar(
+        currentIndex: selectedIndex,
+        tapSequence: _navTapSequence,
+        lastTappedIndex: _lastTappedNavIndex,
+        darkGreen: _darkGreen,
+        onTap: (index) {
+          setState(() {
+            selectedIndex = index;
+            _lastTappedNavIndex = index;
+            _navTapSequence++;
+          });
+
+          handleNavbarButtonTap(
+            context,
+            index,
+            onHomeSelected: () {
+              if (!mounted) {
+                return;
+              }
+
+              setState(() {
+                selectedIndex = homeNavbarIndex;
+                _lastTappedNavIndex = homeNavbarIndex;
+              });
+            },
+            onWeatherSelected: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const WeatherScreen()),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+String _normalizeSearchTerm(String value) {
+  return value
+      .trim()
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9\s]'), ' ')
+      .replaceAll(RegExp(r'\s+'), ' ');
+}
+
+class _StatsSection extends StatelessWidget {
+  const _StatsSection({
+    required this.darkGreen,
+    required this.mediumGreen,
+    required this.lightGreen,
+    required this.textPrimary,
+    required this.textSecondary,
+  });
+
+  final Color darkGreen;
+  final Color mediumGreen;
+  final Color lightGreen;
+  final Color textPrimary;
+  final Color textSecondary;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+
+        if (compact) {
+          return Column(
+            children: [
+              _StatCard(
+                label: 'Climb',
+                value: '0',
+                icon: Icons.hiking_rounded,
+                animationDelay: Duration.zero,
+                darkGreen: darkGreen,
+                accentColor: mediumGreen,
+                accentTint: lightGreen,
+                textPrimary: textPrimary,
+                textSecondary: textSecondary,
+              ),
+              const SizedBox(height: 12),
+              _StatCard(
+                label: 'Achievements',
+                value: '0',
+                icon: Icons.workspace_premium_rounded,
+                animationDelay: const Duration(milliseconds: 110),
+                darkGreen: darkGreen,
+                accentColor: const Color(0xFF7E8A55),
+                accentTint: const Color(0xFFF3F6EA),
+                textPrimary: textPrimary,
+                textSecondary: textSecondary,
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                label: 'Climb',
+                value: '0',
+                icon: Icons.hiking_rounded,
+                animationDelay: Duration.zero,
+                darkGreen: darkGreen,
+                accentColor: mediumGreen,
+                accentTint: lightGreen,
+                textPrimary: textPrimary,
+                textSecondary: textSecondary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _StatCard(
+                label: 'Achievements',
+                value: '0',
+                icon: Icons.workspace_premium_rounded,
+                animationDelay: const Duration(milliseconds: 110),
+                darkGreen: darkGreen,
+                accentColor: const Color(0xFF7E8A55),
+                accentTint: const Color(0xFFF3F6EA),
+                textPrimary: textPrimary,
+                textSecondary: textSecondary,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _StatCard extends StatefulWidget {
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.animationDelay,
+    required this.darkGreen,
+    required this.accentColor,
+    required this.accentTint,
+    required this.textPrimary,
+    required this.textSecondary,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+  final Duration animationDelay;
+  final Color darkGreen;
+  final Color accentColor;
+  final Color accentTint;
+  final Color textPrimary;
+  final Color textSecondary;
+
+  @override
+  State<_StatCard> createState() => _StatCardState();
+}
+
+class _StatCardState extends State<_StatCard> {
+  bool _isVisible = false;
+  bool _isHovered = false;
+  bool _isPressed = false;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(widget.animationDelay, () {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isVisible = true;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isInteractive = _isHovered || _isPressed;
+    final borderColor = isInteractive
+        ? widget.accentColor.withValues(alpha: 0.24)
+        : widget.darkGreen.withValues(alpha: 0.08);
+    final shadowColor = isInteractive
+        ? widget.accentColor.withValues(alpha: 0.14)
+        : widget.darkGreen.withValues(alpha: 0.08);
+
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 380),
+      curve: Curves.easeOut,
+      opacity: _isVisible ? 1 : 0,
+      child: AnimatedSlide(
+        duration: const Duration(milliseconds: 380),
+        curve: Curves.easeOutCubic,
+        offset: _isVisible ? Offset.zero : const Offset(0, 0.08),
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          scale: _isPressed ? 0.985 : (_isHovered ? 1.01 : 1),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(22),
+              onTap: () {},
+              onHover: (value) {
+                if (_isHovered == value) {
+                  return;
+                }
+
+                setState(() {
+                  _isHovered = value;
+                });
+              },
+              onHighlightChanged: (value) {
+                if (_isPressed == value) {
+                  return;
+                }
+
+                setState(() {
+                  _isPressed = value;
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: borderColor),
+                  boxShadow: [
+                    BoxShadow(
+                      color: shadowColor,
+                      blurRadius: isInteractive ? 24 : 18,
+                      offset: Offset(0, isInteractive ? 12 : 8),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeOutCubic,
+                      width: 54,
+                      height: 54,
+                      decoration: BoxDecoration(
+                        color: widget.accentTint,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: widget.accentColor.withValues(alpha: 0.14),
+                        ),
+                      ),
+                      child: Icon(
+                        widget.icon,
+                        color: widget.accentColor,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: widget.accentColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  widget.label,
+                                  style: TextStyle(
+                                    color: widget.textSecondary,
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            widget.value,
+                            style: TextStyle(
+                              color: widget.textPrimary,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.4,
+                              height: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchSection extends StatelessWidget {
+  const _SearchSection({
+    required this.controller,
+    required this.onChanged,
+    required this.onClear,
+    required this.showClearButton,
+    required this.lightGreen,
+    required this.mediumGreen,
+    required this.textSecondary,
+  });
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
+  final bool showClearButton;
+  final Color lightGreen;
+  final Color mediumGreen;
+  final Color textSecondary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: mediumGreen.withValues(alpha: 0.10),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        onChanged: onChanged,
+        cursorColor: mediumGreen,
+        textInputAction: TextInputAction.search,
+        onTapOutside: (_) => FocusScope.of(context).unfocus(),
+        decoration: InputDecoration(
+          hintText: 'Search mountains',
+          hintStyle: TextStyle(
+            color: textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+          prefixIcon: Padding(
+            padding: const EdgeInsets.only(left: 14, right: 10),
+            child: Icon(Icons.search_rounded, color: mediumGreen, size: 24),
+          ),
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 54,
+            minHeight: 54,
+          ),
+          suffixIcon: showClearButton
+              ? IconButton(
+                  onPressed: onClear,
+                  icon: Icon(
+                    Icons.close_rounded,
+                    color: textSecondary.withValues(alpha: 0.8),
+                  ),
+                )
+              : null,
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide(color: lightGreen),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide(color: mediumGreen.withValues(alpha: 0.40)),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 18,
+            vertical: 16,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyMountainState extends StatelessWidget {
+  const _EmptyMountainState({
+    required this.hasActiveSearch,
+    required this.darkGreen,
+    required this.mediumGreen,
+    required this.lightGreen,
+    required this.textPrimary,
+    required this.textSecondary,
+  });
+
+  final bool hasActiveSearch;
+  final Color darkGreen;
+  final Color mediumGreen;
+  final Color lightGreen;
+  final Color textPrimary;
+  final Color textSecondary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: lightGreen),
+        boxShadow: [
+          BoxShadow(
+            color: darkGreen.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: lightGreen,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(Icons.terrain_rounded, color: mediumGreen, size: 30),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            hasActiveSearch ? 'No mountain found' : 'No mountains available',
+            style: TextStyle(
+              color: textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            hasActiveSearch
+                ? 'Try a different mountain name from the available list.'
+                : 'Available mountains will appear here once data is ready.',
+            style: TextStyle(
+              color: textSecondary,
+              fontSize: 14,
+              height: 1.45,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeading extends StatelessWidget {
+  const _SectionHeading({
+    required this.title,
+    required this.subtitle,
+    required this.darkGreen,
+    required this.textSecondary,
+  });
+
+  final String title;
+  final String subtitle;
+  final Color darkGreen;
+  final Color textSecondary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: darkGreen,
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.3,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          subtitle,
+          style: TextStyle(
+            color: textSecondary,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MountainCard extends StatefulWidget {
+  const _MountainCard({
+    super.key,
+    required this.index,
+    required this.mountain,
+    required this.darkGreen,
+    required this.mediumGreen,
+    required this.lightGreen,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.onTap,
+  });
+
+  final int index;
+  final Mountain mountain;
+  final Color darkGreen;
+  final Color mediumGreen;
+  final Color lightGreen;
+  final Color textPrimary;
+  final Color textSecondary;
+  final VoidCallback onTap;
+
+  @override
+  State<_MountainCard> createState() => _MountainCardState();
+}
+
+class _MountainCardState extends State<_MountainCard> {
+  bool _isVisible = false;
+  bool _isPressed = false;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(Duration(milliseconds: 120 * widget.index), () {
+      if (mounted) {
+        setState(() {
+          _isVisible = true;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 420),
+      curve: Curves.easeOut,
+      opacity: _isVisible ? 1 : 0,
+      child: AnimatedSlide(
+        duration: const Duration(milliseconds: 420),
+        curve: Curves.easeOutCubic,
+        offset: _isVisible ? Offset.zero : const Offset(0, 0.06),
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 160),
+          scale: _isPressed ? 0.985 : 1,
+          child: Material(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            elevation: 0,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(28),
+              onTap: widget.onTap,
+              onHighlightChanged: (value) {
+                setState(() {
+                  _isPressed = value;
+                });
+              },
+              child: Ink(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Colors.white, Color(0xFFF7FBF7)],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: widget.darkGreen.withValues(alpha: 0.08),
+                      blurRadius: 22,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: -30,
+                      right: -18,
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: widget.lightGreen.withValues(alpha: 0.55),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final compact = constraints.maxWidth < 360;
+
+                          if (compact) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildMountainImage(double.infinity),
+                                const SizedBox(height: 16),
+                                _buildMountainDetails(),
+                              ],
+                            );
+                          }
+
+                          return Row(
+                            children: [
+                              _buildMountainImage(112),
+                              const SizedBox(width: 16),
+                              Expanded(child: _buildMountainDetails()),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMountainImage(double width) {
+    final mountain = widget.mountain;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: SizedBox(
+        width: width,
+        height: 128,
+        child: Image.asset(
+          mountain.imageAsset ?? 'assets/images/apo.jpg',
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMountainDetails() {
+    final mountain = widget.mountain;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _InfoChip(
+              icon: Icons.public_rounded,
+              label: mountain.region,
+              backgroundColor: widget.lightGreen,
+              foregroundColor: widget.mediumGreen,
+            ),
+            _InfoChip(
+              icon: Icons.vertical_align_top_rounded,
+              label: '${mountain.elevation} m',
+              backgroundColor: widget.lightGreen,
+              foregroundColor: widget.mediumGreen,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          mountain.name,
+          style: TextStyle(
+            color: widget.textPrimary,
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.4,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          mountain.location,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: widget.textSecondary,
+            fontSize: 13.5,
+            height: 1.4,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          mountain.slope,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: widget.mediumGreen,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: widget.darkGreen,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'View Trail',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Icon(
+                    Icons.arrow_outward_rounded,
+                    color: Colors.white,
+                    size: 17,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({
+    required this.icon,
+    required this.label,
+    required this.backgroundColor,
+    required this.foregroundColor,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: foregroundColor),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: foregroundColor,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomeBottomNavigationBar extends StatelessWidget {
+  const _HomeBottomNavigationBar({
+    required this.currentIndex,
+    required this.tapSequence,
+    required this.lastTappedIndex,
+    required this.darkGreen,
+    required this.onTap,
+  });
+
+  final int currentIndex;
+  final int tapSequence;
+  final int lastTappedIndex;
+  final Color darkGreen;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(26),
+            boxShadow: [
+              BoxShadow(
+                color: darkGreen.withValues(alpha: 0.12),
+                blurRadius: 24,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(26),
+            child: BottomNavigationBar(
+              currentIndex: currentIndex,
+              onTap: onTap,
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.white,
+              elevation: 0,
+              selectedItemColor: darkGreen,
+              unselectedItemColor: const Color(0xFF7B877D),
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+              items: [
+                _buildNavItem(
+                  index: profileNavbarIndex,
+                  currentIndex: currentIndex,
+                  tapSequence: tapSequence,
+                  lastTappedIndex: lastTappedIndex,
+                  icon: Icons.person_rounded,
+                  liftOnActive: true,
+                ),
+                _buildNavItem(
+                  index: homeNavbarIndex,
+                  currentIndex: currentIndex,
+                  tapSequence: tapSequence,
+                  lastTappedIndex: lastTappedIndex,
+                  icon: Icons.home_rounded,
+                ),
+                _buildNavItem(
+                  index: weatherNavbarIndex,
+                  currentIndex: currentIndex,
+                  tapSequence: tapSequence,
+                  lastTappedIndex: lastTappedIndex,
+                  icon: Icons.cloud_rounded,
+                ),
+                _buildNavItem(
+                  index: settingsNavbarIndex,
+                  currentIndex: currentIndex,
+                  tapSequence: tapSequence,
+                  lastTappedIndex: lastTappedIndex,
+                  icon: Icons.settings_rounded,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  BottomNavigationBarItem _buildNavItem({
+    required int index,
+    required int currentIndex,
+    required int tapSequence,
+    required int lastTappedIndex,
+    required IconData icon,
+    bool liftOnActive = false,
+  }) {
+    final bool isActive = currentIndex == index;
+    final String keyId = isActive && lastTappedIndex == index
+        ? 'nav-$index-$tapSequence'
+        : 'nav-$index';
+
+    return BottomNavigationBarItem(
+      label: '',
+      icon: KeyedSubtree(
+        key: ValueKey<String>(keyId),
+        child: AnimatedNavIcon(
+          icon: icon,
+          isActive: isActive,
+          activeColor: darkGreen,
+          inactiveColor: const Color(0xFF7B877D),
+          isLifted: liftOnActive,
+        ),
+      ),
+    );
+  }
+}
