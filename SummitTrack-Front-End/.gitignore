@@ -43,19 +43,3 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
-# Local workspace backups
-Restore-Backups/
-
-# Environment files
-**/.env
-**/.ENV
-!**/.env.example
-
-# Node dependencies
-**/node_modules/
-
-# Nested Flutter generated output
-**/.dart_tool/
-**/.flutter-plugins-dependencies
-**/build/
