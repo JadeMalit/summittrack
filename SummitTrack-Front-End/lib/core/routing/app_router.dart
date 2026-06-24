@@ -6,7 +6,9 @@ import '../../data/trail_data/Sta.Cruz details.dart';
 import 'app_routes.dart';
 import '../../features/auth/screens/SignIN_SignUP/pre_hike_loading_screen.dart';
 import '../../features/auth/screens/SignIN_SignUP/signin.dart';
-import '../../features/auth/screens/SignIN_SignUP/signup.dart';
+import '../../features/auth/screens/SignIN_SignUP/forgot_password_screen.dart';
+// Itinuro sa tamang file name pero SignUpScreen ang gagamiting class sa loob
+import '../../features/auth/screens/SignIN_SignUP/register_screen.dart'; 
 import '../../features/auth/widgets/video_background.dart';
 import '../../features/dashboard/screens/home.dart';
 import '../../features/mountains/screens/kapatagan_trail_details.dart';
@@ -23,7 +25,7 @@ class AppRouter {
     final uri = Uri.parse(location);
     final segments = uri.pathSegments;
 
-    if (uri.path == AppRoutes.home) {
+    if (uri.path == AppRoutes.home || uri.path == '/home' || uri.path == 'home') {
       return _route(
         settings,
         _AuthGuard(
@@ -55,9 +57,22 @@ class AppRouter {
           currentLocation: location,
           requireAuth: false,
           redirectTo: AppRoutes.redirectFromUri(uri),
+          // File name ay register_screen.dart pero ang Class ay SignUpScreen
           child: SignUpScreen(
             redirectTo: AppRoutes.redirectFromUri(uri) ?? AppRoutes.home,
           ),
+        ),
+      );
+    }
+
+    // INEDIT DITO: Tinanggal ang AppRoutes.forgotPassword para hindi na maghanap ng getter sa app_routes.dart
+    if (uri.path == '/forgot-password' || uri.path == 'forgot-password') {
+      return _authRoute(
+        settings,
+        _AuthGuard(
+          currentLocation: location,
+          requireAuth: false,
+          child: const ForgotPasswordScreen(),
         ),
       );
     }

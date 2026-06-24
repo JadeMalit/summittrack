@@ -316,24 +316,23 @@ class _SignInScreenState extends State<SignInScreen>
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
                                   ),
-                                  decoration:
-                                      _inputDecoration(
-                                        "Enter your password",
-                                      ).copyWith(
-                                        suffixIcon: IconButton(
-                                          icon: Icon(
-                                            hidePass
-                                                ? Icons.visibility_off
-                                                : Icons.visibility,
-                                          ),
-                                          onPressed: () {
-                                            _clearError();
-                                            setState(() {
-                                              hidePass = !hidePass;
-                                            });
-                                          },
-                                        ),
+                                  decoration: _inputDecoration(
+                                    "Enter your password",
+                                  ).copyWith(
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        hidePass
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
                                       ),
+                                      onPressed: () {
+                                        _clearError();
+                                        setState(() {
+                                          hidePass = !hidePass;
+                                        });
+                                      },
+                                    ),
+                                  ),
                                 ),
                               ),
 
@@ -344,7 +343,8 @@ class _SignInScreenState extends State<SignInScreen>
                                 alignment: Alignment.centerLeft,
                                 child: TextButton(
                                   onPressed: () {
-                                    // Navigate to Reset Password Screen
+                                    _clearError();
+                                    Navigator.pushNamed(context, '/forgot-password');
                                   },
                                   child: Text(
                                     "Forgot Password?",
