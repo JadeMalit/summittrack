@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../services/weather_service.dart';
 import '../../navigation/button_functions/navbar_button_function.dart';
 import '../../navigation/widgets/animated_nav_icon.dart';
+import '../widgets/weather/weather_forecast_card.dart';
+import '../widgets/weather/weather_header.dart';
+import '../widgets/weather/weather_safety_card.dart';
+import '../widgets/weather/weather_stat_card.dart';
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen({super.key});
@@ -11,7 +16,8 @@ class WeatherScreen extends StatefulWidget {
   State<WeatherScreen> createState() => _WeatherScreenState();
 }
 
-class _WeatherScreenState extends State<WeatherScreen> {
+class _WeatherScreenState extends State<WeatherScreen>
+    with SingleTickerProviderStateMixin {
   final WeatherService weatherService = WeatherService();
   int selectedIndex = 2;
 
@@ -43,10 +49,36 @@ class _WeatherScreenState extends State<WeatherScreen> {
   bool isError = false;
   String errorMessage = "";
 
+  late final AnimationController _entranceController;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<Offset> _slideAnimation;
+
   @override
   void initState() {
     super.initState();
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 520),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _entranceController,
+      curve: Curves.easeOutCubic,
+    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _entranceController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
     loadWeather();
+  }
+
+  @override
+  void dispose() {
+    _entranceController.dispose();
+    super.dispose();
   }
 
   Future<void> loadWeather() async {
@@ -62,6 +94,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         setState(() {
           weatherData = data;
         });
+        _entranceController.forward(from: 0);
       }
     } catch (e) {
       if (mounted) {
@@ -74,132 +107,211 @@ class _WeatherScreenState extends State<WeatherScreen> {
   }
 
   String getHikingStatus(int rainChance) {
-    if (rainChance < 40) return "✅ Safe to Hike";
-    if (rainChance < 70) return "⚠️ Use Caution";
-    return "❌ Not Recommended";
+    if (rainChance < 40) return "Recommended";
+    if (rainChance < 70) return "Use Caution";
+    return "Not Recommended";
   }
 
-  List<Color> getBGGradient(String condition) {
+  List<Color> getBGGradient(String condition, BuildContext context) {
+    final colors = context.appColors;
     final cond = condition.toLowerCase();
-    if (cond.contains("rain") ||
-        cond.contains("drizzle") ||
-        cond.contains("thunderstorm")) {
-      return [const Color(0xFF3A506B), const Color(0xFF1A2536)];
-    } else if (cond.contains("cloud") || cond.contains("overcast")) {
-      return [const Color(0xFF6190E8), const Color(0xFFA7BFE8)];
+
+    if (context.isDarkMode) {
+      if (_isRainy(cond)) {
+        return [
+          const Color(0xFF09131D),
+          const Color(0xFF17293A),
+          colors.background,
+        ];
+      }
+      if (_isCloudy(cond)) {
+        return [
+          const Color(0xFF101820),
+          const Color(0xFF24313A),
+          colors.background,
+        ];
+      }
+      return [
+        const Color(0xFF081D17),
+        const Color(0xFF123B2A),
+        colors.background,
+      ];
     }
-    return [const Color(0xFF2193b0), const Color(0xFF6dd5ed)];
+
+    if (_isRainy(cond)) {
+      return [
+        const Color(0xFF263D55),
+        const Color(0xFF607D97),
+        const Color(0xFFE8F0F4),
+      ];
+    }
+    if (_isCloudy(cond)) {
+      return [
+        const Color(0xFF55728C),
+        const Color(0xFFA9BBC8),
+        const Color(0xFFEAF2F3),
+      ];
+    }
+    if (_isFoggy(cond)) {
+      return [
+        const Color(0xFF6B7D83),
+        const Color(0xFFB2C2C2),
+        const Color(0xFFEFF5EF),
+      ];
+    }
+    return [
+      const Color(0xFF2E91C7),
+      const Color(0xFF8ED3F4),
+      const Color(0xFFFFE3A1),
+    ];
   }
 
-  /// 🔥 ANIMATED BOTTOM SHEET SELECTOR
   void _showMountainPicker(BuildContext context) {
+    final colors = context.appColors;
+    final isDark = context.isDarkMode;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      transitionAnimationController: AnimationController(
-        vsync: Navigator.of(context),
-        duration: const Duration(milliseconds: 400), // Makinis na sliding speed
-      ),
       builder: (context) {
-        return TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0.0, end: 1.0),
-          duration: const Duration(milliseconds: 300),
-          builder: (context, value, child) {
-            return Transform.scale(
-              scale: 0.95 + (0.05 * value), // May banayad na pop animation
-              child: Opacity(opacity: value, child: child),
-            );
-          },
-          child: Container(
-            height:
-                MediaQuery.of(context).size.height *
-                0.45, // Kalahati lang ng screen para hindi nakakaharang
-            decoration: const BoxDecoration(
-              color: Color(0xFF1E1E2C),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
+        return SafeArea(
+          top: false,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0, end: 1),
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              return Transform.translate(
+                offset: Offset(0, 18 * (1 - value)),
+                child: Opacity(opacity: value, child: child),
+              );
+            },
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.5,
+              decoration: BoxDecoration(
+                color: isDark ? colors.surface : Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(28),
+                  topRight: Radius.circular(28),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: colors.shadow.withValues(alpha: 0.7),
+                    blurRadius: 28,
+                    offset: const Offset(0, -8),
+                  ),
+                ],
               ),
-            ),
-            child: Column(
-              children: [
-                /// Decorative Top Handle Bar
-                const SizedBox(height: 12),
-                Container(
-                  width: 50,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(10),
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
+                  Container(
+                    width: 46,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: colors.divider,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 15),
-                const Text(
-                  "Select Mountain",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Divider(color: Colors.white12, height: 1),
-
-                /// Scrollable List na may magandang highlight indicators
-                Expanded(
-                  child: ListView.builder(
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: mountains.length,
-                    itemBuilder: (context, index) {
-                      final isSelected = mountains[index] == selectedMountain;
-                      return Container(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 4,
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: colors.accent.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Icon(
+                            Icons.terrain_rounded,
+                            color: colors.accent,
+                          ),
                         ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? Colors.green.withOpacity(0.2)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ListTile(
-                          title: Text(
-                            mountains[index],
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            "Select Mountain",
                             style: TextStyle(
-                              color: isSelected
-                                  ? Colors.green[400]
-                                  : Colors.white,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
+                              color: colors.textPrimary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
-                          trailing: isSelected
-                              ? const Icon(
-                                  Icons.check_circle,
-                                  color: Colors.green,
-                                )
-                              : const Icon(
-                                  Icons.circle_outlined,
-                                  color: Colors.white24,
-                                ),
-                          onTap: () {
-                            setState(() {
-                              selectedMountain = mountains[index];
-                            });
-                            loadWeather();
-                            Navigator.pop(
-                              context,
-                            ); // Isasara ang bottom sheet nang kusa
-                          },
                         ),
-                      );
-                    },
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  Divider(color: colors.divider, height: 1),
+                  Expanded(
+                    child: ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      itemCount: mountains.length,
+                      itemBuilder: (context, index) {
+                        final mountain = mountains[index];
+                        final isSelected = mountain == selectedMountain;
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 3),
+                          child: Material(
+                            color: isSelected
+                                ? colors.accent.withValues(alpha: 0.12)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
+                            child: ListTile(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              leading: Icon(
+                                Icons.hiking_rounded,
+                                color: isSelected
+                                    ? colors.accent
+                                    : colors.textSecondary,
+                              ),
+                              title: Text(
+                                mountain,
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? colors.textPrimary
+                                      : colors.textSecondary,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w800
+                                      : FontWeight.w600,
+                                ),
+                              ),
+                              trailing: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 180),
+                                child: Icon(
+                                  isSelected
+                                      ? Icons.check_circle_rounded
+                                      : Icons.circle_outlined,
+                                  key: ValueKey(isSelected),
+                                  color: isSelected
+                                      ? colors.accent
+                                      : colors.divider,
+                                ),
+                              ),
+                              onTap: () {
+                                setState(() {
+                                  selectedMountain = mountain;
+                                });
+                                Navigator.pop(context);
+                                loadWeather();
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -209,29 +321,45 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final String conditionText =
-        weatherData?["current"]?["condition"]?["text"] ?? "Clear";
-    final List<Color> bgTheme = getBGGradient(conditionText);
+        _conditionText(weatherData?["current"]) ?? "Clear";
+    final List<Color> bgTheme = getBGGradient(conditionText, context);
 
     return Scaffold(
-      body: Container(
+      body: AnimatedContainer(
+        duration: const Duration(milliseconds: 420),
+        curve: Curves.easeOutCubic,
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: bgTheme,
           ),
         ),
         child: SafeArea(
-          child: isError
-              ? _buildErrorScreen()
-              : weatherData == null
-              ? const Center(
-                  child: CircularProgressIndicator(color: Colors.white),
-                )
-              : _buildiOSWeatherBody(),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 320),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            child: isError
+                ? _buildErrorScreen(key: const ValueKey("weather-error"))
+                : weatherData == null
+                ? _buildLoadingScreen(
+                    colors,
+                    key: const ValueKey("weather-loading"),
+                  )
+                : FadeTransition(
+                    key: ValueKey("weather-body-$selectedMountain"),
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: _buildWeatherBody(),
+                    ),
+                  ),
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -250,16 +378,18 @@ class _WeatherScreenState extends State<WeatherScreen> {
             );
           }
         },
-        selectedItemColor: Colors.green[800],
-        unselectedItemColor: Colors.black54,
+        backgroundColor: colors.navBackground,
+        selectedItemColor: colors.accent,
+        unselectedItemColor: colors.textSecondary,
         type: BottomNavigationBarType.fixed,
+        elevation: 16,
         items: [
           BottomNavigationBarItem(
             icon: AnimatedNavIcon(
               icon: Icons.person_rounded,
               isActive: selectedIndex == 0,
-              activeColor: Colors.green.shade800,
-              inactiveColor: Colors.black54,
+              activeColor: colors.accent,
+              inactiveColor: colors.textSecondary,
               isLifted: true,
             ),
             label: "",
@@ -268,8 +398,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
             icon: AnimatedNavIcon(
               icon: Icons.home_rounded,
               isActive: selectedIndex == 1,
-              activeColor: Colors.green.shade800,
-              inactiveColor: Colors.black54,
+              activeColor: colors.accent,
+              inactiveColor: colors.textSecondary,
             ),
             label: "",
           ),
@@ -277,8 +407,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
             icon: AnimatedNavIcon(
               icon: Icons.cloud_rounded,
               isActive: selectedIndex == 2,
-              activeColor: Colors.green.shade800,
-              inactiveColor: Colors.black54,
+              activeColor: colors.accent,
+              inactiveColor: colors.textSecondary,
             ),
             label: "",
           ),
@@ -286,8 +416,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
             icon: AnimatedNavIcon(
               icon: Icons.settings_rounded,
               isActive: selectedIndex == 3,
-              activeColor: Colors.green.shade800,
-              inactiveColor: Colors.black54,
+              activeColor: colors.accent,
+              inactiveColor: colors.textSecondary,
             ),
             label: "",
           ),
@@ -296,321 +426,481 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 
-  Widget _buildiOSWeatherBody() {
+  Widget _buildWeatherBody() {
     final current = weatherData!["current"];
     final location = weatherData!["location"];
-
-    final forecastDay = weatherData!["forecast"]?["forecastday"];
-    int rainChance = 0;
-    if (forecastDay != null && forecastDay.isNotEmpty) {
-      rainChance =
-          num.tryParse(
-            forecastDay[0]["day"]["daily_chance_of_rain"].toString(),
-          )?.toInt() ??
-          0;
-    }
+    final condition = _conditionText(current) ?? "Clear";
+    final rainChance = _rainChanceFromForecast();
+    final safety = _safetyPresentation(rainChance);
+    final accentColor = _conditionAccent(condition);
+    final locationName = _locationName(location);
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: Column(
-        children: [
-          /// 🔥 BAGONG DESIGNED SELECTOR CHIP (Pinalitan ang Dropdown)
-          GestureDetector(
-            onTap: () => _showMountainPicker(context),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(25),
-                border: Border.all(color: Colors.white.withOpacity(0.2)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.location_on,
-                    color: Colors.white70,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    selectedMountain,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(
-                    Icons.unfold_more,
-                    color: Colors.white70,
-                    size: 18,
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 30),
-
-          /// MAIN DISPLAY
-          Text(
-            selectedMountain,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Text(
-            "${current["temp_c"]}°",
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 84,
-              fontWeight: FontWeight.w200,
-            ),
-          ),
-          Text(
-            current["condition"]["text"].toString().toUpperCase(),
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.5,
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            "Region: ${location["name"]}",
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              fontSize: 14,
-            ),
-          ),
-
-          const SizedBox(height: 25),
-
-          /// HIKING STATUS CARD
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
-            ),
-            child: Text(
-              getHikingStatus(rainChance),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          /// 2x2 GRID DETAILS
-          Row(
-            children: [
-              Expanded(
-                child: _buildiOSInfoCard(
-                  "HUMIDITY",
-                  "${current["humidity"]}%",
-                  Icons.water_drop,
-                ),
-              ),
-              const SizedBox(width: 15),
-              Expanded(
-                child: _buildiOSInfoCard(
-                  "WIND",
-                  "${current["wind_kph"]} km/h",
-                  Icons.air,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 15),
-          Row(
-            children: [
-              Expanded(
-                child: _buildiOSInfoCard(
-                  "RAIN CHANCE",
-                  "$rainChance%",
-                  Icons.umbrella,
-                ),
-              ),
-              const SizedBox(width: 15),
-              Expanded(
-                child: _buildiOSInfoCard(
-                  "SAFETY INDEX",
-                  rainChance > 50 ? "LOW" : "HIGH",
-                  Icons.gpp_good,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 25),
-
-          /// FORECAST SECTION
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              "FORECAST",
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.6),
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.2,
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          _buildForecastSection(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildiOSInfoCard(String title, String value, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
-      ),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 26),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, color: Colors.white.withOpacity(0.6), size: 16),
-              const SizedBox(width: 6),
-              Text(
-                title,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+          WeatherHeader(
+            mountainName: selectedMountain,
+            locationName: locationName,
+            condition: _titleCase(condition),
+            temperature: _temperatureText(current["temp_c"]),
+            accentColor: accentColor,
+            onSelectMountain: () => _showMountainPicker(context),
+          ),
+          const SizedBox(height: 18),
+          _SlideUpSection(
+            delay: const Duration(milliseconds: 60),
+            child: WeatherSafetyCard(
+              title: safety.title,
+              message: safety.message,
+              rainChance: "$rainChance%",
+              icon: safety.icon,
+              statusColor: safety.color,
+            ),
+          ),
+          const SizedBox(height: 22),
+          _SectionTitle(
+            title: "Trail Conditions",
+            color: _sectionTitleColor(context),
           ),
           const SizedBox(height: 12),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w500,
+          _SlideUpSection(
+            delay: const Duration(milliseconds: 120),
+            child: GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 1.15,
+              children: [
+                WeatherStatCard(
+                  title: "Humidity",
+                  value: "${current["humidity"] ?? "--"}%",
+                  caption: "Air moisture",
+                  icon: Icons.water_drop_rounded,
+                  accentColor: const Color(0xFF2E91C7),
+                ),
+                WeatherStatCard(
+                  title: "Wind",
+                  value: "${current["wind_kph"] ?? "--"} km/h",
+                  caption: "Trail exposure",
+                  icon: Icons.air_rounded,
+                  accentColor: const Color(0xFF6C7A89),
+                ),
+                WeatherStatCard(
+                  title: "Rain Chance",
+                  value: "$rainChance%",
+                  caption: "Expected precipitation",
+                  icon: Icons.umbrella_rounded,
+                  accentColor: safety.color,
+                ),
+                WeatherStatCard(
+                  title: "Safety Index",
+                  value: _safetyIndexText(rainChance),
+                  caption: getHikingStatus(rainChance),
+                  icon: Icons.shield_rounded,
+                  accentColor: safety.color,
+                ),
+              ],
             ),
+          ),
+          const SizedBox(height: 24),
+          _SectionTitle(title: "Forecast", color: _sectionTitleColor(context)),
+          const SizedBox(height: 12),
+          _SlideUpSection(
+            delay: const Duration(milliseconds: 180),
+            child: _buildForecastSection(condition, current["temp_c"]),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildForecastSection() {
+  Widget _buildForecastSection(String fallbackCondition, dynamic fallbackTemp) {
     final forecastList = weatherData!["forecast"]?["forecastday"] as List?;
+
     if (forecastList == null || forecastList.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Text(
-          "No forecast available",
-          style: TextStyle(color: Colors.white70),
-        ),
-      );
+      return _EmptyForecastCard(color: _sectionTitleColor(context));
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
-      ),
+    return SizedBox(
+      height: 146,
       child: ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
         itemCount: forecastList.length,
-        separatorBuilder: (context, index) =>
-            Divider(color: Colors.white.withOpacity(0.1), height: 1),
+        separatorBuilder: (context, index) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final dayData = forecastList[index];
-          return ListTile(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 4,
+          final condition = _forecastCondition(dayData, fallbackCondition);
+          return WeatherForecastCard(
+            dayLabel: _forecastDayLabel(dayData, index),
+            condition: _titleCase(condition),
+            temperature: _temperatureText(
+              _forecastTemperature(dayData, fallbackTemp),
+              includeCelsius: true,
             ),
-            leading: const Icon(Icons.wb_cloudy_outlined, color: Colors.white),
-            title: Text(
-              dayData["date"] ?? "Today",
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            subtitle: Text(
-              dayData["day"]?["condition"]?["text"] ?? "Clear",
-              style: TextStyle(color: Colors.white.withOpacity(0.7)),
-            ),
-            trailing: Text(
-              "${dayData["day"]?["avgtemp_c"] ?? currentTemp}°C",
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            accentColor: _conditionAccent(condition),
           );
         },
       ),
     );
   }
 
-  dynamic get currentTemp => weatherData!["current"]["temp_c"];
+  Widget _buildLoadingScreen(AppColors colors, {Key? key}) {
+    final foreground = context.isDarkMode ? colors.textPrimary : Colors.white;
 
-  Widget _buildErrorScreen() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.cloud_off, color: Colors.white70, size: 64),
-          const SizedBox(height: 16),
-          const Text(
-            "Connection or Key Issue",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+      key: key,
+      child: Container(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+        decoration: BoxDecoration(
+          color: context.isDarkMode
+              ? colors.surfaceHigh.withValues(alpha: 0.82)
+              : Colors.white.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: foreground.withValues(alpha: 0.18)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: foreground, strokeWidth: 3),
+            const SizedBox(height: 16),
+            Text(
+              "Checking mountain weather",
+              style: TextStyle(
+                color: foreground,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorScreen({Key? key}) {
+    final colors = context.appColors;
+    final foreground = context.isDarkMode ? colors.textPrimary : Colors.white;
+    final muted = context.isDarkMode
+        ? colors.textSecondary
+        : Colors.white.withValues(alpha: 0.78);
+
+    return Center(
+      key: key,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(22),
+          decoration: BoxDecoration(
+            color: context.isDarkMode
+                ? colors.surfaceHigh.withValues(alpha: 0.88)
+                : Colors.white.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: foreground.withValues(alpha: 0.18)),
           ),
-          const SizedBox(height: 8),
-          Text(
-            errorMessage,
-            style: const TextStyle(color: Colors.yellow, fontSize: 12),
-            textAlign: TextAlign.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: colors.danger.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: Icon(
+                  Icons.cloud_off_rounded,
+                  color: colors.danger,
+                  size: 34,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "Weather Unavailable",
+                style: TextStyle(
+                  color: foreground,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                errorMessage,
+                style: TextStyle(
+                  color: muted,
+                  fontSize: 12.5,
+                  height: 1.35,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 22),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: loadWeather,
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text("Retry"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.accent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 24),
-          ElevatedButton(onPressed: loadWeather, child: const Text("Retry")),
-        ],
+        ),
+      ),
+    );
+  }
+
+  int _rainChanceFromForecast() {
+    final forecastDay = weatherData!["forecast"]?["forecastday"];
+    if (forecastDay is List && forecastDay.isNotEmpty) {
+      final firstDay = forecastDay.first;
+      final day = firstDay is Map ? firstDay["day"] : null;
+      final value = day is Map ? day["daily_chance_of_rain"] : null;
+      final parsed = num.tryParse(value.toString());
+      if (parsed == null) return 0;
+      return parsed.clamp(0, 100).toInt();
+    }
+    return 0;
+  }
+
+  _SafetyPresentation _safetyPresentation(int rainChance) {
+    final colors = context.appColors;
+
+    if (rainChance < 40) {
+      return _SafetyPresentation(
+        title: "Recommended",
+        message: "Conditions look favorable for hiking today.",
+        color: colors.accent,
+        icon: Icons.verified_rounded,
+      );
+    }
+
+    if (rainChance < 70) {
+      return _SafetyPresentation(
+        title: "Use Caution",
+        message: "Pack rain protection and monitor trail conditions.",
+        color: colors.warning,
+        icon: Icons.warning_amber_rounded,
+      );
+    }
+
+    return _SafetyPresentation(
+      title: "Not Recommended",
+      message: "Weather conditions may not be safe for hiking today.",
+      color: colors.danger,
+      icon: Icons.report_problem_rounded,
+    );
+  }
+
+  String _safetyIndexText(int rainChance) {
+    if (rainChance < 40) return "High";
+    if (rainChance < 70) return "Fair";
+    return "Low";
+  }
+
+  Color _conditionAccent(String condition) {
+    final cond = condition.toLowerCase();
+    if (_isRainy(cond)) return const Color(0xFF4F7FA2);
+    if (_isCloudy(cond)) return const Color(0xFF6E8290);
+    if (_isFoggy(cond)) return const Color(0xFF7C8C8A);
+    return const Color(0xFFFFB84D);
+  }
+
+  Color _sectionTitleColor(BuildContext context) {
+    final colors = context.appColors;
+    return context.isDarkMode ? colors.textSecondary : const Color(0xFF273B45);
+  }
+
+  dynamic _forecastTemperature(dynamic dayData, dynamic fallbackTemp) {
+    final day = dayData is Map ? dayData["day"] : null;
+    if (day is Map) {
+      return day["avgtemp_c"] ??
+          day["maxtemp_c"] ??
+          day["temp_c"] ??
+          fallbackTemp;
+    }
+    return fallbackTemp;
+  }
+
+  String _forecastCondition(dynamic dayData, String fallbackCondition) {
+    final day = dayData is Map ? dayData["day"] : null;
+    final condition = day is Map ? day["condition"] : null;
+    if (condition is Map && condition["text"] != null) {
+      return condition["text"].toString();
+    }
+    return fallbackCondition;
+  }
+
+  String _forecastDayLabel(dynamic dayData, int index) {
+    final dateValue = dayData is Map ? dayData["date"] : null;
+    final parsedDate = DateTime.tryParse(dateValue?.toString() ?? "");
+    if (parsedDate == null) {
+      return index == 0 ? "Today" : "Day ${index + 1}";
+    }
+
+    if (index == 0) return "Today";
+
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    return days[parsedDate.weekday - 1];
+  }
+
+  String _locationName(dynamic location) {
+    if (location is Map && location["name"] != null) {
+      return "Region: ${location["name"]}";
+    }
+    return "Region unavailable";
+  }
+
+  String? _conditionText(dynamic current) {
+    if (current is! Map) return null;
+    final condition = current["condition"];
+    if (condition is Map && condition["text"] != null) {
+      return condition["text"].toString();
+    }
+    return null;
+  }
+
+  String _temperatureText(dynamic value, {bool includeCelsius = false}) {
+    final temp = num.tryParse(value.toString());
+    if (temp == null) return includeCelsius ? "--\u00B0C" : "--\u00B0";
+
+    final suffix = includeCelsius ? "\u00B0C" : "\u00B0";
+    return "${temp.round()}$suffix";
+  }
+
+  String _titleCase(String value) {
+    return value
+        .split(" ")
+        .where((word) => word.isNotEmpty)
+        .map((word) {
+          final lower = word.toLowerCase();
+          return "${lower[0].toUpperCase()}${lower.substring(1)}";
+        })
+        .join(" ");
+  }
+
+  bool _isRainy(String condition) {
+    return condition.contains("rain") ||
+        condition.contains("drizzle") ||
+        condition.contains("thunder") ||
+        condition.contains("storm");
+  }
+
+  bool _isCloudy(String condition) {
+    return condition.contains("cloud") || condition.contains("overcast");
+  }
+
+  bool _isFoggy(String condition) {
+    return condition.contains("mist") ||
+        condition.contains("fog") ||
+        condition.contains("haze") ||
+        condition.contains("smoke");
+  }
+}
+
+class _SafetyPresentation {
+  const _SafetyPresentation({
+    required this.title,
+    required this.message,
+    required this.color,
+    required this.icon,
+  });
+
+  final String title;
+  final String message;
+  final Color color;
+  final IconData icon;
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title, required this.color});
+
+  final String title;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w900),
+    );
+  }
+}
+
+class _SlideUpSection extends StatelessWidget {
+  const _SlideUpSection({required this.child, required this.delay});
+
+  final Widget child;
+  final Duration delay;
+
+  @override
+  Widget build(BuildContext context) {
+    const animationMs = 420;
+    final totalMs = animationMs + delay.inMilliseconds;
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: Duration(milliseconds: totalMs),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        final delayedProgress =
+            ((value * totalMs) - delay.inMilliseconds) / animationMs;
+        final progress = delayedProgress.clamp(0.0, 1.0).toDouble();
+
+        return Transform.translate(
+          offset: Offset(0, 18 * (1 - progress)),
+          child: Opacity(opacity: progress, child: child),
+        );
+      },
+      child: child,
+    );
+  }
+}
+
+class _EmptyForecastCard extends StatelessWidget {
+  const _EmptyForecastCard({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final isDark = context.isDarkMode;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark
+            ? colors.surfaceHigh.withValues(alpha: 0.78)
+            : Colors.white.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: isDark ? colors.border : Colors.white.withValues(alpha: 0.7),
+        ),
+      ),
+      child: Text(
+        "No forecast available",
+        style: TextStyle(
+          color: color,
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

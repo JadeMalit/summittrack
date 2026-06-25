@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../data/trail_data/trail_data.dart';
 import '../../hike/screens/lets_hike_calendar_weather_modal.dart';
 import '../widgets/first_aid_emergency_tips.dart';
@@ -20,10 +21,13 @@ class TrailDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      backgroundColor: _backgroundColor,
+      backgroundColor: context.isDarkMode
+          ? colors.background
+          : _backgroundColor,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -119,7 +123,7 @@ class _SectionHeading extends StatelessWidget {
       style: GoogleFonts.fredoka(
         fontSize: 19,
         fontWeight: FontWeight.w600,
-        color: const Color(0xFF2B2419),
+        color: context.appColors.textPrimary,
       ),
     );
   }
@@ -133,6 +137,8 @@ class _TrailBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
       child: Stack(
@@ -149,9 +155,9 @@ class _TrailBanner extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.08),
-                    Colors.black.withOpacity(0.28),
-                    Colors.black.withOpacity(0.52),
+                    Colors.black.withValues(alpha: 0.08),
+                    Colors.black.withValues(alpha: 0.28),
+                    Colors.black.withValues(alpha: 0.52),
                   ],
                 ),
               ),
@@ -161,7 +167,7 @@ class _TrailBanner extends StatelessWidget {
             top: 14,
             left: 14,
             child: Material(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               shape: const CircleBorder(),
               child: IconButton(
                 onPressed: onBack,
@@ -179,7 +185,9 @@ class _TrailBanner extends StatelessWidget {
               textAlign: TextAlign.center,
               style: GoogleFonts.lilitaOne(
                 fontSize: 28,
-                color: const Color(0xFF58FF42),
+                color: context.isDarkMode
+                    ? colors.softHighlight
+                    : const Color(0xFF58FF42),
                 letterSpacing: 0.8,
                 shadows: const [
                   Shadow(
@@ -209,11 +217,15 @@ class _DetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F1E8),
+        color: context.isDarkMode ? colors.surface : const Color(0xFFF5F1E8),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFC9C1B1)),
+        border: Border.all(
+          color: context.isDarkMode ? colors.border : const Color(0xFFC9C1B1),
+        ),
       ),
       padding: const EdgeInsets.all(16),
       child: child,
@@ -229,6 +241,8 @@ class _DetailSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -237,7 +251,7 @@ class _DetailSection extends StatelessWidget {
           style: GoogleFonts.fredoka(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF2F281D),
+            color: colors.textPrimary,
           ),
         ),
         const SizedBox(height: 4),
@@ -246,7 +260,7 @@ class _DetailSection extends StatelessWidget {
           style: GoogleFonts.merriweather(
             fontSize: 13.5,
             height: 1.55,
-            color: const Color(0xFF3F372B),
+            color: colors.textSecondary,
           ),
           textAlign: TextAlign.justify,
         ),
@@ -262,6 +276,8 @@ class _SafetyReminderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return _DetailCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,8 +293,8 @@ class _SafetyReminderCard extends StatelessWidget {
                       child: Container(
                         width: 7,
                         height: 7,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF4A4133),
+                        decoration: BoxDecoration(
+                          color: colors.accent,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -290,7 +306,7 @@ class _SafetyReminderCard extends StatelessWidget {
                         style: GoogleFonts.merriweather(
                           fontSize: 13.2,
                           height: 1.5,
-                          color: const Color(0xFF3F372B),
+                          color: colors.textSecondary,
                         ),
                       ),
                     ),
@@ -309,17 +325,23 @@ class _TrailMapCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.92),
+        color: context.isDarkMode
+            ? colors.surfaceHigh
+            : Colors.white.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFC7C0B3)),
-        boxShadow: const [
+        border: Border.all(
+          color: context.isDarkMode ? colors.border : const Color(0xFFC7C0B3),
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x14000000),
+            color: colors.shadow,
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -332,7 +354,7 @@ class _TrailMapCard extends StatelessWidget {
             style: GoogleFonts.fredoka(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF2C251A),
+              color: colors.textPrimary,
             ),
           ),
           const SizedBox(height: 10),
@@ -352,7 +374,9 @@ class _TrailMapCard extends StatelessWidget {
                         style: GoogleFonts.poppins(
                           fontSize: 11.5,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF625948),
+                          color: context.isDarkMode
+                              ? const Color(0xFF3A473A)
+                              : const Color(0xFF625948),
                         ),
                       ),
                       const Spacer(),
@@ -399,12 +423,16 @@ class _MapLegendChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.86),
+        color: context.isDarkMode
+            ? colors.surface.withValues(alpha: 0.92)
+            : Colors.white.withValues(alpha: 0.86),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(0.75)),
+        border: Border.all(color: color.withValues(alpha: 0.75)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -420,7 +448,7 @@ class _MapLegendChip extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 10.5,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF4A4033),
+              color: colors.textPrimary,
             ),
           ),
         ],
@@ -434,6 +462,8 @@ class _AddPhotoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -448,9 +478,11 @@ class _AddPhotoSection extends StatelessWidget {
             );
           },
           style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF2D261D),
-            side: const BorderSide(color: Color(0xFF92876F), width: 1.6),
-            backgroundColor: Colors.white.withOpacity(0.7),
+            foregroundColor: colors.textPrimary,
+            side: BorderSide(color: colors.border, width: 1.6),
+            backgroundColor: context.isDarkMode
+                ? colors.surfaceHigh
+                : Colors.white.withValues(alpha: 0.7),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
@@ -475,14 +507,20 @@ class _AddPhotoSection extends StatelessWidget {
         Container(
           constraints: const BoxConstraints(minHeight: 250),
           decoration: BoxDecoration(
-            color: const Color(0xFFD7D7D7),
+            color: context.isDarkMode
+                ? colors.surfaceMuted
+                : const Color(0xFFD7D7D7),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFF7A766F)),
-            boxShadow: const [
+            border: Border.all(
+              color: context.isDarkMode
+                  ? colors.border
+                  : const Color(0xFF7A766F),
+            ),
+            boxShadow: [
               BoxShadow(
-                color: Color(0x10000000),
+                color: colors.shadow,
                 blurRadius: 8,
-                offset: Offset(0, 3),
+                offset: const Offset(0, 3),
               ),
             ],
           ),
@@ -492,10 +530,10 @@ class _AddPhotoSection extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.image_outlined,
                     size: 54,
-                    color: Color(0xFF686868),
+                    color: colors.textSecondary,
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -503,7 +541,7 @@ class _AddPhotoSection extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       fontSize: 14,
-                      color: const Color(0xFF5C5C5C),
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
@@ -523,19 +561,27 @@ class _LetsHikeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return SizedBox(
       width: double.infinity,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF41D11C), Color(0xFF8DEB6B), Color(0xFFEAF5E8)],
+          gradient: LinearGradient(
+            colors: context.isDarkMode
+                ? [colors.primary, colors.accent]
+                : const [
+                    Color(0xFF41D11C),
+                    Color(0xFF8DEB6B),
+                    Color(0xFFEAF5E8),
+                  ],
           ),
           borderRadius: BorderRadius.circular(14),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color(0x22000000),
+              color: colors.shadow,
               blurRadius: 10,
-              offset: Offset(0, 5),
+              offset: const Offset(0, 5),
             ),
           ],
         ),
@@ -571,7 +617,9 @@ class _LetsHikeButton extends StatelessWidget {
             style: GoogleFonts.fredoka(
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF1E261A),
+              color: context.isDarkMode
+                  ? Colors.white
+                  : const Color(0xFF1E261A),
             ),
           ),
         ),
@@ -658,7 +706,7 @@ class _TrailMapPainter extends CustomPainter {
       );
 
     final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.12)
+      ..color = Colors.black.withValues(alpha: 0.12)
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 10;

@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PreHikeHeaderCard extends StatefulWidget {
-  const PreHikeHeaderCard({super.key, required this.onLogout});
-
-  final Future<void> Function() onLogout;
+  const PreHikeHeaderCard({super.key});
 
   @override
   State<PreHikeHeaderCard> createState() => _PreHikeHeaderCardState();
@@ -284,11 +282,6 @@ class _PreHikeHeaderCardState extends State<PreHikeHeaderCard>
                                               ),
                                             ),
                                           ),
-                                          const SizedBox(width: 12),
-                                          _LogoutButton(
-                                            compact: compact,
-                                            onPressed: widget.onLogout,
-                                          ),
                                         ],
                                       ),
                                       const SizedBox(height: 18),
@@ -427,40 +420,6 @@ class _MountainBadge extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _LogoutButton extends StatelessWidget {
-  const _LogoutButton({required this.compact, required this.onPressed});
-
-  final bool compact;
-  final Future<void> Function() onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final buttonSize = compact ? 42.0 : 46.0;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(buttonSize / 2),
-        child: Ink(
-          width: buttonSize,
-          height: buttonSize,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.10),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
-          ),
-          child: const Icon(
-            Icons.logout_rounded,
-            color: Color(0xFFF1F8F4),
-            size: 21,
-          ),
-        ),
       ),
     );
   }

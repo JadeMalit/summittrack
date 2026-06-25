@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 
 import '../../data/trail_data/Sta.Cruz details.dart';
 import 'app_routes.dart';
+import '../../features/auth/screens/SignIN_SignUP/pre_hike_loading_screen.dart';
 import '../../features/auth/screens/SignIN_SignUP/signin.dart';
 import '../../features/auth/screens/SignIN_SignUP/signup.dart';
+import '../../features/auth/widgets/video_background.dart';
 import '../../features/dashboard/screens/home.dart';
 import '../../features/mountains/screens/kapatagan_trail_details.dart';
 import '../../features/mountains/screens/mountain_detail_screen.dart';
@@ -33,7 +35,7 @@ class AppRouter {
     }
 
     if (uri.path == AppRoutes.login) {
-      return _route(
+      return _authRoute(
         settings,
         _AuthGuard(
           currentLocation: location,
@@ -47,7 +49,7 @@ class AppRouter {
     }
 
     if (uri.path == AppRoutes.signup) {
-      return _route(
+      return _authRoute(
         settings,
         _AuthGuard(
           currentLocation: location,
@@ -162,6 +164,37 @@ class AppRouter {
     );
   }
 
+  static PageRouteBuilder<dynamic> _authRoute(
+    RouteSettings settings,
+    Widget child,
+  ) {
+    return PageRouteBuilder<dynamic>(
+      settings: settings,
+      transitionDuration: const Duration(milliseconds: 160),
+      reverseTransitionDuration: const Duration(milliseconds: 120),
+      pageBuilder: (_, __, ___) => ColoredBox(
+        color: VideoBackground.fallbackBackgroundColor,
+        child: child,
+      ),
+      transitionsBuilder: (_, animation, __, child) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+          reverseCurve: Curves.easeInCubic,
+        );
+        final slideAnimation = Tween<Offset>(
+          begin: const Offset(0.02, 0),
+          end: Offset.zero,
+        ).animate(curvedAnimation);
+
+        return FadeTransition(
+          opacity: curvedAnimation,
+          child: SlideTransition(position: slideAnimation, child: child),
+        );
+      },
+    );
+  }
+
   static MaterialPageRoute<dynamic> _route(
     RouteSettings settings,
     Widget child,
@@ -174,9 +207,16 @@ class AppRouter {
 }
 
 Future<void>? _authBootstrapFuture;
+bool _authBootstrapComplete = false;
 
 Future<void> _ensureAuthBootstrap() {
-  return _authBootstrapFuture ??= _bootstrapAuth();
+  if (_authBootstrapComplete) {
+    return SynchronousFuture<void>(null);
+  }
+
+  return _authBootstrapFuture ??= _bootstrapAuth().then<void>((_) {
+    _authBootstrapComplete = true;
+  });
 }
 
 Future<void> _bootstrapAuth() async {
@@ -211,16 +251,24 @@ class _AuthGuard extends StatefulWidget {
 }
 
 class _AuthGuardState extends State<_AuthGuard> {
-  late final Future<void> _bootstrapFuture;
+  Future<void>? _bootstrapFuture;
+  late final bool _bootstrapAlreadyComplete;
 
   @override
   void initState() {
     super.initState();
-    _bootstrapFuture = _ensureAuthBootstrap();
+    _bootstrapAlreadyComplete = _authBootstrapComplete;
+    if (!_bootstrapAlreadyComplete) {
+      _bootstrapFuture = _ensureAuthBootstrap();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_bootstrapAlreadyComplete) {
+      return _buildWithAuthState();
+    }
+
     return FutureBuilder<void>(
       future: _bootstrapFuture,
       builder: (context, snapshot) {
@@ -228,40 +276,41 @@ class _AuthGuardState extends State<_AuthGuard> {
           return const _AuthLoadingScreen();
         }
 
-        return StreamBuilder<User?>(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          initialData: FirebaseAuth.instance.currentUser,
-          builder: (context, authSnapshot) {
-            if (authSnapshot.connectionState == ConnectionState.waiting &&
-                !authSnapshot.hasData) {
-              return const _AuthLoadingScreen();
-            }
+        return _buildWithAuthState();
+      },
+    );
+  }
 
-            final user = authSnapshot.data;
+  Widget _buildWithAuthState() {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      initialData: FirebaseAuth.instance.currentUser,
+      builder: (context, authSnapshot) {
+        final user = authSnapshot.data;
 
-            if (widget.requireAuth) {
-              if (user != null) {
-                return widget.child;
-              }
-
-              return _RouteRedirect(
-                targetLocation: AppRoutes.loginWithRedirect(
-                  widget.currentLocation,
-                ),
-              );
-            }
-
-            if (user != null) {
-              return _RouteRedirect(
-                targetLocation: AppRoutes.resolveRedirectTarget(
-                  widget.redirectTo,
-                ),
-              );
-            }
-
+        if (widget.requireAuth) {
+          if (user != null) {
             return widget.child;
-          },
-        );
+          }
+
+          return _RouteRedirect(
+            targetLocation: AppRoutes.loginWithRedirect(widget.currentLocation),
+          );
+        }
+
+        if (user != null) {
+          final isLoginRoute =
+              Uri.parse(widget.currentLocation).path == AppRoutes.login;
+          if (isLoginRoute && PreHikeLoginTransition.isActive) {
+            return widget.child;
+          }
+
+          return _RouteRedirect(
+            targetLocation: AppRoutes.resolveRedirectTarget(widget.redirectTo),
+          );
+        }
+
+        return widget.child;
       },
     );
   }
@@ -308,7 +357,10 @@ class _AuthLoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    return const Scaffold(
+      backgroundColor: VideoBackground.fallbackBackgroundColor,
+      body: Center(child: CircularProgressIndicator(color: Colors.white)),
+    );
   }
 }
 

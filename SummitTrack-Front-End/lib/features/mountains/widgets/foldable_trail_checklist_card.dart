@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../data/trail_data/trail_data.dart';
 
 class FoldableTrailChecklistCard extends StatefulWidget {
@@ -62,6 +63,8 @@ class _FoldableTrailChecklistCardState extends State<FoldableTrailChecklistCard>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -72,8 +75,14 @@ class _FoldableTrailChecklistCardState extends State<FoldableTrailChecklistCard>
           clipper: _ChecklistCardClipper(),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.92),
-              border: Border.all(color: const Color(0xFFCFC8BB)),
+              color: context.isDarkMode
+                  ? colors.surface
+                  : Colors.white.withValues(alpha: 0.92),
+              border: Border.all(
+                color: context.isDarkMode
+                    ? colors.border
+                    : const Color(0xFFCFC8BB),
+              ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -102,13 +111,15 @@ class _FoldableTrailChecklistCardState extends State<FoldableTrailChecklistCard>
                 Container(
                   height: 1,
                   margin: const EdgeInsets.symmetric(horizontal: 18),
-                  color: const Color(0xFFDDD7C8).withOpacity(0.85),
+                  color: context.isDarkMode
+                      ? colors.divider
+                      : const Color(0xFFDDD7C8).withValues(alpha: 0.85),
                 ),
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: _toggleChecklist,
-                    splashColor: const Color(0xFF6A5F4B).withOpacity(0.08),
+                    splashColor: colors.accent.withValues(alpha: 0.08),
                     highlightColor: Colors.transparent,
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(18, 10, 18, 24),
@@ -125,7 +136,7 @@ class _FoldableTrailChecklistCardState extends State<FoldableTrailChecklistCard>
                                 style: GoogleFonts.fredoka(
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF4A4133),
+                                  color: colors.textSecondary,
                                 ),
                               ),
                             ),
@@ -134,9 +145,9 @@ class _FoldableTrailChecklistCardState extends State<FoldableTrailChecklistCard>
                             turns: _isChecklistOpen ? 0.0 : 0.5,
                             duration: const Duration(milliseconds: 260),
                             curve: Curves.easeInOutCubic,
-                            child: const Icon(
+                            child: Icon(
                               Icons.keyboard_arrow_up_rounded,
-                              color: Color(0xFF4A4133),
+                              color: colors.textSecondary,
                               size: 26,
                             ),
                           ),
@@ -161,6 +172,8 @@ class _ChecklistContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -169,7 +182,7 @@ class _ChecklistContent extends StatelessWidget {
           style: GoogleFonts.fredoka(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF2E291F),
+            color: colors.textPrimary,
           ),
         ),
         const SizedBox(height: 12),
@@ -180,7 +193,7 @@ class _ChecklistContent extends StatelessWidget {
           style: GoogleFonts.fredoka(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF2E291F),
+            color: colors.textPrimary,
           ),
         ),
         const SizedBox(height: 10),
@@ -192,7 +205,7 @@ class _ChecklistContent extends StatelessWidget {
             style: GoogleFonts.fredoka(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF2E291F),
+              color: colors.textPrimary,
             ),
           ),
           const SizedBox(height: 10),
@@ -210,6 +223,8 @@ class _ChecklistGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Column(
       children: items
           .map(
@@ -223,8 +238,8 @@ class _ChecklistGroup extends StatelessWidget {
                     child: Container(
                       width: 6,
                       height: 6,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF4C4335),
+                      decoration: BoxDecoration(
+                        color: colors.accent,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -236,7 +251,7 @@ class _ChecklistGroup extends StatelessWidget {
                       style: GoogleFonts.merriweather(
                         fontSize: 13,
                         height: 1.45,
-                        color: const Color(0xFF453E33),
+                        color: colors.textSecondary,
                       ),
                     ),
                   ),

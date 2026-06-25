@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/routing/app_routes.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../data/trail_data/mountain.dart';
 import 'mt_apo.dart';
 
@@ -11,12 +12,15 @@ class MountainDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     if (mountain.name == 'Mt. Apo') {
       return const MtApoScreen();
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(mountain.name), backgroundColor: Colors.green),
+      appBar: AppBar(title: Text(mountain.name)),
+      backgroundColor: colors.background,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,11 +31,11 @@ class MountainDetailScreen extends StatelessWidget {
               width: double.infinity,
               child: mountain.imageAsset == null
                   ? Container(
-                      color: Colors.green[200],
-                      child: const Icon(
+                      color: colors.surfaceMuted,
+                      child: Icon(
                         Icons.terrain,
                         size: 100,
-                        color: Colors.white,
+                        color: colors.accent,
                       ),
                     )
                   : Image.asset(mountain.imageAsset!, fit: BoxFit.cover),
@@ -45,7 +49,8 @@ class MountainDetailScreen extends StatelessWidget {
                   /// NAME
                   Text(
                     mountain.name,
-                    style: const TextStyle(
+                    style: TextStyle(
+                      color: colors.textPrimary,
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
                     ),
@@ -62,9 +67,13 @@ class MountainDetailScreen extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   /// DESCRIPTION
-                  const Text(
+                  Text(
                     "Description",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: colors.textPrimary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 5),
                   Text(mountain.description),
@@ -72,9 +81,13 @@ class MountainDetailScreen extends StatelessWidget {
                   const SizedBox(height: 30),
 
                   /// TRAILS
-                  const Text(
+                  Text(
                     "Trails",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: colors.textPrimary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   if (mountain.trails.isEmpty)
@@ -86,7 +99,7 @@ class MountainDetailScreen extends StatelessWidget {
                         label: Text(trail),
                         onPressed: () => _openTrail(context, mountain, trail),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
+                          backgroundColor: colors.primary,
                           minimumSize: const Size(double.infinity, 48),
                         ),
                       ),
@@ -105,7 +118,7 @@ class MountainDetailScreen extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: colors.primary,
                       minimumSize: const Size(double.infinity, 50),
                     ),
                   ),
@@ -121,7 +134,7 @@ class MountainDetailScreen extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
+                      backgroundColor: colors.warning,
                       minimumSize: const Size(double.infinity, 50),
                     ),
                   ),

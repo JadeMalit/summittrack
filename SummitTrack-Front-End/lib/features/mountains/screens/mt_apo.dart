@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/routing/app_routes.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../data/trail_data/Sta.Cruz details.dart';
 import '../../../data/trail_data/kapatagan_trail_data.dart';
 import '../widgets/animated_mt_apo_banner.dart';
@@ -18,6 +19,8 @@ class MtApoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final isDark = context.isDarkMode;
     final trailButtons = [
       _TrailButtonConfig(
         title: staCruzSibulanTrail.name,
@@ -61,7 +64,7 @@ class MtApoScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: _backgroundColor,
+      backgroundColor: isDark ? colors.background : _backgroundColor,
       body: SafeArea(
         top: true,
         child: SingleChildScrollView(
@@ -73,14 +76,16 @@ class MtApoScreen extends StatelessWidget {
               const SizedBox(height: 14),
               Container(
                 decoration: BoxDecoration(
-                  color: _cardColor,
+                  color: isDark ? colors.surface : _cardColor,
                   borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: const Color(0xFFB9B29F)),
-                  boxShadow: const [
+                  border: Border.all(
+                    color: isDark ? colors.border : const Color(0xFFB9B29F),
+                  ),
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x1E000000),
+                      color: colors.shadow,
                       blurRadius: 14,
-                      offset: Offset(0, 6),
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
@@ -117,10 +122,12 @@ class MtApoScreen extends StatelessWidget {
                     ) ...[
                       if (index > 0) ...[
                         const SizedBox(height: 10),
-                        const Divider(
+                        Divider(
                           height: 1,
                           thickness: 1,
-                          color: Color(0xFFB8B09B),
+                          color: isDark
+                              ? colors.divider
+                              : const Color(0xFFB8B09B),
                         ),
                         const SizedBox(height: 10),
                       ],
@@ -153,8 +160,9 @@ class _InfoLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final textStyle = GoogleFonts.merriweather(
-      color: const Color(0xFF332B1D),
+      color: colors.textPrimary,
       fontSize: 13.5,
       height: 1.5,
     );
@@ -184,16 +192,26 @@ class _TrailActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final buttonColor = context.isDarkMode
+        ? colors.accent
+        : MtApoScreen._buttonColor;
+    final titleColor = context.isDarkMode
+        ? colors.background
+        : const Color(0xFF2D1E06);
+
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: config.onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: MtApoScreen._buttonColor,
-          foregroundColor: Colors.white,
+          backgroundColor: buttonColor,
+          foregroundColor: titleColor,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          elevation: 3.5,
-          shadowColor: MtApoScreen._buttonShadow,
+          elevation: context.isDarkMode ? 0 : 3.5,
+          shadowColor: context.isDarkMode
+              ? colors.shadow
+              : MtApoScreen._buttonShadow,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -207,7 +225,7 @@ class _TrailActionButton extends StatelessWidget {
               style: GoogleFonts.fredoka(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF2D1E06),
+                color: titleColor,
               ),
             ),
             const SizedBox(height: 2),
@@ -218,7 +236,7 @@ class _TrailActionButton extends StatelessWidget {
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
                 fontStyle: FontStyle.italic,
-                color: Colors.white,
+                color: titleColor.withValues(alpha: 0.78),
               ),
             ),
           ],

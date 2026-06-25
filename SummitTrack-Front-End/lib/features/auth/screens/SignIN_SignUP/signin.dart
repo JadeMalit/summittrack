@@ -1,12 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/routing/app_routes.dart';
 import '../../widgets/video_background.dart';
+import 'pre_hike_loading_screen.dart';
 
 class SignInScreen extends StatefulWidget {
-  const SignInScreen({super.key, this.redirectTo = '/home'});
+  const SignInScreen({super.key, this.redirectTo = AppRoutes.home});
 
   final String redirectTo;
 
@@ -21,6 +24,8 @@ class _SignInScreenState extends State<SignInScreen>
 
   bool loading = false;
   bool hidePass = true;
+  bool _didPrecacheAssets = false;
+  bool _navigatingToRegister = false;
   String? errorMessage;
 
   late AnimationController _controller;
@@ -49,7 +54,21 @@ class _SignInScreenState extends State<SignInScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).clearSnackBars();
+      unawaited(
+        VideoBackground.preload('assets/videos/register_background.mp4'),
+      );
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_didPrecacheAssets) return;
+    _didPrecacheAssets = true;
+    unawaited(
+      precacheImage(const AssetImage("assets/images/logo.jpg"), context),
+    );
   }
 
   @override
@@ -76,6 +95,45 @@ class _SignInScreenState extends State<SignInScreen>
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
+  void _showSignInError(Object error) {
+    if (error is FirebaseAuthException) {
+      if (error.code == 'invalid-credential' ||
+          error.code == 'wrong-password' ||
+          error.code == 'user-not-found' ||
+          error.code == 'invalid-email') {
+        _showError("Incorrect email or password.");
+      } else if (error.code == 'network-request-failed') {
+        _showError(
+          "Unable to sign in right now. Please check your internet connection.",
+        );
+      } else {
+        _showError("Unable to sign in right now. Please try again.");
+      }
+
+      return;
+    }
+
+    _showError("Unable to sign in right now. Please try again.");
+  }
+
+  Future<void> _goToRegister() async {
+    if (_navigatingToRegister || loading) return;
+
+    _navigatingToRegister = true;
+    FocusScope.of(context).unfocus();
+    _clearError();
+    unawaited(VideoBackground.preload('assets/videos/register_background.mp4'));
+
+    try {
+      await Navigator.pushNamed(
+        context,
+        AppRoutes.signupWithRedirect(widget.redirectTo),
+      );
+    } finally {
+      _navigatingToRegister = false;
+    }
+  }
+
   Future<void> signIn() async {
     if (loading) return;
 
@@ -92,28 +150,29 @@ class _SignInScreenState extends State<SignInScreen>
 
     try {
       setState(() => loading = true);
+      PreHikeLoginTransition.start();
 
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
+      final loginFuture = FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password)
+          .then<void>((_) {});
+
+      if (!mounted) return;
+
+      final signInError = await Navigator.of(context).push<Object?>(
+        MaterialPageRoute(
+          builder: (_) => PreHikeLoadingScreen(
+            loginFuture: loginFuture,
+            nextRoute: widget.redirectTo,
+          ),
+        ),
       );
 
       if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed(widget.redirectTo);
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'invalid-credential' ||
-          e.code == 'wrong-password' ||
-          e.code == 'user-not-found' ||
-          e.code == 'invalid-email') {
-        _showError("Incorrect email or password.");
-      } else if (e.code == 'network-request-failed') {
-        _showError(
-          "Unable to sign in right now. Please check your internet connection.",
-        );
-      } else {
-        _showError("Unable to sign in right now. Please try again.");
+      if (signInError != null) {
+        _showSignInError(signInError);
       }
     } catch (_) {
+      PreHikeLoginTransition.finish();
       _showError("Unable to sign in right now. Please try again.");
     } finally {
       if (mounted) {
@@ -151,6 +210,7 @@ class _SignInScreenState extends State<SignInScreen>
     );
 
     return Scaffold(
+      backgroundColor: VideoBackground.fallbackBackgroundColor,
       body: VideoBackground(
         videoAssetPath: 'assets/videos/login_background.mp4',
         child: SafeArea(
@@ -311,14 +371,7 @@ class _SignInScreenState extends State<SignInScreen>
                                     ),
                                   ),
                                   GestureDetector(
-                                    onTap: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        AppRoutes.signupWithRedirect(
-                                          widget.redirectTo,
-                                        ),
-                                      );
-                                    },
+                                    onTap: _goToRegister,
                                     child: Text(
                                       "Register",
                                       style: GoogleFonts.poppins(

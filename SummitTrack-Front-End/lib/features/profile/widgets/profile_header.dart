@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../helpers/profile_constants.dart';
 
 class ProfileHeader extends StatelessWidget {
@@ -11,15 +12,12 @@ class ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: ProfileConstants.topBarHeight,
-      child: Row(
-        children: [
-          _TopIconButton(
-            icon: Icons.arrow_back_ios_new_rounded,
-            onTap: onBackTap,
-          ),
-          const Spacer(),
-          const _TopIconBadge(icon: Icons.home_rounded),
-        ],
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: _TopIconButton(
+          icon: Icons.arrow_back_ios_new_rounded,
+          onTap: onBackTap,
+        ),
       ),
     );
   }
@@ -33,6 +31,8 @@ class _TopIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -42,47 +42,26 @@ class _TopIconButton extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.75),
+            color: context.isDarkMode
+                ? colors.surfaceHigh
+                : Colors.white.withValues(alpha: 0.75),
             shape: BoxShape.circle,
-            border: Border.all(color: ProfileConstants.surfaceBorder),
+            border: Border.all(
+              color: context.isDarkMode
+                  ? colors.border
+                  : ProfileConstants.surfaceBorder,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
+                color: colors.shadow,
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Icon(icon, color: ProfileConstants.textDark, size: 20),
+          child: Icon(icon, color: colors.textPrimary, size: 20),
         ),
       ),
-    );
-  }
-}
-
-class _TopIconBadge extends StatelessWidget {
-  const _TopIconBadge({required this.icon});
-
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.72),
-        shape: BoxShape.circle,
-        border: Border.all(color: ProfileConstants.surfaceBorder),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Icon(icon, color: ProfileConstants.textDark, size: 20),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../hike/screens/hike.dart';
 import '../../hike/screens/reflections.dart';
 import '../../mountains/screens/mountains.dart'; // Mountain screen for the list
@@ -35,12 +36,13 @@ class _MainNavState extends State<MainNav> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'SummitTrack - ${getUserName()}',
         ), // Display user name in the AppBar
-        backgroundColor: Colors.green[700],
       ),
       body: _screens[_currentIndex], // Display the screen based on selected tab
       bottomNavigationBar: BottomNavigationBar(
@@ -56,8 +58,8 @@ class _MainNavState extends State<MainNav> {
             icon: AnimatedNavIcon(
               icon: Icons.home_rounded,
               isActive: _currentIndex == 0,
-              activeColor: Colors.green.shade700,
-              inactiveColor: const Color(0xFF7B877D),
+              activeColor: colors.accent,
+              inactiveColor: colors.textSecondary,
             ),
             label: 'Home',
           ),
@@ -65,8 +67,8 @@ class _MainNavState extends State<MainNav> {
             icon: AnimatedNavIcon(
               icon: Icons.terrain_rounded,
               isActive: _currentIndex == 1,
-              activeColor: Colors.green.shade700,
-              inactiveColor: const Color(0xFF7B877D),
+              activeColor: colors.accent,
+              inactiveColor: colors.textSecondary,
             ),
             label: 'Mountains',
           ),
@@ -74,8 +76,8 @@ class _MainNavState extends State<MainNav> {
             icon: AnimatedNavIcon(
               icon: Icons.person_rounded,
               isActive: _currentIndex == 2,
-              activeColor: Colors.green.shade700,
-              inactiveColor: const Color(0xFF7B877D),
+              activeColor: colors.accent,
+              inactiveColor: colors.textSecondary,
               isLifted: true,
             ),
             label: 'Profile',
@@ -84,8 +86,8 @@ class _MainNavState extends State<MainNav> {
             icon: AnimatedNavIcon(
               icon: Icons.hiking_rounded,
               isActive: _currentIndex == 3,
-              activeColor: Colors.green.shade700,
-              inactiveColor: const Color(0xFF7B877D),
+              activeColor: colors.accent,
+              inactiveColor: colors.textSecondary,
             ),
             label: 'Hike',
           ),
@@ -93,8 +95,8 @@ class _MainNavState extends State<MainNav> {
             icon: AnimatedNavIcon(
               icon: Icons.book_rounded,
               isActive: _currentIndex == 4,
-              activeColor: Colors.green.shade700,
-              inactiveColor: const Color(0xFF7B877D),
+              activeColor: colors.accent,
+              inactiveColor: colors.textSecondary,
             ),
             label: 'Reflections',
           ),

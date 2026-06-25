@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../helpers/profile_constants.dart';
 
 class ProfileAvatarSection extends StatelessWidget {
@@ -18,6 +19,7 @@ class ProfileAvatarSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final hasLocalPhoto = avatarBytes != null && avatarBytes!.isNotEmpty;
     final hasNetworkPhoto = photoUrl != null && photoUrl!.trim().isNotEmpty;
 
@@ -36,14 +38,18 @@ class ProfileAvatarSection extends StatelessWidget {
           height: 112,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: const Color(0xFFF6F8F3),
+            color: context.isDarkMode
+                ? colors.surfaceHigh
+                : const Color(0xFFF6F8F3),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.78),
+              color: context.isDarkMode
+                  ? colors.accent.withValues(alpha: 0.42)
+                  : Colors.white.withValues(alpha: 0.78),
               width: 4,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.16),
+                color: colors.shadow,
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -53,7 +59,7 @@ class ProfileAvatarSection extends StatelessWidget {
             padding: const EdgeInsets.all(4),
             child: ClipOval(
               child: DecoratedBox(
-                decoration: const BoxDecoration(color: Color(0xFFEAF1E4)),
+                decoration: BoxDecoration(color: colors.surfaceMuted),
                 child: imageProvider != null
                     ? Image(
                         image: imageProvider,
@@ -61,10 +67,10 @@ class ProfileAvatarSection extends StatelessWidget {
                         width: double.infinity,
                         height: double.infinity,
                       )
-                    : const Icon(
+                    : Icon(
                         Icons.person_outline_rounded,
                         size: 50,
-                        color: ProfileConstants.textDark,
+                        color: colors.textPrimary,
                       ),
               ),
             ),
@@ -82,24 +88,28 @@ class ProfileAvatarSection extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.isDarkMode ? colors.accent : Colors.white,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: ProfileConstants.surfaceBorder,
+                    color: context.isDarkMode
+                        ? colors.border
+                        : ProfileConstants.surfaceBorder,
                     width: 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.12),
+                      color: colors.shadow,
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.add_rounded,
                   size: 20,
-                  color: ProfileConstants.cardTop,
+                  color: context.isDarkMode
+                      ? colors.background
+                      : colors.primary,
                 ),
               ),
             ),

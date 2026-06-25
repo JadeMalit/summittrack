@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../helpers/profile_constants.dart';
 import '../helpers/profile_models.dart';
 import '../helpers/profile_validators.dart';
@@ -20,10 +21,7 @@ Future<String?> showProfileEditSheet(
 }
 
 class _EditProfileSheet extends StatefulWidget {
-  const _EditProfileSheet({
-    required this.field,
-    required this.initialValue,
-  });
+  const _EditProfileSheet({required this.field, required this.initialValue});
 
   final ProfileEditableField field;
   final String initialValue;
@@ -58,12 +56,13 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 0, 16, bottomInset + 16),
       child: Material(
-        color: ProfileConstants.softCard,
+        color: context.isDarkMode ? colors.surface : ProfileConstants.softCard,
         borderRadius: BorderRadius.circular(26),
         child: SafeArea(
           top: false,
@@ -80,7 +79,9 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                       width: 48,
                       height: 5,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFCED8C6),
+                        color: context.isDarkMode
+                            ? colors.divider
+                            : const Color(0xFFCED8C6),
                         borderRadius: BorderRadius.circular(999),
                       ),
                     ),
@@ -88,10 +89,10 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                   const SizedBox(height: 18),
                   Text(
                     'Edit ${widget.field.label}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: ProfileConstants.textDark,
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -99,6 +100,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                     controller: _controller,
                     autofocus: true,
                     keyboardType: widget.field.keyboardType,
+                    style: TextStyle(color: colors.textPrimary),
                     textInputAction: TextInputAction.done,
                     maxLines: widget.field.maxLines,
                     minLines: widget.field.maxLines > 1 ? 3 : 1,
@@ -112,7 +114,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                     decoration: InputDecoration(
                       hintText: widget.field.hintText,
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: colors.surfaceHigh,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 14,
                         vertical: 14,
@@ -123,14 +125,16 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: ProfileConstants.surfaceBorder,
+                        borderSide: BorderSide(
+                          color: context.isDarkMode
+                              ? colors.border
+                              : ProfileConstants.surfaceBorder,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: ProfileConstants.cardTop,
+                        borderSide: BorderSide(
+                          color: colors.accent,
                           width: 1.5,
                         ),
                       ),
@@ -144,14 +148,16 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                           onPressed: () => Navigator.of(context).pop(),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            side: const BorderSide(
-                              color: ProfileConstants.surfaceBorder,
+                            side: BorderSide(
+                              color: context.isDarkMode
+                                  ? colors.border
+                                  : ProfileConstants.surfaceBorder,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
-                            foregroundColor: ProfileConstants.textDark,
-                            backgroundColor: Colors.white,
+                            foregroundColor: colors.textPrimary,
+                            backgroundColor: colors.surfaceHigh,
                           ),
                           child: const Text('Cancel'),
                         ),
@@ -161,7 +167,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                         child: ElevatedButton(
                           onPressed: _submit,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: ProfileConstants.cardTop,
+                            backgroundColor: colors.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(

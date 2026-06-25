@@ -28,10 +28,10 @@ class LetsHikeCalendarWeatherModal extends StatefulWidget {
 
 class _LetsHikeCalendarWeatherModalState
     extends State<LetsHikeCalendarWeatherModal> {
-  static const Color _panelColor = Color(0xFF171821);
-  static const Color _cardColor = Color(0xFF20212E);
-  static const Color _accentColor = Color(0xFFE83D93);
-  static const Color _mutedTextColor = Color(0xFFB7B9C8);
+  static const Color _panelColor = Color(0xFF0B120D);
+  static const Color _cardColor = Color(0xFF121C14);
+  static const Color _accentColor = Color(0xFF3FA65B);
+  static const Color _mutedTextColor = Color(0xFFB8C7B7);
 
   final WeatherService _weatherService = WeatherService();
   late DateTime _selectedDate;
@@ -496,9 +496,14 @@ class _CalendarDateCell extends StatelessWidget {
           curve: Curves.easeOut,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isSelected ? const Color(0xFFE83D93) : Colors.transparent,
+            color: isSelected
+                ? _LetsHikeCalendarWeatherModalState._accentColor
+                : Colors.transparent,
             border: isToday && !isSelected
-                ? Border.all(color: const Color(0xFFE83D93), width: 1.4)
+                ? Border.all(
+                    color: _LetsHikeCalendarWeatherModalState._accentColor,
+                    width: 1.4,
+                  )
                 : null,
           ),
           alignment: Alignment.center,

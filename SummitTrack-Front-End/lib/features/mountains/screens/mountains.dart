@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // To get current user
 
+import '../../../core/theme/app_colors.dart';
 import '../../../core/routing/mountain_screen_resolver.dart';
 import '../../../services/data_service.dart';
 
@@ -10,6 +11,7 @@ class MountainsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mountains = DataService.getMountains();
+    final colors = context.appColors;
 
     // Get current user from FirebaseAuth
     final User? user = FirebaseAuth.instance.currentUser;
@@ -17,10 +19,8 @@ class MountainsScreen extends StatelessWidget {
         user?.displayName ?? 'Guest'; // If not logged in, show 'Guest'
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mountains'),
-        backgroundColor: Colors.green[700],
-      ),
+      appBar: AppBar(title: const Text('Mountains')),
+      backgroundColor: colors.background,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -33,13 +33,9 @@ class MountainsScreen extends StatelessWidget {
                   // Profile Picture
                   CircleAvatar(
                     radius: 40,
-                    backgroundColor: Colors.green[700],
+                    backgroundColor: colors.iconBackground,
                     child: user?.photoURL == null
-                        ? const Icon(
-                            Icons.person,
-                            size: 50,
-                            color: Colors.white,
-                          )
+                        ? Icon(Icons.person, size: 50, color: colors.accent)
                         : ClipOval(
                             child: Image.network(
                               user!
@@ -54,7 +50,8 @@ class MountainsScreen extends StatelessWidget {
                   // User's Name
                   Text(
                     'Hello, $userName!',
-                    style: const TextStyle(
+                    style: TextStyle(
+                      color: colors.textPrimary,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -74,7 +71,7 @@ class MountainsScreen extends StatelessWidget {
                   final mountain = mountains[index];
                   return Card(
                     margin: const EdgeInsets.all(10),
-                    elevation: 5,
+                    elevation: context.isDarkMode ? 0 : 3,
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(10),
                       title: Text(mountain.name),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../helpers/profile_constants.dart';
 import '../helpers/profile_models.dart';
 
@@ -36,7 +37,9 @@ class _ProfileDetailItemState extends State<ProfileDetailItem> {
 
   @override
   Widget build(BuildContext context) {
-    final start = ProfileConstants.detailItemStart +
+    final colors = context.appColors;
+    final start =
+        ProfileConstants.detailItemStart +
         (widget.index * ProfileConstants.detailItemStep);
     final end = (start + ProfileConstants.detailItemDuration).clamp(0.0, 1.0);
     final animation = CurvedAnimation(
@@ -67,14 +70,23 @@ class _ProfileDetailItemState extends State<ProfileDetailItem> {
               borderRadius: BorderRadius.circular(18),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.96),
+                  color: context.isDarkMode
+                      ? colors.surfaceHigh
+                      : Colors.white.withValues(alpha: 0.96),
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: ProfileConstants.surfaceBorder),
+                  border: Border.all(
+                    color: context.isDarkMode
+                        ? colors.border
+                        : ProfileConstants.surfaceBorder,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.07),
+                      color: colors.shadow,
                       blurRadius: 12,
                       offset: const Offset(0, 5),
                     ),
@@ -87,7 +99,7 @@ class _ProfileDetailItemState extends State<ProfileDetailItem> {
                       width: 4,
                       height: ProfileConstants.detailItemHeight,
                       decoration: BoxDecoration(
-                        color: ProfileConstants.cardTop.withValues(alpha: 0.65),
+                        color: colors.accent.withValues(alpha: 0.65),
                         borderRadius: BorderRadius.circular(999),
                       ),
                     ),
@@ -98,8 +110,8 @@ class _ProfileDetailItemState extends State<ProfileDetailItem> {
                         children: [
                           Text(
                             widget.detail.label,
-                            style: const TextStyle(
-                              color: Color(0xFF6C726B),
+                            style: TextStyle(
+                              color: colors.textSecondary,
                               fontSize: 11.5,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.35,
@@ -108,8 +120,8 @@ class _ProfileDetailItemState extends State<ProfileDetailItem> {
                           const SizedBox(height: 6),
                           Text(
                             widget.detail.value,
-                            style: const TextStyle(
-                              color: ProfileConstants.textDark,
+                            style: TextStyle(
+                              color: colors.textPrimary,
                               fontSize: 15.5,
                               fontWeight: FontWeight.w600,
                               height: 1.35,
@@ -126,7 +138,7 @@ class _ProfileDetailItemState extends State<ProfileDetailItem> {
                       child: Icon(
                         Icons.edit_outlined,
                         size: 18,
-                        color: ProfileConstants.textDark.withValues(alpha: 0.68),
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],

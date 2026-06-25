@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/routing/mountain_screen_resolver.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../services/data_service.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -9,6 +10,7 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final User? user = FirebaseAuth.instance.currentUser;
     final String userName = user?.displayName ?? 'Hiker';
 
@@ -22,8 +24,8 @@ class DashboardScreen extends StatelessWidget {
         .toList();
 
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: Colors.green[700],
         title: Row(
           children: [
             const CircleAvatar(radius: 18, child: Icon(Icons.person)),

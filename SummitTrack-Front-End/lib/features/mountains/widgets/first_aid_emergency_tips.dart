@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/theme/app_colors.dart';
+
 class FirstAidEmergencyTips extends StatefulWidget {
   const FirstAidEmergencyTips({super.key});
 
@@ -81,22 +83,27 @@ class _FirstAidEmergencyTipsState extends State<FirstAidEmergencyTips> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final tipTextStyle = GoogleFonts.merriweather(
       fontSize: 12.8,
       height: 1.6,
-      color: const Color(0xFF40382B),
+      color: colors.textSecondary,
     );
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.92),
+        color: context.isDarkMode
+            ? colors.surfaceHigh
+            : Colors.white.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFC7C0B3)),
-        boxShadow: const [
+        border: Border.all(
+          color: context.isDarkMode ? colors.border : const Color(0xFFC7C0B3),
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x14000000),
+            color: colors.shadow,
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -121,9 +128,15 @@ class _FirstAidEmergencyTipsState extends State<FirstAidEmergencyTips> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFFF7F5F1),
+              color: context.isDarkMode
+                  ? colors.surface
+                  : const Color(0xFFF7F5F1),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFCEC6B9)),
+              border: Border.all(
+                color: context.isDarkMode
+                    ? colors.border
+                    : const Color(0xFFCEC6B9),
+              ),
             ),
             child: Text(
               'This section is for basic emergency guidance only and does not replace professional medical help.',
@@ -131,7 +144,7 @@ class _FirstAidEmergencyTipsState extends State<FirstAidEmergencyTips> {
                 fontSize: 11.8,
                 height: 1.45,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF5A5143),
+                color: colors.textSecondary,
               ),
             ),
           ),
@@ -156,14 +169,18 @@ class _EmergencyTipTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return AnimatedSize(
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeInOut,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF7F5F1),
+          color: context.isDarkMode ? colors.surface : const Color(0xFFF7F5F1),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFB7B0A4)),
+          border: Border.all(
+            color: context.isDarkMode ? colors.border : const Color(0xFFB7B0A4),
+          ),
         ),
         child: Material(
           color: Colors.transparent,
@@ -184,7 +201,7 @@ class _EmergencyTipTile extends StatelessWidget {
                             style: GoogleFonts.fredoka(
                               fontSize: 14.4,
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF2F2A22),
+                              color: colors.textPrimary,
                             ),
                           ),
                         ),
@@ -193,15 +210,20 @@ class _EmergencyTipTile extends StatelessWidget {
                       AnimatedRotation(
                         turns: isOpen ? 0.5 : 0.0,
                         duration: const Duration(milliseconds: 220),
-                        child: const Icon(
+                        child: Icon(
                           Icons.keyboard_arrow_down_rounded,
-                          color: Color(0xFF2F2A22),
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],
                   ),
                   if (isOpen) ...[
-                    const Divider(height: 1, color: Color(0xFFD5CEC2)),
+                    Divider(
+                      height: 1,
+                      color: context.isDarkMode
+                          ? colors.divider
+                          : const Color(0xFFD5CEC2),
+                    ),
                     const SizedBox(height: 10),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 10),

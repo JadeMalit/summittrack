@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/routing/app_routes.dart';
@@ -9,25 +11,43 @@ const int homeNavbarIndex = 1;
 const int weatherNavbarIndex = 2;
 const int settingsNavbarIndex = 3;
 
-void handleNavbarButtonTap(
+Future<void> handleNavbarButtonTap(
   BuildContext context,
   int index, {
   VoidCallback? onHomeSelected,
-  VoidCallback? onWeatherSelected,
-}) {
+  FutureOr<void> Function()? onWeatherSelected,
+}) async {
   switch (index) {
     case profileNavbarIndex:
-      openProfileScreen(context);
+      await openProfileScreen(context);
       return;
     case homeNavbarIndex:
       _openHomeScreen(context, onHomeSelected: onHomeSelected);
       return;
     case weatherNavbarIndex:
-      onWeatherSelected?.call();
+      final onWeather = onWeatherSelected;
+      if (onWeather != null) {
+        await onWeather();
+      }
       return;
     case settingsNavbarIndex:
-      openSettingsScreen(context);
+      await openSettingsScreen(context);
       return;
+  }
+}
+
+int navbarIndexForRouteName(String? routeName) {
+  final location = AppRoutes.normalizeLocation(routeName);
+  final path = Uri.parse(location).path;
+
+  switch (path) {
+    case AppRoutes.profile:
+      return profileNavbarIndex;
+    case AppRoutes.settings:
+      return settingsNavbarIndex;
+    case AppRoutes.home:
+    default:
+      return homeNavbarIndex;
   }
 }
 

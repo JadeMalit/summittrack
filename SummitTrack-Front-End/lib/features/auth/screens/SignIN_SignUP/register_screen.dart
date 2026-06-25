@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/routing/app_routes.dart';
+import '../../helpers/gmail_email_validator.dart';
 import '../../widgets/video_background.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -25,6 +28,9 @@ class _SignUpScreenState extends State<SignUpScreen>
   bool loading = false;
   bool hidePass = true;
   bool hideConfirm = true;
+  bool _didPrecacheAssets = false;
+  bool _navigatingToSignIn = false;
+  String? emailError;
   String? passwordError;
   String? confirmPasswordError;
 
@@ -49,6 +55,22 @@ class _SignUpScreenState extends State<SignUpScreen>
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(VideoBackground.preload('assets/videos/login_background.mp4'));
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_didPrecacheAssets) return;
+    _didPrecacheAssets = true;
+    unawaited(
+      precacheImage(const AssetImage("assets/images/logo.jpg"), context),
+    );
   }
 
   @override
@@ -62,14 +84,21 @@ class _SignUpScreenState extends State<SignUpScreen>
   }
 
   Future<void> signUp() async {
+    if (loading) return;
+
+    final email = normalizeGmailEmail(emailController.text);
     final password = passwordController.text.trim();
     final confirmPassword = confirmController.text.trim();
+    final emailValidationMessage = validateGmailEmail(email);
 
     /// EMPTY FIELD CHECK
     if (nameController.text.trim().isEmpty ||
-        emailController.text.trim().isEmpty ||
+        email.isEmpty ||
         password.isEmpty ||
         confirmPassword.isEmpty) {
+      setState(() {
+        emailError = email.isEmpty ? null : emailValidationMessage;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Please fill in all fields"),
@@ -79,9 +108,15 @@ class _SignUpScreenState extends State<SignUpScreen>
       return;
     }
 
+    if (emailValidationMessage != null) {
+      setState(() => emailError = emailValidationMessage);
+      return;
+    }
+
     final passwordValidationMessage = _validatePassword(password);
     if (passwordValidationMessage != null) {
       setState(() {
+        emailError = null;
         passwordError = passwordValidationMessage;
         confirmPasswordError = null;
       });
@@ -91,6 +126,7 @@ class _SignUpScreenState extends State<SignUpScreen>
     /// PASSWORD MATCH CHECK
     if (password != confirmPassword) {
       setState(() {
+        emailError = null;
         passwordError = null;
         confirmPasswordError = "Passwords do not match.";
       });
@@ -100,16 +136,14 @@ class _SignUpScreenState extends State<SignUpScreen>
     try {
       setState(() {
         loading = true;
+        emailError = null;
         passwordError = null;
         confirmPasswordError = null;
       });
 
       /// CREATE ACCOUNT
       UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-            email: emailController.text.trim(),
-            password: password,
-          );
+          .createUserWithEmailAndPassword(email: email, password: password);
 
       /// SAVE DISPLAY NAME
       await userCredential.user!.updateDisplayName(nameController.text.trim());
@@ -122,9 +156,13 @@ class _SignUpScreenState extends State<SignUpScreen>
           .set({
             'uid': userCredential.user!.uid,
             'name': nameController.text.trim(),
-            'email': emailController.text.trim(),
+            'email': email,
             'createdAt': Timestamp.now(),
           });
+
+      if (!mounted) {
+        return;
+      }
 
       /// SUCCESS MESSAGE
       ScaffoldMessenger.of(context).showSnackBar(
@@ -138,12 +176,14 @@ class _SignUpScreenState extends State<SignUpScreen>
       await FirebaseAuth.instance.signOut();
 
       /// GO TO SIGN IN UPON SUCCESS
-      if (mounted) {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRoutes.loginWithRedirect(widget.redirectTo),
-        );
+      if (!mounted) {
+        return;
       }
+
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.loginWithRedirect(widget.redirectTo),
+      );
     } on FirebaseAuthException catch (e) {
       String message = "Something went wrong.";
 
@@ -157,10 +197,18 @@ class _SignUpScreenState extends State<SignUpScreen>
         message = "Check your internet connection.";
       }
 
+      if (!mounted) {
+        return;
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message), backgroundColor: Colors.red),
       );
     } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
@@ -189,6 +237,23 @@ class _SignUpScreenState extends State<SignUpScreen>
     }
 
     return null;
+  }
+
+  Future<void> _goToSignIn() async {
+    if (_navigatingToSignIn || loading) return;
+
+    _navigatingToSignIn = true;
+    FocusScope.of(context).unfocus();
+    unawaited(VideoBackground.preload('assets/videos/login_background.mp4'));
+
+    try {
+      await Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.loginWithRedirect(widget.redirectTo),
+      );
+    } finally {
+      _navigatingToSignIn = false;
+    }
   }
 
   InputDecoration _inputDecoration(String hint) {
@@ -235,6 +300,7 @@ class _SignUpScreenState extends State<SignUpScreen>
     );
 
     return Scaffold(
+      backgroundColor: VideoBackground.fallbackBackgroundColor,
       body: VideoBackground(
         videoAssetPath: 'assets/videos/register_background.mp4',
         overlayColor: const Color(0x80000000),
@@ -303,6 +369,16 @@ class _SignUpScreenState extends State<SignUpScreen>
                           child: TextField(
                             controller: emailController,
                             keyboardType: TextInputType.emailAddress,
+                            onChanged: (value) {
+                              final validationMessage = validateGmailEmail(
+                                value,
+                              );
+                              if (emailError != validationMessage) {
+                                setState(() {
+                                  emailError = validationMessage;
+                                });
+                              }
+                            },
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -310,6 +386,20 @@ class _SignUpScreenState extends State<SignUpScreen>
                             decoration: _inputDecoration("Enter your email"),
                           ),
                         ),
+                        if (emailError != null) ...[
+                          const SizedBox(height: 6),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              emailError!,
+                              style: GoogleFonts.poppins(
+                                color: Colors.redAccent,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 15),
 
                         /// PASSWORD
@@ -341,9 +431,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                                       setState(() => hidePass = !hidePass);
                                     },
                                   ),
-                              ),
-                            ),
+                                ),
                           ),
+                        ),
                         if (passwordError != null) ...[
                           const SizedBox(height: 6),
                           Align(
@@ -425,14 +515,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                               ),
                             ),
                             GestureDetector(
-                              onTap: () {
-                                Navigator.pushReplacementNamed(
-                                  context,
-                                  AppRoutes.loginWithRedirect(
-                                    widget.redirectTo,
-                                  ),
-                                );
-                              },
+                              onTap: _goToSignIn,
                               child: Text(
                                 "Sign In",
                                 style: GoogleFonts.poppins(

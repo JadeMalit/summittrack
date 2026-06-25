@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/theme/app_colors.dart';
 import '../helpers/profile_constants.dart';
 import '../helpers/profile_models.dart';
 import '../helpers/profile_value_helpers.dart';
@@ -12,6 +13,8 @@ import '../widgets/profile_background.dart';
 import '../widgets/profile_edit_fields.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_info_card.dart';
+import '../widgets/logout_confirmation_dialog.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -43,15 +46,10 @@ class _ProfileScreenState extends State<ProfileScreen>
       parent: _introController,
       curve: Curves.easeOut,
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.03),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _introController,
-        curve: Curves.easeOutCubic,
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.03), end: Offset.zero).animate(
+          CurvedAnimation(parent: _introController, curve: Curves.easeOutCubic),
+        );
 
     _seedProfileFromAuth();
     _loadStoredProfile();
@@ -84,10 +82,12 @@ class _ProfileScreenState extends State<ProfileScreen>
     }
 
     setState(() {
-      _fullName = prefs.getString(ProfileConstants.nameKey)?.trim() ?? _fullName;
+      _fullName =
+          prefs.getString(ProfileConstants.nameKey)?.trim() ?? _fullName;
       _email = prefs.getString(ProfileConstants.emailKey)?.trim() ?? _email;
       _phone = prefs.getString(ProfileConstants.phoneKey)?.trim() ?? _phone;
-      _address = prefs.getString(ProfileConstants.addressKey)?.trim() ?? _address;
+      _address =
+          prefs.getString(ProfileConstants.addressKey)?.trim() ?? _address;
       _bio = prefs.getString(ProfileConstants.bioKey)?.trim() ?? _bio;
       _avatarBytes = _decodeAvatar(storedAvatar);
     });
@@ -202,12 +202,22 @@ class _ProfileScreenState extends State<ProfileScreen>
     }
   }
 
+  Future<void> _handleLogout() async {
+    final shouldLogout = await showLogoutConfirmationDialog(context);
+    if (!mounted || !shouldLogout) {
+      return;
+    }
+
+    await FirebaseAuth.instance.signOut();
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+    final colors = context.appColors;
 
     return Scaffold(
-      backgroundColor: ProfileConstants.pageBackground,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeInAnimation,
@@ -250,12 +260,16 @@ class _ProfileScreenState extends State<ProfileScreen>
                       ProfileDetail(
                         field: ProfileEditableField.email,
                         label: 'Email',
-                        value: _displayValueForField(ProfileEditableField.email),
+                        value: _displayValueForField(
+                          ProfileEditableField.email,
+                        ),
                       ),
                       ProfileDetail(
                         field: ProfileEditableField.phone,
                         label: 'Phone Number',
-                        value: _displayValueForField(ProfileEditableField.phone),
+                        value: _displayValueForField(
+                          ProfileEditableField.phone,
+                        ),
                       ),
                       ProfileDetail(
                         field: ProfileEditableField.address,
@@ -271,14 +285,13 @@ class _ProfileScreenState extends State<ProfileScreen>
                       ),
                     ],
                     onDetailTap: _showEditSheet,
-                    onLogout: () async {
-                      await FirebaseAuth.instance.signOut();
-                    },
+                    onLogout: _handleLogout,
                     entryAnimation: _introController,
                   ),
                 ),
                 Positioned(
-                  top: ProfileConstants.cardTopOffset -
+                  top:
+                      ProfileConstants.cardTopOffset -
                       ProfileConstants.avatarOverlap,
                   left: 0,
                   right: 0,

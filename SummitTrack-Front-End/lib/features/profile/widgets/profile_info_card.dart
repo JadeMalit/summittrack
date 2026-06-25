@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../helpers/profile_constants.dart';
+import '../../../core/theme/app_colors.dart';
 import '../helpers/profile_models.dart';
 import 'profile_action_buttons.dart';
 import 'profile_detail_item.dart';
@@ -23,18 +23,19 @@ class ProfileInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            ProfileConstants.cardTop,
-            ProfileConstants.cardMiddle,
-            ProfileConstants.cardBottom,
+            colors.profileTop,
+            colors.profileMiddle,
+            colors.profileBottom,
           ],
         ),
         borderRadius: const BorderRadius.only(
@@ -43,7 +44,7 @@ class ProfileInfoCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.14),
+            color: colors.shadow,
             blurRadius: 28,
             offset: const Offset(0, 12),
           ),

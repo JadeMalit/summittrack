@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/theme/app_colors.dart';
+
 class CustomBackButton extends StatefulWidget {
   const CustomBackButton({
     super.key,
@@ -33,6 +35,7 @@ class _CustomBackButtonState extends State<CustomBackButton> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final shadowStrength = _isPressed ? 0.10 : (_isHovered ? 0.22 : 0.16);
     final offsetY = _isPressed ? 1.5 : (_isHovered ? 3.5 : 2.5);
 
@@ -76,31 +79,26 @@ class _CustomBackButtonState extends State<CustomBackButton> {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            const Color.fromARGB(255, 241, 38, 38),
-                            const Color.fromARGB(255, 238, 79, 67),
-                            Color.fromARGB(
-                              255,
-                              245,
-                              172,
-                              172,
-                            ).withOpacity(0.92),
+                            colors.danger,
+                            colors.danger.withValues(alpha: 0.90),
+                            colors.danger.withValues(alpha: 0.62),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                          color: Color(0xFF92A585).withOpacity(0.55),
+                          color: colors.border.withValues(alpha: 0.55),
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Color(
-                              0xFF20351C,
-                            ).withOpacity(shadowStrength),
+                            color: colors.shadow.withValues(
+                              alpha: shadowStrength,
+                            ),
                             blurRadius: _isHovered ? 16 : 12,
                             offset: Offset(0, offsetY),
                           ),
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 4,
                             offset: const Offset(0, 1),
                           ),

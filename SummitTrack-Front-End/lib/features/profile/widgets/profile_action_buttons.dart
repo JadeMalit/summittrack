@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../helpers/profile_constants.dart';
+import '../../../core/theme/app_colors.dart';
 
 class ProfileActionButtons extends StatelessWidget {
   const ProfileActionButtons({super.key, required this.onLogout});
@@ -23,6 +23,8 @@ class ProfileLogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -32,15 +34,15 @@ class ProfileLogoutButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [ProfileConstants.logoutTop, ProfileConstants.logoutBottom],
+              colors: [colors.primary, colors.primaryPressed],
             ),
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: ProfileConstants.logoutBottom.withValues(alpha: 0.24),
+                color: colors.shadow,
                 blurRadius: 16,
                 offset: const Offset(0, 8),
               ),

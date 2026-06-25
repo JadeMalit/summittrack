@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../helpers/profile_constants.dart';
 
 class ProfileBackground extends StatelessWidget {
@@ -7,6 +8,8 @@ class ProfileBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Stack(
       children: [
         Positioned.fill(
@@ -15,11 +18,13 @@ class ProfileBackground extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  ProfileConstants.pageBackground,
-                  const Color(0xFFEAF1E4),
-                  const Color(0xFFF9FBF6),
-                ],
+                colors: context.isDarkMode
+                    ? [colors.background, colors.backgroundAlt, colors.surface]
+                    : [
+                        ProfileConstants.pageBackground,
+                        const Color(0xFFEAF1E4),
+                        const Color(0xFFF9FBF6),
+                      ],
               ),
             ),
           ),
@@ -29,7 +34,9 @@ class ProfileBackground extends StatelessWidget {
           right: -60,
           child: _SoftOrb(
             size: 180,
-            color: ProfileConstants.cardTop.withValues(alpha: 0.09),
+            color: colors.accent.withValues(
+              alpha: context.isDarkMode ? 0.08 : 0.09,
+            ),
           ),
         ),
         Positioned(
@@ -37,7 +44,9 @@ class ProfileBackground extends StatelessWidget {
           left: -70,
           child: _SoftOrb(
             size: 150,
-            color: ProfileConstants.cardBottom.withValues(alpha: 0.12),
+            color: colors.softHighlight.withValues(
+              alpha: context.isDarkMode ? 0.08 : 0.12,
+            ),
           ),
         ),
       ],

@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/routing/mountain_screen_resolver.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../data/trail_data/mountain.dart';
 import '../../../services/data_service.dart';
 import '../widgets/pre_hike_header_card.dart';
@@ -19,12 +19,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  static const Color _darkGreen = Color(0xFF0B6623);
-  static const Color _mediumGreen = Color(0xFF2E7D32);
-  static const Color _lightGreen = Color(0xFFE8F5E9);
-  static const Color _textPrimary = Color(0xFF182319);
-  static const Color _textSecondary = Color(0xFF5C6B5D);
-
   late final List<Mountain> _allMountains;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
@@ -42,6 +36,51 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void updateSelectedIndex(int index, {bool isUserTap = false}) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      selectedIndex = index;
+      _lastTappedNavIndex = index;
+
+      if (isUserTap) {
+        _navTapSequence++;
+      }
+    });
+  }
+
+  void _syncSelectedIndexWithCurrentRoute() {
+    updateSelectedIndex(
+      navbarIndexForRouteName(ModalRoute.of(context)?.settings.name),
+    );
+  }
+
+  Future<void> _handleBottomNavigationTap(int index) async {
+    updateSelectedIndex(index, isUserTap: true);
+
+    await handleNavbarButtonTap(
+      context,
+      index,
+      onHomeSelected: () {
+        updateSelectedIndex(homeNavbarIndex);
+      },
+      onWeatherSelected: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const WeatherScreen()),
+        );
+      },
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    _syncSelectedIndexWithCurrentRoute();
   }
 
   List<Mountain> get _filteredMountains {
@@ -80,6 +119,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final darkGreen = colors.primary;
+    final mediumGreen = colors.accent;
+    final lightGreen = colors.surfaceMuted;
+    final textPrimary = colors.textPrimary;
+    final textSecondary = colors.textSecondary;
     final mountains = _filteredMountains;
     final hasActiveSearch = _searchQuery.isNotEmpty;
     final resultCountLabel = mountains.length == 1
@@ -87,13 +132,19 @@ class _HomeScreenState extends State<HomeScreen> {
         : '${mountains.length} mountains';
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 238, 238, 238),
+      backgroundColor: colors.background,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFF1F8F1), Color(0xFFFFFFFF), Color(0xFFF7FBF7)],
+            colors: context.isDarkMode
+                ? [colors.background, colors.backgroundAlt, colors.background]
+                : const [
+                    Color(0xFFF1F8F1),
+                    Color(0xFFFFFFFF),
+                    Color(0xFFF7FBF7),
+                  ],
           ),
         ),
         child: SafeArea(
@@ -103,22 +154,16 @@ class _HomeScreenState extends State<HomeScreen> {
             physics: const BouncingScrollPhysics(),
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              SliverToBoxAdapter(
-                child: PreHikeHeaderCard(
-                  onLogout: () async {
-                    await FirebaseAuth.instance.signOut();
-                  },
-                ),
-              ),
+              SliverToBoxAdapter(child: PreHikeHeaderCard()),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                   child: _StatsSection(
-                    darkGreen: _darkGreen,
-                    mediumGreen: _mediumGreen,
-                    lightGreen: _lightGreen,
-                    textPrimary: _textPrimary,
-                    textSecondary: _textSecondary,
+                    darkGreen: darkGreen,
+                    mediumGreen: mediumGreen,
+                    lightGreen: lightGreen,
+                    textPrimary: textPrimary,
+                    textSecondary: textSecondary,
                   ),
                 ),
               ),
@@ -131,9 +176,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     onChanged: _handleSearchChanged,
                     onClear: _clearSearch,
                     showClearButton: _searchController.text.trim().isNotEmpty,
-                    lightGreen: _lightGreen,
-                    mediumGreen: _mediumGreen,
-                    textSecondary: _textSecondary,
+                    lightGreen: lightGreen,
+                    mediumGreen: mediumGreen,
+                    textSecondary: textSecondary,
                   ),
                 ),
               ),
@@ -145,8 +190,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     subtitle: hasActiveSearch
                         ? 'Showing $resultCountLabel from the mountains available in the app.'
                         : 'Browse all available mountains and open their trail details.',
-                    darkGreen: _darkGreen,
-                    textSecondary: _textSecondary,
+                    darkGreen: darkGreen,
+                    textSecondary: textSecondary,
                   ),
                 ),
               ),
@@ -156,11 +201,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
                     child: _EmptyMountainState(
                       hasActiveSearch: hasActiveSearch,
-                      darkGreen: _darkGreen,
-                      mediumGreen: _mediumGreen,
-                      lightGreen: _lightGreen,
-                      textPrimary: _textPrimary,
-                      textSecondary: _textSecondary,
+                      darkGreen: darkGreen,
+                      mediumGreen: mediumGreen,
+                      lightGreen: lightGreen,
+                      textPrimary: textPrimary,
+                      textSecondary: textSecondary,
                     ),
                   ),
                 )
@@ -177,11 +222,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           key: ValueKey(mountains[index].name),
                           index: index,
                           mountain: mountains[index],
-                          darkGreen: _darkGreen,
-                          mediumGreen: _mediumGreen,
-                          lightGreen: _lightGreen,
-                          textPrimary: _textPrimary,
-                          textSecondary: _textSecondary,
+                          darkGreen: darkGreen,
+                          mediumGreen: mediumGreen,
+                          lightGreen: lightGreen,
+                          textPrimary: textPrimary,
+                          textSecondary: textSecondary,
                           onTap: () {
                             openMountainScreen(context, mountains[index]);
                           },
@@ -198,35 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: selectedIndex,
         tapSequence: _navTapSequence,
         lastTappedIndex: _lastTappedNavIndex,
-        darkGreen: _darkGreen,
-        onTap: (index) {
-          setState(() {
-            selectedIndex = index;
-            _lastTappedNavIndex = index;
-            _navTapSequence++;
-          });
-
-          handleNavbarButtonTap(
-            context,
-            index,
-            onHomeSelected: () {
-              if (!mounted) {
-                return;
-              }
-
-              setState(() {
-                selectedIndex = homeNavbarIndex;
-                _lastTappedNavIndex = homeNavbarIndex;
-              });
-            },
-            onWeatherSelected: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const WeatherScreen()),
-              );
-            },
-          );
-        },
+        onTap: _handleBottomNavigationTap,
       ),
     );
   }
@@ -257,9 +274,16 @@ class _StatsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 360;
+        final achievementAccent = context.isDarkMode
+            ? colors.softHighlight
+            : const Color(0xFF7E8A55);
+        final achievementTint = context.isDarkMode
+            ? colors.surfaceMuted
+            : const Color(0xFFF3F6EA);
 
         if (compact) {
           return Column(
@@ -282,8 +306,8 @@ class _StatsSection extends StatelessWidget {
                 icon: Icons.workspace_premium_rounded,
                 animationDelay: const Duration(milliseconds: 110),
                 darkGreen: darkGreen,
-                accentColor: const Color(0xFF7E8A55),
-                accentTint: const Color(0xFFF3F6EA),
+                accentColor: achievementAccent,
+                accentTint: achievementTint,
                 textPrimary: textPrimary,
                 textSecondary: textSecondary,
               ),
@@ -314,8 +338,8 @@ class _StatsSection extends StatelessWidget {
                 icon: Icons.workspace_premium_rounded,
                 animationDelay: const Duration(milliseconds: 110),
                 darkGreen: darkGreen,
-                accentColor: const Color(0xFF7E8A55),
-                accentTint: const Color(0xFFF3F6EA),
+                accentColor: achievementAccent,
+                accentTint: achievementTint,
                 textPrimary: textPrimary,
                 textSecondary: textSecondary,
               ),
@@ -382,13 +406,14 @@ class _StatCardState extends State<_StatCard> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final isInteractive = _isHovered || _isPressed;
     final borderColor = isInteractive
         ? widget.accentColor.withValues(alpha: 0.24)
-        : widget.darkGreen.withValues(alpha: 0.08);
+        : colors.border;
     final shadowColor = isInteractive
         ? widget.accentColor.withValues(alpha: 0.14)
-        : widget.darkGreen.withValues(alpha: 0.08);
+        : colors.shadow;
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 380),
@@ -430,7 +455,7 @@ class _StatCardState extends State<_StatCard> {
                 curve: Curves.easeOutCubic,
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colors.surface,
                   borderRadius: BorderRadius.circular(22),
                   border: Border.all(color: borderColor),
                   boxShadow: [
@@ -535,13 +560,15 @@ class _SearchSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: mediumGreen.withValues(alpha: 0.10),
+            color: colors.shadow,
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -551,6 +578,7 @@ class _SearchSection extends StatelessWidget {
         controller: controller,
         onChanged: onChanged,
         cursorColor: mediumGreen,
+        style: TextStyle(color: colors.textPrimary),
         textInputAction: TextInputAction.search,
         onTapOutside: (_) => FocusScope.of(context).unfocus(),
         decoration: InputDecoration(
@@ -577,7 +605,7 @@ class _SearchSection extends StatelessWidget {
                 )
               : null,
           filled: true,
-          fillColor: Colors.white,
+          fillColor: colors.surface,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide.none,
@@ -619,15 +647,17 @@ class _EmptyMountainState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: lightGreen),
+        border: Border.all(color: colors.border),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withValues(alpha: 0.08),
+            color: colors.shadow,
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -765,6 +795,8 @@ class _MountainCardState extends State<_MountainCard> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 420),
       curve: Curves.easeOut,
@@ -777,7 +809,7 @@ class _MountainCardState extends State<_MountainCard> {
           duration: const Duration(milliseconds: 160),
           scale: _isPressed ? 0.985 : 1,
           child: Material(
-            color: Colors.white,
+            color: colors.surface,
             borderRadius: BorderRadius.circular(28),
             elevation: 0,
             child: InkWell(
@@ -791,14 +823,14 @@ class _MountainCardState extends State<_MountainCard> {
               child: Ink(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(28),
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Colors.white, Color(0xFFF7FBF7)],
+                    colors: [colors.surface, colors.surfaceHigh],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: widget.darkGreen.withValues(alpha: 0.08),
+                      color: colors.shadow,
                       blurRadius: 22,
                       offset: const Offset(0, 12),
                     ),
@@ -873,6 +905,7 @@ class _MountainCardState extends State<_MountainCard> {
 
   Widget _buildMountainDetails() {
     final mountain = widget.mountain;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -937,23 +970,19 @@ class _MountainCardState extends State<_MountainCard> {
                 color: widget.darkGreen,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     'View Trail',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: onPrimary,
                       fontSize: 13.5,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(width: 8),
-                  Icon(
-                    Icons.arrow_outward_rounded,
-                    color: Colors.white,
-                    size: 17,
-                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.arrow_outward_rounded, color: onPrimary, size: 17),
                 ],
               ),
             ),
@@ -1009,29 +1038,29 @@ class _HomeBottomNavigationBar extends StatelessWidget {
     required this.currentIndex,
     required this.tapSequence,
     required this.lastTappedIndex,
-    required this.darkGreen,
     required this.onTap,
   });
 
   final int currentIndex;
   final int tapSequence;
   final int lastTappedIndex;
-  final Color darkGreen;
   final ValueChanged<int> onTap;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return SafeArea(
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colors.navBackground,
             borderRadius: BorderRadius.circular(26),
             boxShadow: [
               BoxShadow(
-                color: darkGreen.withValues(alpha: 0.12),
+                color: colors.shadow,
                 blurRadius: 24,
                 offset: const Offset(0, 10),
               ),
@@ -1043,10 +1072,10 @@ class _HomeBottomNavigationBar extends StatelessWidget {
               currentIndex: currentIndex,
               onTap: onTap,
               type: BottomNavigationBarType.fixed,
-              backgroundColor: Colors.white,
+              backgroundColor: colors.navBackground,
               elevation: 0,
-              selectedItemColor: darkGreen,
-              unselectedItemColor: const Color(0xFF7B877D),
+              selectedItemColor: colors.accent,
+              unselectedItemColor: colors.textSecondary,
               showSelectedLabels: false,
               showUnselectedLabels: false,
               items: [
@@ -1056,6 +1085,8 @@ class _HomeBottomNavigationBar extends StatelessWidget {
                   tapSequence: tapSequence,
                   lastTappedIndex: lastTappedIndex,
                   icon: Icons.person_rounded,
+                  activeColor: colors.accent,
+                  inactiveColor: colors.textSecondary,
                   liftOnActive: true,
                 ),
                 _buildNavItem(
@@ -1064,6 +1095,8 @@ class _HomeBottomNavigationBar extends StatelessWidget {
                   tapSequence: tapSequence,
                   lastTappedIndex: lastTappedIndex,
                   icon: Icons.home_rounded,
+                  activeColor: colors.accent,
+                  inactiveColor: colors.textSecondary,
                 ),
                 _buildNavItem(
                   index: weatherNavbarIndex,
@@ -1071,6 +1104,8 @@ class _HomeBottomNavigationBar extends StatelessWidget {
                   tapSequence: tapSequence,
                   lastTappedIndex: lastTappedIndex,
                   icon: Icons.cloud_rounded,
+                  activeColor: colors.accent,
+                  inactiveColor: colors.textSecondary,
                 ),
                 _buildNavItem(
                   index: settingsNavbarIndex,
@@ -1078,6 +1113,8 @@ class _HomeBottomNavigationBar extends StatelessWidget {
                   tapSequence: tapSequence,
                   lastTappedIndex: lastTappedIndex,
                   icon: Icons.settings_rounded,
+                  activeColor: colors.accent,
+                  inactiveColor: colors.textSecondary,
                 ),
               ],
             ),
@@ -1093,6 +1130,8 @@ class _HomeBottomNavigationBar extends StatelessWidget {
     required int tapSequence,
     required int lastTappedIndex,
     required IconData icon,
+    required Color activeColor,
+    required Color inactiveColor,
     bool liftOnActive = false,
   }) {
     final bool isActive = currentIndex == index;
@@ -1107,8 +1146,8 @@ class _HomeBottomNavigationBar extends StatelessWidget {
         child: AnimatedNavIcon(
           icon: icon,
           isActive: isActive,
-          activeColor: darkGreen,
-          inactiveColor: const Color(0xFF7B877D),
+          activeColor: activeColor,
+          inactiveColor: inactiveColor,
           isLifted: liftOnActive,
         ),
       ),
