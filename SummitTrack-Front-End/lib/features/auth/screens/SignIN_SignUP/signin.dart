@@ -21,6 +21,13 @@ class _SignInScreenState extends State<SignInScreen>
     with SingleTickerProviderStateMixin {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final emailFocusNode = FocusNode();
+  final passwordFocusNode = FocusNode();
+
+  static const _inputTextColor = Color(0xFF1F1F1F);
+  static const _inputHintColor = Color(0xFF6A6A6A);
+  static const _inputIconColor = Color(0xFF4F4F4F);
+  static const _inputCursorColor = Color(0xFF4CAF50);
 
   bool loading = false;
   bool hidePass = true;
@@ -75,6 +82,8 @@ class _SignInScreenState extends State<SignInScreen>
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
+    emailFocusNode.dispose();
+    passwordFocusNode.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -134,6 +143,20 @@ class _SignInScreenState extends State<SignInScreen>
     }
   }
 
+  Future<void> _goToForgotPassword() async {
+    if (loading) return;
+
+    FocusScope.of(context).unfocus();
+    _clearError();
+
+    await Navigator.pushNamed(context, '/forgot-password');
+
+    if (!mounted) return;
+
+    emailFocusNode.unfocus();
+    passwordFocusNode.unfocus();
+  }
+
   Future<void> signIn() async {
     if (loading) return;
 
@@ -184,10 +207,15 @@ class _SignInScreenState extends State<SignInScreen>
   InputDecoration _inputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.poppins(color: Colors.grey[600], fontSize: 16),
+      hintStyle: GoogleFonts.poppins(
+        color: _inputHintColor,
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+      ),
       filled: true,
       fillColor: Colors.white.withValues(alpha: 0.9),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      suffixIconColor: _inputIconColor,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
         borderSide: const BorderSide(color: Colors.green, width: 1.5),
@@ -200,6 +228,14 @@ class _SignInScreenState extends State<SignInScreen>
         borderRadius: BorderRadius.circular(20),
         borderSide: const BorderSide(color: Colors.lightGreen, width: 2),
       ),
+    );
+  }
+
+  TextStyle _inputTextStyle() {
+    return GoogleFonts.poppins(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      color: _inputTextColor,
     );
   }
 
@@ -279,11 +315,16 @@ class _SignInScreenState extends State<SignInScreen>
                                 position: _slideAnimation,
                                 child: TextField(
                                   controller: emailController,
+                                  focusNode: emailFocusNode,
+                                  keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.next,
+                                  cursorColor: _inputCursorColor,
                                   onChanged: (_) => _clearError(),
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                  onSubmitted: (_) =>
+                                      passwordFocusNode.requestFocus(),
+                                  onTapOutside: (_) =>
+                                      FocusScope.of(context).unfocus(),
+                                  style: _inputTextStyle(),
                                   decoration: _inputDecoration(
                                     "Enter your email",
                                   ),
@@ -310,29 +351,33 @@ class _SignInScreenState extends State<SignInScreen>
                                 position: _slideAnimation,
                                 child: TextField(
                                   controller: passwordController,
+                                  focusNode: passwordFocusNode,
                                   onChanged: (_) => _clearError(),
                                   obscureText: hidePass,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  decoration: _inputDecoration(
-                                    "Enter your password",
-                                  ).copyWith(
-                                    suffixIcon: IconButton(
-                                      icon: Icon(
-                                        hidePass
-                                            ? Icons.visibility_off
-                                            : Icons.visibility,
+                                  textInputAction: TextInputAction.done,
+                                  cursorColor: _inputCursorColor,
+                                  onSubmitted: (_) => signIn(),
+                                  onTapOutside: (_) =>
+                                      FocusScope.of(context).unfocus(),
+                                  style: _inputTextStyle(),
+                                  decoration:
+                                      _inputDecoration(
+                                        "Enter your password",
+                                      ).copyWith(
+                                        suffixIcon: IconButton(
+                                          icon: Icon(
+                                            hidePass
+                                                ? Icons.visibility_off
+                                                : Icons.visibility,
+                                          ),
+                                          onPressed: () {
+                                            _clearError();
+                                            setState(() {
+                                              hidePass = !hidePass;
+                                            });
+                                          },
+                                        ),
                                       ),
-                                      onPressed: () {
-                                        _clearError();
-                                        setState(() {
-                                          hidePass = !hidePass;
-                                        });
-                                      },
-                                    ),
-                                  ),
                                 ),
                               ),
 
@@ -342,10 +387,7 @@ class _SignInScreenState extends State<SignInScreen>
                               Align(
                                 alignment: Alignment.centerLeft,
                                 child: TextButton(
-                                  onPressed: () {
-                                    _clearError();
-                                    Navigator.pushNamed(context, '/forgot-password');
-                                  },
+                                  onPressed: _goToForgotPassword,
                                   child: Text(
                                     "Forgot Password?",
                                     style: GoogleFonts.poppins(

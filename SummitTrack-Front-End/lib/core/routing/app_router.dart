@@ -8,7 +8,7 @@ import '../../features/auth/screens/SignIN_SignUP/pre_hike_loading_screen.dart';
 import '../../features/auth/screens/SignIN_SignUP/signin.dart';
 import '../../features/auth/screens/SignIN_SignUP/forgot_password_screen.dart';
 // Itinuro sa tamang file name pero SignUpScreen ang gagamiting class sa loob
-import '../../features/auth/screens/SignIN_SignUP/register_screen.dart'; 
+import '../../features/auth/screens/SignIN_SignUP/register_screen.dart';
 import '../../features/auth/widgets/video_background.dart';
 import '../../features/dashboard/screens/home.dart';
 import '../../features/mountains/screens/kapatagan_trail_details.dart';
@@ -25,7 +25,9 @@ class AppRouter {
     final uri = Uri.parse(location);
     final segments = uri.pathSegments;
 
-    if (uri.path == AppRoutes.home || uri.path == '/home' || uri.path == 'home') {
+    if (uri.path == AppRoutes.home ||
+        uri.path == '/home' ||
+        uri.path == 'home') {
       return _route(
         settings,
         _AuthGuard(
@@ -314,9 +316,15 @@ class _AuthGuardState extends State<_AuthGuard> {
         }
 
         if (user != null) {
-          final isLoginRoute =
-              Uri.parse(widget.currentLocation).path == AppRoutes.login;
+          final publicRoutePath = Uri.parse(widget.currentLocation).path;
+          final isLoginRoute = publicRoutePath == AppRoutes.login;
           if (isLoginRoute && PreHikeLoginTransition.isActive) {
+            return widget.child;
+          }
+
+          final isSignupRoute = publicRoutePath == AppRoutes.signup;
+          if (RegistrationAuthFlow.isActive &&
+              (isLoginRoute || isSignupRoute)) {
             return widget.child;
           }
 

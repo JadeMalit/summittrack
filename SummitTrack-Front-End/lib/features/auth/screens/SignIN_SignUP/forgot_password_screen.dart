@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../widgets/video_background.dart'; 
-// RELATIVE PATH FIX: Papasok sa apat na antas ng folder pabalik sa core routing
-import '../../../../core/routing/app_routes.dart';
+import '../../widgets/video_background.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -13,16 +11,20 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
+  final _emailFocusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
+    _emailFocusNode.dispose();
     super.dispose();
   }
 
   Future<void> _sendResetLink() async {
+    FocusScope.of(context).unfocus();
+
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -47,7 +49,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       Navigator.of(context).pop();
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
-      
+
       String errorMessage = 'An error occurred. Please try again.';
       if (e.code == 'user-not-found') {
         errorMessage = 'No user found with this email.';
@@ -68,6 +70,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         });
       }
     }
+  }
+
+  void _goBackToSignIn() {
+    FocusScope.of(context).unfocus();
+    Navigator.of(context).pop();
   }
 
   @override
@@ -92,7 +99,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle,
                         image: DecorationImage(
-                          image: AssetImage('assets/images/logo.jpg'), 
+                          image: AssetImage('assets/images/logo.jpg'),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -103,7 +110,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF9CCC65), 
+                        color: Color(0xFF9CCC65),
                         letterSpacing: 1.5,
                       ),
                     ),
@@ -111,10 +118,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     const Text(
                       'Enter your email and we\'ll send you a link to reset your password.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.white70),
                     ),
                     const SizedBox(height: 32),
                     Column(
@@ -131,8 +135,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _emailController,
+                          focusNode: _emailFocusNode,
                           keyboardType: TextInputType.emailAddress,
-                          style: const TextStyle(color: Colors.black87), 
+                          textInputAction: TextInputAction.done,
+                          cursorColor: const Color(0xFF4CAF50),
+                          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                          style: const TextStyle(color: Colors.black87),
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: const Color.fromARGB(230, 255, 255, 255),
@@ -151,8 +159,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             if (value == null || value.trim().isEmpty) {
                               return 'Please enter your email';
                             }
-                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                .hasMatch(value.trim())) {
+                            if (!RegExp(
+                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                            ).hasMatch(value.trim())) {
                               return 'Please enter a valid email address';
                             }
                             return null;
@@ -168,10 +177,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15.0),
                           gradient: const LinearGradient(
-                            colors: [
-                              Color(0xFF9CCC65), 
-                              Color(0xFF7CB342),
-                            ],
+                            colors: [Color(0xFF9CCC65), Color(0xFF7CB342)],
                           ),
                         ),
                         child: ElevatedButton(
@@ -184,7 +190,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             ),
                           ),
                           child: _isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
                               : const Text(
                                   'SEND RESET LINK',
                                   style: TextStyle(
@@ -202,7 +210,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         Expanded(child: Divider(color: Colors.white38)),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Text('OR', style: TextStyle(color: Colors.white60)),
+                          child: Text(
+                            'OR',
+                            style: TextStyle(color: Colors.white60),
+                          ),
                         ),
                         Expanded(child: Divider(color: Colors.white38)),
                       ],
@@ -212,11 +223,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       width: double.infinity,
                       height: 55,
                       child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(); 
-                        },
+                        onPressed: _goBackToSignIn,
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFF9CCC65), width: 2),
+                          side: const BorderSide(
+                            color: Color(0xFF9CCC65),
+                            width: 2,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15.0),
                           ),
