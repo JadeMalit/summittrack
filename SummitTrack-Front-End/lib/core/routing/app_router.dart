@@ -7,17 +7,36 @@ import 'app_routes.dart';
 import '../../features/auth/screens/SignIN_SignUP/pre_hike_loading_screen.dart';
 import '../../features/auth/screens/SignIN_SignUP/signin.dart';
 import '../../features/auth/screens/SignIN_SignUP/forgot_password_screen.dart';
-// Itinuro sa tamang file name pero SignUpScreen ang gagamiting class sa loob
 import '../../features/auth/screens/SignIN_SignUP/register_screen.dart';
 import '../../features/auth/widgets/video_background.dart';
 import '../../features/dashboard/screens/home.dart';
 import '../../features/mountains/screens/kapatagan_trail_details.dart';
 import '../../features/mountains/screens/mountain_detail_screen.dart';
 import '../../features/mountains/screens/mt_apo.dart';
+import '../../features/mountains/screens/mt_pulag.dart'; 
+import '../../features/mountains/screens/mt_mayon.dart'; 
+import '../../features/mountains/screens/mt_batulao.dart';
+import '../../features/mountains/screens/mt_ulap.dart'; // <--- IMPORTS PARA KAY ULAP
+import '../../features/mountains/screens/mt_daraitan.dart'; // <--- IDINAGDAG ANG IMPORT NI DARAITAN SCREEN
 import '../../features/mountains/screens/trail_detail_screen.dart';
 import '../../features/profile/screens/profile.dart';
 import '../../features/settings/screens/settings.dart';
 import '../../services/data_service.dart';
+import '../../data/trail_data/ambangeg_trail_data.dart'; 
+import '../../data/trail_data/akiki_trail_data.dart';    
+import '../../data/trail_data/tawangan_trail_data.dart';
+import '../../data/trail_data/ambaguio_trail_data.dart';
+import '../../data/trail_data/buyohan_trail_data.dart'; 
+import '../../data/trail_data/anoling_trail_data.dart';
+import '../../data/trail_data/miisi_trail_data.dart';
+import '../../data/trail_data/old_trail_data.dart'; 
+import '../../data/trail_data/new_trail_data.dart';
+import '../../data/trail_data/ambanao_paoay_data.dart'; // <--- BAGONG UTILS NI ULAP
+import '../../data/trail_data/gungal_rock_data.dart';
+import '../../data/trail_data/sta_fe_trail_data.dart';
+import '../../data/trail_data/daraitan_summit_data.dart'; // <--- IDINAGDAG ANG UTILS NI DARAITAN
+import '../../data/trail_data/tinipak_river_data.dart';
+import '../../data/trail_data/daraitan_traverse_data.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -57,7 +76,6 @@ class AppRouter {
         _AuthGuard(
           currentLocation: location,
           requireAuth: false,
-          // File name ay register_screen.dart pero ang Class ay SignUpScreen
           child: SignUpScreen(
             redirectTo: AppRoutes.redirectFromUri(uri) ?? AppRoutes.home,
           ),
@@ -65,7 +83,6 @@ class AppRouter {
       );
     }
 
-    // INEDIT DITO: Tinanggal ang AppRoutes.forgotPassword para hindi na maghanap ng getter sa app_routes.dart
     if (uri.path == '/forgot-password' || uri.path == 'forgot-password') {
       return _authRoute(
         settings,
@@ -114,16 +131,57 @@ class AppRouter {
       }
 
       if (mountainId == AppRoutes.mtPulagMountainId) {
-        final mountain = DataService.getMountains().firstWhere(
-          (mountain) => mountain.name == 'Mt. Pulag',
-        );
-
         return _route(
           settings,
           _AuthGuard(
             currentLocation: location,
             requireAuth: true,
-            child: MountainDetailScreen(mountain: mountain),
+            child: const MtPulagScreen(),
+          ),
+        );
+      }
+
+      if (mountainId.toLowerCase().contains('mayon')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtMayonScreen(),
+          ),
+        );
+      }
+
+      if (mountainId.toLowerCase().contains('batulao')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtBatulaoScreen(),
+          ),
+        );
+      }
+
+      if (mountainId.toLowerCase().contains('ulap')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtUlapScreen(),
+          ),
+        );
+      }
+
+      // IDINAGDAG: Intercept para kay Mt. Daraitan Screen
+      if (mountainId.toLowerCase().contains('daraitan')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtDaraitanScreen(),
           ),
         );
       }
@@ -160,6 +218,263 @@ class AppRouter {
             child: const KapataganTrailDetailsScreen(),
           ),
         );
+      }
+
+      // --- MT. PULAG TRAILS ---
+      if (mountainId == AppRoutes.mtPulagMountainId &&
+          trailId == 'ambangeg') {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: TrailDetailScreen(
+              trail: ambangegTrail,
+              parentRoute: AppRoutes.mountain(mountainId),
+              trailPhotoId: 'ambangeg_trail',
+            ),
+          ),
+        );
+      }
+
+      if (mountainId == AppRoutes.mtPulagMountainId &&
+          trailId == 'akiki') {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: TrailDetailScreen(
+              trail: akikiTrail,
+              parentRoute: AppRoutes.mountain(mountainId),
+              trailPhotoId: 'akiki_trail',
+            ),
+          ),
+        );
+      }
+
+      if (mountainId == AppRoutes.mtPulagMountainId &&
+          trailId == 'tawangan') {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: TrailDetailScreen(
+              trail: tawanganTrail,
+              parentRoute: AppRoutes.mountain(mountainId),
+              trailPhotoId: 'tawangan_trail',
+            ),
+          ),
+        );
+      }
+
+      if (mountainId == AppRoutes.mtPulagMountainId &&
+          trailId == 'ambaguio') {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: TrailDetailScreen(
+              trail: ambaguioTrail,
+              parentRoute: AppRoutes.mountain(mountainId),
+              trailPhotoId: 'ambaguio_trail',
+            ),
+          ),
+        );
+      }
+
+      // --- MT. MAYON TRAILS ---
+      if (mountainId.toLowerCase().contains('mayon')) {
+        if (trailId == 'buyohan') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: buyohanTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'buyohan_trail',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'anoling') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: anolingTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'anoling_trail',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'miisi') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: miisiTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'miisi_trail',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'tabaco') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: buyohanTrail, 
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'buyohan_trail',
+              ),
+            ),
+          );
+        }
+      }
+
+      // --- MT. BATULAO TRAILS ---
+      if (mountainId.toLowerCase().contains('batulao')) {
+        if (trailId == 'old') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: oldTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'old_trail',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'new') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: newTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'new_trail',
+              ),
+            ),
+          );
+        }
+      }
+
+      // --- MT. ULAP TRAILS ---
+      if (mountainId.toLowerCase().contains('ulap')) {
+        if (trailId == 'ambanao') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: ambanaoPaoayTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'ambanao_trail',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'gungal') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: gungalRockTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'gungal_trail',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'stafe') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: staFeTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'stafe_trail',
+              ),
+            ),
+          );
+        }
+      }
+
+      // --- MT. DARAITAN TRAILS (BAGONG IDINAGDAG) ---
+      if (mountainId.toLowerCase().contains('daraitan')) {
+        if (trailId == 'summit') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: daraitanSummitTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'daraitan_summit',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'tinipak') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: tinipakRiverTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'tinipak_river',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'traverse') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: daraitanTraverseTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'daraitan_traverse',
+              ),
+            ),
+          );
+        }
       }
     }
 

@@ -1,0 +1,260 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../../../core/routing/app_routes.dart';
+import '../../../core/theme/app_colors.dart';
+import '../widgets/animated_mt_apo_banner.dart'; 
+import '../widgets/custom_back_button.dart';
+
+class MtPulagScreen extends StatelessWidget {
+  const MtPulagScreen({super.key});
+
+  static const _backgroundColor = Color(0xFFE3DDCF);
+  static const _cardColor = Color(0xFFF4EFE5);
+  static const _buttonColor = Color(0xFFB98914); 
+  static const _buttonShadow = Color(0xFF6A4A09);
+  static const _headerImage = 'assets/images/sta_cruz_sibulan_trail.png'; 
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final isDark = context.isDarkMode;
+
+    final trailButtons = [
+      _TrailButtonConfig(
+        title: 'Ambangeg Trail',
+        subtitle: 'Open Trail Details',
+        onTap: () {
+          Navigator.of(context).pushNamed(
+            AppRoutes.trail(
+              AppRoutes.mtPulagMountainId,
+              'ambangeg',
+            ),
+          );
+        },
+      ),
+      _TrailButtonConfig(
+        title: 'Akiki Trail',
+        subtitle: 'Open Trail Details',
+        onTap: () {
+          // INEDIT DITO: Gumagana na ang Akiki Trail route
+          Navigator.of(context).pushNamed(
+            AppRoutes.trail(
+              AppRoutes.mtPulagMountainId,
+              'akiki',
+            ),
+          );
+        },
+      ),
+      _TrailButtonConfig(
+        title: 'Tawangan Trail',
+        subtitle: 'Open Trail Details',
+        onTap: () {
+          // INEDIT DITO: Gumagana na ang Tawangan Trail route
+          Navigator.of(context).pushNamed(
+            AppRoutes.trail(
+              AppRoutes.mtPulagMountainId,
+              'tawangan',
+            ),
+          );
+        },
+      ),
+      _TrailButtonConfig(
+        title: 'Ambaguio Trail',
+        subtitle: 'Open Trail Details',
+        onTap: () {
+          // INEDIT DITO: Gumagana na ang Ambaguio Trail route
+          Navigator.of(context).pushNamed(
+            AppRoutes.trail(
+              AppRoutes.mtPulagMountainId,
+              'ambaguio',
+            ),
+          );
+        },
+      ),
+    ];
+
+    return Scaffold(
+      backgroundColor: isDark ? colors.background : _backgroundColor,
+      body: SafeArea(
+        top: true,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AnimatedMtApoBanner(imageAsset: _headerImage, title: 'Mt. Pulag'),
+              const SizedBox(height: 14),
+              Container(
+                decoration: BoxDecoration(
+                  color: isDark ? colors.surface : _cardColor,
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: isDark ? colors.border : const Color(0xFFB9B29F),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colors.shadow,
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 22),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _InfoLine(label: 'Name:', value: 'Mt. Pulag'),
+                    const _InfoLine(
+                      label: 'Location:',
+                      value: 'Kabayan, Benguet; Bordering Ifugao and Nueva Vizcaya, Luzon, Philippines.',
+                    ),
+                    const _InfoLine(
+                      label: 'Elevation:',
+                      value: '2,928 meters above sea level, making it the third-highest mountain in the Philippines and the highest peak in Luzon.',
+                    ),
+                    const _InfoLine(
+                      label: 'Description:',
+                      value: 'Famous for its majestic "Sea of Clouds" and the view of the Milky Way Galaxy at dawn. It features vast grassland summits and dwarf bamboo landscapes.',
+                    ),
+                    const _InfoLine(
+                      label: 'Slope:',
+                      value: 'Ranges from easy, rolling hills (Ambangeg) to steep, highly challenging pine and mossy forest ridges (Akiki/Tawangan). Suitable for all types of hikers depending on the trail.',
+                    ),
+                    const SizedBox(height: 18),
+                    for (
+                      var index = 0;
+                      index < trailButtons.length;
+                      index++
+                    ) ...[
+                      if (index > 0) ...[
+                        const SizedBox(height: 10),
+                        Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: isDark
+                              ? colors.divider
+                              : const Color(0xFFB8B09B),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                      _TrailActionButton(config: trailButtons[index]),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 22),
+              CustomBackButton(onTap: () => Navigator.of(context).maybePop()),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoLine extends StatelessWidget {
+  const _InfoLine({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final textStyle = GoogleFonts.merriweather(
+      color: colors.textPrimary,
+      fontSize: 13.5,
+      height: 1.5,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: RichText(
+        text: TextSpan(
+          style: textStyle,
+          children: [
+            TextSpan(
+              text: '$label ',
+              style: textStyle.copyWith(fontWeight: FontWeight.w700),
+            ),
+            TextSpan(text: value),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TrailActionButton extends StatelessWidget {
+  const _TrailActionButton({required this.config});
+
+  final _TrailButtonConfig config;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final buttonColor = context.isDarkMode
+        ? colors.accent
+        : MtPulagScreen._buttonColor;
+    final titleColor = context.isDarkMode
+        ? colors.background
+        : const Color(0xFF2D1E06);
+
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: config.onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: buttonColor,
+          foregroundColor: titleColor,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          elevation: context.isDarkMode ? 0 : 3.5,
+          shadowColor: context.isDarkMode
+              ? colors.shadow
+              : MtPulagScreen._buttonShadow,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              config.title,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.fredoka(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: titleColor,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              config.subtitle,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                fontStyle: FontStyle.italic,
+                color: titleColor.withValues(alpha: 0.78),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TrailButtonConfig {
+  const _TrailButtonConfig({
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+}
