@@ -7,7 +7,11 @@ import '../../features/mountains/screens/mt_pulag.dart';
 import '../../features/mountains/screens/mt_mayon.dart'; 
 import '../../features/mountains/screens/mt_batulao.dart'; 
 import '../../features/mountains/screens/mt_ulap.dart'; 
-import '../../features/mountains/screens/mt_daraitan.dart'; // <--- IDINAGDAG ANG IMPORT NI DARAITAN
+import '../../features/mountains/screens/mt_daraitan.dart'; 
+import '../../features/mountains/screens/mt_maculot.dart'; 
+import '../../features/mountains/screens/mt_pico_de_loro.dart'; 
+import '../../features/mountains/screens/mt_pinatubo.dart'; 
+import '../../features/mountains/screens/mt_guiting_guiting.dart'; // <--- IDINAGDAG ANG IMPORT NI GUITING-GUITING SCREEN
 import 'app_routes.dart';
 
 String? mountainRouteFor(Mountain mountain) {
@@ -22,8 +26,16 @@ String? mountainRouteFor(Mountain mountain) {
       return '/mountain/batulao';
     case 'Mt. Ulap':
       return '/mountain/ulap';
-    case 'Mt. Daraitan': // <--- IDINAGDAG: Para sa click action mula sa Home card
+    case 'Mt. Daraitan': 
       return '/mountain/daraitan';
+    case 'Mt. Maculot': 
+      return '/mountain/maculot';
+    case 'Mt. Pico de Loro': 
+      return '/mountain/picodeloro';
+    case 'Mt. Pinatubo': 
+      return '/mountain/pinatubo';
+    case 'Mt. Guiting-Guiting': // <--- IDINAGDAG: Para sa click action mula sa Home card
+      return '/mountain/g2';
     default:
       return null;
   }
@@ -46,7 +58,19 @@ Widget buildMountainScreen(Mountain mountain) {
     return const MtUlapScreen(); 
   }
   if (mountain.name == 'Mt. Daraitan') {
-    return const MtDaraitanScreen(); // <--- IDINAGDAG: Diretso na sa 3 action buttons natin!
+    return const MtDaraitanScreen(); 
+  }
+  if (mountain.name == 'Mt. Maculot') {
+    return const MtMaculotScreen(); 
+  }
+  if (mountain.name == 'Mt. Pico de Loro') {
+    return const MtPicoDeLoroScreen(); 
+  }
+  if (mountain.name == 'Mt. Pinatubo') {
+    return const MtPinatuboScreen(); 
+  }
+  if (mountain.name == 'Mt. Guiting-Guiting') {
+    return const MtGuitingGuitingScreen(); // <--- IDINAGDAG: Diretso na sa 3 action buttons natin!
   }
 
   return MountainDetailScreen(mountain: mountain);

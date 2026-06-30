@@ -18,6 +18,10 @@ import '../../features/mountains/screens/mt_mayon.dart';
 import '../../features/mountains/screens/mt_batulao.dart';
 import '../../features/mountains/screens/mt_ulap.dart'; // <--- IMPORTS PARA KAY ULAP
 import '../../features/mountains/screens/mt_daraitan.dart'; // <--- IDINAGDAG ANG IMPORT NI DARAITAN SCREEN
+import '../../features/mountains/screens/mt_maculot.dart'; // <--- IDINAGDAG ANG IMPORT NI MACULOT SCREEN
+import '../../features/mountains/screens/mt_pico_de_loro.dart'; // <--- IDINAGDAG ANG IMPORT NI PICO DE LORO SCREEN
+import '../../features/mountains/screens/mt_pinatubo.dart'; // <--- IDINAGDAG ANG IMPORT NI PINATUBO SCREEN
+import '../../features/mountains/screens/mt_guiting_guiting.dart'; // <--- IDINAGDAG ANG IMPORT NI GUITING-GUITING SCREEN
 import '../../features/mountains/screens/trail_detail_screen.dart';
 import '../../features/profile/screens/profile.dart';
 import '../../features/settings/screens/settings.dart';
@@ -37,6 +41,19 @@ import '../../data/trail_data/sta_fe_trail_data.dart';
 import '../../data/trail_data/daraitan_summit_data.dart'; // <--- IDINAGDAG ANG UTILS NI DARAITAN
 import '../../data/trail_data/tinipak_river_data.dart';
 import '../../data/trail_data/daraitan_traverse_data.dart';
+import '../../data/trail_data/maculot_rockies_data.dart'; // <--- IDINAGDAG ANG UTILS NI MACULOT
+import '../../data/trail_data/maculot_summit_data.dart';
+import '../../data/trail_data/maculot_traverse_data.dart';
+import '../../data/trail_data/maculot_airforce_data.dart';
+import '../../data/trail_data/pico_main_data.dart'; // <--- IDINAGDAG ANG UTILS NI PICO DE LORO
+import '../../data/trail_data/pico_monolith_data.dart';
+import '../../data/trail_data/pico_traverse_data.dart';
+import '../../data/trail_data/pinatubo_capas_data.dart'; // <--- IDINAGDAG ANG UTILS NI MT. PINATUBO
+import '../../data/trail_data/pinatubo_sapangbato_data.dart';
+import '../../data/trail_data/pinatubo_porac_data.dart';
+import '../../data/trail_data/g2_tampayan_data.dart'; // <--- IDINAGDAG ANG UTILS NI MT. GUITING-GUITING
+import '../../data/trail_data/g2_olango_data.dart';
+import '../../data/trail_data/g2_traverse_data.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -174,7 +191,6 @@ class AppRouter {
         );
       }
 
-      // IDINAGDAG: Intercept para kay Mt. Daraitan Screen
       if (mountainId.toLowerCase().contains('daraitan')) {
         return _route(
           settings,
@@ -182,6 +198,51 @@ class AppRouter {
             currentLocation: location,
             requireAuth: true,
             child: const MtDaraitanScreen(),
+          ),
+        );
+      }
+
+      if (mountainId.toLowerCase().contains('maculot')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtMaculotScreen(),
+          ),
+        );
+      }
+
+      if (mountainId.toLowerCase().contains('picodeloro')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtPicoDeLoroScreen(),
+          ),
+        );
+      }
+
+      if (mountainId.toLowerCase().contains('pinatubo')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtPinatuboScreen(),
+          ),
+        );
+      }
+
+      // IDINAGDAG: Intercept para kay Mt. Guiting-Guiting Screen
+      if (mountainId.toLowerCase() == 'g2' || mountainId.toLowerCase().contains('guiting')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtGuitingGuitingScreen(),
           ),
         );
       }
@@ -429,7 +490,7 @@ class AppRouter {
         }
       }
 
-      // --- MT. DARAITAN TRAILS (BAGONG IDINAGDAG) ---
+      // --- MT. DARAITAN TRAILS ---
       if (mountainId.toLowerCase().contains('daraitan')) {
         if (trailId == 'summit') {
           return _route(
@@ -471,6 +532,213 @@ class AppRouter {
                 trail: daraitanTraverseTrail,
                 parentRoute: AppRoutes.mountain(mountainId),
                 trailPhotoId: 'daraitan_traverse',
+              ),
+            ),
+          );
+        }
+      }
+
+      // --- MT. MACULOT TRAILS ---
+      if (mountainId.toLowerCase().contains('maculot')) {
+        if (trailId == 'rockies') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: maculotRockiesTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'maculot_rockies',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'summit') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: maculotSummitTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'maculot_summit',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'traverse') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: maculotTraverseTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'maculot_traverse',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'airforce') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: maculotAirForceTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'maculot_airforce',
+              ),
+            ),
+          );
+        }
+      }
+
+      // --- MT. PICO DE LORO TRAILS ---
+      if (mountainId.toLowerCase().contains('picodeloro')) {
+        if (trailId == 'main') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: picoMainTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'pico_main',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'monolith') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: picoMonolithTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'pico_monolith',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'traverse') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: picoTraverseTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'pico_traverse',
+              ),
+            ),
+          );
+        }
+      }
+
+      // --- MT. PINATUBO TRAILS ---
+      if (mountainId.toLowerCase().contains('pinatubo')) {
+        if (trailId == 'capas') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: pinatuboCapasTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'pinatubo_capas',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'sapangbato') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: pinatuboSapangbatoTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'pinatubo_sapangbato',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'porac') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: pinatuboPoracTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'pinatubo_porac',
+              ),
+            ),
+          );
+        }
+      }
+
+      // --- MT. GUITING-GUITING TRAILS (IDINAGDAG) ---
+      if (mountainId.toLowerCase() == 'g2' || mountainId.toLowerCase().contains('guiting')) {
+        if (trailId == 'tampayan') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: g2TampayanTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'g2_tampayan',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'olango') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: g2OlangoTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'g2_olango',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'traverse') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: g2TraverseTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'g2_traverse',
               ),
             ),
           );
