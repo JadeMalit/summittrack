@@ -185,7 +185,7 @@ class _SignInScreenState extends State<SignInScreen>
         MaterialPageRoute(
           builder: (_) => PreHikeLoadingScreen(
             loginFuture: loginFuture,
-            nextRoute: widget.redirectTo,
+            nextRoute: AppRoutes.home,
           ),
         ),
       );

@@ -39,6 +39,8 @@ dependencies:
   google_fonts: ^6.2.1
   http: ^1.2.2
   image_picker: ^1.1.2
+  image_picker_android: ^0.8.13+1
+  image_picker_platform_interface: ^2.11.1
   shared_preferences: ^2.3.2
   video_player: ^2.9.5
 
@@ -64,6 +66,8 @@ flutter:
 
   assets:
     - assets/images/apo.jpg
+    - assets/images/sta_cruz_sibulan_trail.png
+    - assets/images/mt_apo_enhanced.png
     - assets/images/pulag.jpg
     - assets/images/logo.jpg
     - assets/images/mt apo.jpg

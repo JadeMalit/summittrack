@@ -6,16 +6,19 @@ import '../../../data/trail_data/trail_data.dart';
 import '../../hike/screens/lets_hike_calendar_weather_modal.dart';
 import '../widgets/first_aid_emergency_tips.dart';
 import '../widgets/foldable_trail_checklist_card.dart';
+import '../widgets/trail_photo_uploader.dart';
 
 class TrailDetailScreen extends StatelessWidget {
   const TrailDetailScreen({
     super.key,
     required this.trail,
     required this.parentRoute,
+    this.trailPhotoId = 'sta_cruz_sibulan',
   });
 
   final TrailData trail;
   final String parentRoute;
+  final String trailPhotoId;
 
   static const _backgroundColor = Color(0xFFE3DDCF);
 
@@ -36,13 +39,14 @@ class TrailDetailScreen extends StatelessWidget {
             children: [
               _TrailBanner(
                 trail: trail,
-                onBack: () {
-                  if (Navigator.of(context).canPop()) {
-                    Navigator.of(context).pop();
+                onBack: () async {
+                  final navigator = Navigator.of(context);
+                  final didHandlePop = await navigator.maybePop();
+                  if (didHandlePop || !context.mounted) {
                     return;
                   }
 
-                  Navigator.of(context).pushReplacementNamed(parentRoute);
+                  navigator.pushReplacementNamed(parentRoute);
                 },
               ),
               Padding(
@@ -97,7 +101,7 @@ class TrailDetailScreen extends StatelessWidget {
                     const SizedBox(height: 18),
                     const _SectionHeading(title: 'Add Your Photo'),
                     const SizedBox(height: 10),
-                    const _AddPhotoSection(),
+                    TrailPhotoUploader(trailId: trailPhotoId),
                     const SizedBox(height: 22),
                     _LetsHikeButton(trailName: trail.name),
                   ],
@@ -453,103 +457,6 @@ class _MapLegendChip extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _AddPhotoSection extends StatelessWidget {
-  const _AddPhotoSection();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.appColors;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        OutlinedButton(
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Photo upload UI is ready. Backend hookup is not added yet.',
-                ),
-              ),
-            );
-          },
-          style: OutlinedButton.styleFrom(
-            foregroundColor: colors.textPrimary,
-            side: BorderSide(color: colors.border, width: 1.6),
-            backgroundColor: context.isDarkMode
-                ? colors.surfaceHigh
-                : Colors.white.withValues(alpha: 0.7),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.add_rounded, size: 34),
-              const SizedBox(width: 10),
-              Text(
-                'Add your photo',
-                style: GoogleFonts.fredoka(
-                  fontSize: 19,
-                  fontWeight: FontWeight.w600,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        Container(
-          constraints: const BoxConstraints(minHeight: 250),
-          decoration: BoxDecoration(
-            color: context.isDarkMode
-                ? colors.surfaceMuted
-                : const Color(0xFFD7D7D7),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: context.isDarkMode
-                  ? colors.border
-                  : const Color(0xFF7A766F),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: colors.shadow,
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.image_outlined,
-                    size: 54,
-                    color: colors.textSecondary,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Your uploaded trail photo will appear here.',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: colors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

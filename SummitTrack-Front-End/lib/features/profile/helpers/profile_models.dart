@@ -18,6 +18,18 @@ class ProfileDetail {
 }
 
 extension ProfileEditableFieldMetadata on ProfileEditableField {
+  bool get isEditable {
+    switch (this) {
+      case ProfileEditableField.email:
+        return false;
+      case ProfileEditableField.fullName:
+      case ProfileEditableField.phone:
+      case ProfileEditableField.address:
+      case ProfileEditableField.bio:
+        return true;
+    }
+  }
+
   String get label {
     switch (this) {
       case ProfileEditableField.fullName:
@@ -30,6 +42,30 @@ extension ProfileEditableFieldMetadata on ProfileEditableField {
         return 'Address';
       case ProfileEditableField.bio:
         return 'Bio';
+    }
+  }
+
+  String? get supportingText {
+    switch (this) {
+      case ProfileEditableField.email:
+        return 'Email used for sign in';
+      case ProfileEditableField.fullName:
+      case ProfileEditableField.phone:
+      case ProfileEditableField.address:
+      case ProfileEditableField.bio:
+        return null;
+    }
+  }
+
+  IconData get trailingIcon {
+    switch (this) {
+      case ProfileEditableField.email:
+        return Icons.lock_outline_rounded;
+      case ProfileEditableField.fullName:
+      case ProfileEditableField.phone:
+      case ProfileEditableField.address:
+      case ProfileEditableField.bio:
+        return Icons.edit_outlined;
     }
   }
 

@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownsUserDocument(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function ownsTrailPhotoData(uid, trailId) {
+      return request.resource.data.uid == uid
+        && request.resource.data.trailId == trailId
+        && request.resource.data.storagePath is string
+        && request.resource.data.storagePath.matches('^trail_photos/' + uid + '/' + trailId + '/[^/]+$');
+    }
+
+    match /users/{uid} {
+      allow read: if ownsUserDocument(uid);
+      allow create, update, delete: if ownsUserDocument(uid);
+
+      match /trail_photos/{trailId}/photos/{photoId} {
+        allow read: if ownsUserDocument(uid);
+        allow create, update: if ownsUserDocument(uid) && ownsTrailPhotoData(uid, trailId);
+        allow delete: if ownsUserDocument(uid);
+      }
+    }
+  }
+}

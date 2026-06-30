@@ -36,6 +36,15 @@ class _SignUpScreenState extends State<SignUpScreen>
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmController = TextEditingController();
+  final nameFocusNode = FocusNode();
+  final emailFocusNode = FocusNode();
+  final passwordFocusNode = FocusNode();
+  final confirmFocusNode = FocusNode();
+
+  static const _inputTextColor = Color(0xFF1F1F1F);
+  static const _inputHintColor = Color(0xFF6A6A6A);
+  static const _inputIconColor = Color(0xFF4F4F4F);
+  static const _inputCursorColor = Color(0xFF4CAF50);
 
   bool loading = false;
   bool hidePass = true;
@@ -91,6 +100,10 @@ class _SignUpScreenState extends State<SignUpScreen>
     emailController.dispose();
     passwordController.dispose();
     confirmController.dispose();
+    nameFocusNode.dispose();
+    emailFocusNode.dispose();
+    passwordFocusNode.dispose();
+    confirmFocusNode.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -99,8 +112,8 @@ class _SignUpScreenState extends State<SignUpScreen>
     if (loading) return;
 
     final email = normalizeGmailEmail(emailController.text);
-    final password = passwordController.text.trim();
-    final confirmPassword = confirmController.text.trim();
+    final password = passwordController.text;
+    final confirmPassword = confirmController.text;
     final emailValidationMessage = validateGmailEmail(email);
 
     /// EMPTY FIELD CHECK
@@ -136,11 +149,15 @@ class _SignUpScreenState extends State<SignUpScreen>
     }
 
     /// PASSWORD MATCH CHECK
-    if (password != confirmPassword) {
+    final confirmValidationMessage = _validateConfirmPassword(
+      password,
+      confirmPassword,
+    );
+    if (confirmValidationMessage != null) {
       setState(() {
         emailError = null;
         passwordError = null;
-        confirmPasswordError = "Passwords do not match.";
+        confirmPasswordError = confirmValidationMessage;
       });
       return;
     }
@@ -212,7 +229,7 @@ class _SignUpScreenState extends State<SignUpScreen>
       if (e.code == 'email-already-in-use') {
         message = "Email is already registered.";
       } else if (e.code == 'weak-password') {
-        message = "Password should be at least 6 characters.";
+        message = "Password must meet the password requirements.";
       } else if (e.code == 'invalid-email') {
         message = "Please enter a valid email.";
       } else if (e.code == 'network-request-failed') {
@@ -391,23 +408,79 @@ class _SignUpScreenState extends State<SignUpScreen>
   }
 
   String? _validatePassword(String password) {
+    final messages = _passwordValidationMessages(password);
+    return messages.isEmpty ? null : messages.join('\n');
+  }
+
+  List<String> _passwordValidationMessages(String password) {
+    final messages = <String>[];
+
     if (password.length < 8) {
-      return "Password must be at least 8 characters.";
+      messages.add("Password must be at least 8 characters.");
+    }
+
+    if (!RegExp(r'[A-Z]').hasMatch(password)) {
+      messages.add("Password must contain at least one uppercase letter.");
+    }
+
+    if (!RegExp(r'\d').hasMatch(password)) {
+      messages.add("Password must contain at least one number.");
+    }
+
+    if (!RegExp(r'[^A-Za-z0-9\s]').hasMatch(password)) {
+      messages.add("Password must contain at least one special character.");
+    }
+
+    if (RegExp(r'\s').hasMatch(password)) {
+      messages.add("Spaces are not allowed in password.");
     }
 
     if (RegExp(r'^[A-Za-z]+$').hasMatch(password)) {
-      return "Password must include at least one number.";
+      messages.add("Password cannot be all letters only.");
     }
 
     if (RegExp(r'^\d+$').hasMatch(password)) {
-      return "Password must include at least one letter.";
+      messages.add("Password cannot be all numbers only.");
     }
 
-    if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d).{8,}$').hasMatch(password)) {
-      return "Password must include at least one letter and one number.";
+    return messages;
+  }
+
+  String? _validateConfirmPassword(String password, String confirmPassword) {
+    if (confirmPassword.isEmpty) {
+      return null;
     }
 
-    return null;
+    return password == confirmPassword ? null : "Passwords do not match.";
+  }
+
+  void _updatePasswordValidation(String password) {
+    final validationMessage = password.isEmpty
+        ? null
+        : _validatePassword(password);
+    final confirmValidationMessage = _validateConfirmPassword(
+      password,
+      confirmController.text,
+    );
+
+    if (passwordError != validationMessage ||
+        confirmPasswordError != confirmValidationMessage) {
+      setState(() {
+        passwordError = validationMessage;
+        confirmPasswordError = confirmValidationMessage;
+      });
+    }
+  }
+
+  void _updateConfirmPasswordValidation(String confirmPassword) {
+    final validationMessage = _validateConfirmPassword(
+      passwordController.text,
+      confirmPassword,
+    );
+
+    if (confirmPasswordError != validationMessage) {
+      setState(() => confirmPasswordError = validationMessage);
+    }
   }
 
   Future<void> _goToSignIn() async {
@@ -430,10 +503,15 @@ class _SignUpScreenState extends State<SignUpScreen>
   InputDecoration _inputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.poppins(color: Colors.grey[600], fontSize: 16),
+      hintStyle: GoogleFonts.poppins(
+        color: _inputHintColor,
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+      ),
       filled: true,
       fillColor: Colors.white.withValues(alpha: 0.9),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      suffixIconColor: _inputIconColor,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
         borderSide: const BorderSide(color: Colors.green, width: 1.5),
@@ -446,6 +524,14 @@ class _SignUpScreenState extends State<SignUpScreen>
         borderRadius: BorderRadius.circular(20),
         borderSide: const BorderSide(color: Colors.lightGreen, width: 2),
       ),
+    );
+  }
+
+  TextStyle _inputTextStyle() {
+    return GoogleFonts.poppins(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      color: _inputTextColor,
     );
   }
 
@@ -523,10 +609,13 @@ class _SignUpScreenState extends State<SignUpScreen>
                             position: _slideAnimation,
                             child: TextField(
                               controller: nameController,
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              focusNode: nameFocusNode,
+                              textInputAction: TextInputAction.next,
+                              cursorColor: _inputCursorColor,
+                              onSubmitted: (_) => emailFocusNode.requestFocus(),
+                              onTapOutside: (_) =>
+                                  FocusScope.of(context).unfocus(),
+                              style: _inputTextStyle(),
                               decoration: _inputDecoration(
                                 "Enter your full name",
                               ),
@@ -541,7 +630,10 @@ class _SignUpScreenState extends State<SignUpScreen>
                             position: _slideAnimation,
                             child: TextField(
                               controller: emailController,
+                              focusNode: emailFocusNode,
                               keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              cursorColor: _inputCursorColor,
                               onChanged: (value) {
                                 final validationMessage = validateGmailEmail(
                                   value,
@@ -552,10 +644,11 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   });
                                 }
                               },
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              onSubmitted: (_) =>
+                                  passwordFocusNode.requestFocus(),
+                              onTapOutside: (_) =>
+                                  FocusScope.of(context).unfocus(),
+                              style: _inputTextStyle(),
                               decoration: _inputDecoration("Enter your email"),
                             ),
                           ),
@@ -582,16 +675,16 @@ class _SignUpScreenState extends State<SignUpScreen>
                             position: _slideAnimation,
                             child: TextField(
                               controller: passwordController,
+                              focusNode: passwordFocusNode,
                               obscureText: hidePass,
-                              onChanged: (_) {
-                                if (passwordError != null) {
-                                  setState(() => passwordError = null);
-                                }
-                              },
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              onChanged: _updatePasswordValidation,
+                              textInputAction: TextInputAction.next,
+                              cursorColor: _inputCursorColor,
+                              onSubmitted: (_) =>
+                                  confirmFocusNode.requestFocus(),
+                              onTapOutside: (_) =>
+                                  FocusScope.of(context).unfocus(),
+                              style: _inputTextStyle(),
                               decoration:
                                   _inputDecoration(
                                     "Enter your password",
@@ -619,6 +712,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   color: Colors.redAccent,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
+                                  height: 1.35,
                                 ),
                               ),
                             ),
@@ -632,16 +726,15 @@ class _SignUpScreenState extends State<SignUpScreen>
                             position: _slideAnimation,
                             child: TextField(
                               controller: confirmController,
+                              focusNode: confirmFocusNode,
                               obscureText: hideConfirm,
-                              onChanged: (_) {
-                                if (confirmPasswordError != null) {
-                                  setState(() => confirmPasswordError = null);
-                                }
-                              },
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              onChanged: _updateConfirmPasswordValidation,
+                              textInputAction: TextInputAction.done,
+                              cursorColor: _inputCursorColor,
+                              onSubmitted: (_) => signUp(),
+                              onTapOutside: (_) =>
+                                  FocusScope.of(context).unfocus(),
+                              style: _inputTextStyle(),
                               decoration:
                                   _inputDecoration(
                                     "Confirm your password",

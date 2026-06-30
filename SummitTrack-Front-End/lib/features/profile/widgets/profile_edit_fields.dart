@@ -12,10 +12,18 @@ Future<String?> showProfileEditSheet(
 }) {
   return showModalBottomSheet<String>(
     context: context,
+    // Keep profile edit sheets open until the user chooses Cancel or Save.
+    isDismissible: false,
+    // Prevent swipe-down dismissal so the close behavior stays button-driven.
+    enableDrag: false,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (context) {
-      return _EditProfileSheet(field: field, initialValue: initialValue);
+      return PopScope(
+        canPop: false,
+        // Keep back navigation from dismissing the sheet outside Cancel/Save.
+        child: _EditProfileSheet(field: field, initialValue: initialValue),
+      );
     },
   );
 }

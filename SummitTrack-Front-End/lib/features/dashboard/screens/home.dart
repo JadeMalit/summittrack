@@ -889,16 +889,16 @@ class _MountainCardState extends State<_MountainCard> {
 
   Widget _buildMountainImage(double width) {
     final mountain = widget.mountain;
+    final imageAsset = mountain.name == 'Mt. Apo'
+        ? 'assets/images/mt_apo_enhanced.png'
+        : mountain.imageAsset ?? 'assets/images/apo.jpg';
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: SizedBox(
         width: width,
         height: 128,
-        child: Image.asset(
-          mountain.imageAsset ?? 'assets/images/apo.jpg',
-          fit: BoxFit.cover,
-        ),
+        child: Image.asset(imageAsset, fit: BoxFit.cover),
       ),
     );
   }

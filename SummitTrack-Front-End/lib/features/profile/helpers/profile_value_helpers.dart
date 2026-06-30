@@ -51,14 +51,17 @@ String profileDisplayValueForField({
   required String bio,
   required User? currentUser,
 }) {
-  final value = profileValueForField(
-    field: field,
-    fullName: fullName,
-    email: email,
-    phone: phone,
-    address: address,
-    bio: bio,
-  ).trim();
+  final value = switch (field) {
+    ProfileEditableField.email => sanitizeValue(currentUser?.email),
+    _ => profileValueForField(
+      field: field,
+      fullName: fullName,
+      email: email,
+      phone: phone,
+      address: address,
+      bio: bio,
+    ).trim(),
+  };
 
   if (value.isNotEmpty) {
     return value;

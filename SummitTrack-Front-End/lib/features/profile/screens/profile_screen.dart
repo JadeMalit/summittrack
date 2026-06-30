@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../helpers/profile_constants.dart';
 import '../helpers/profile_models.dart';
@@ -25,7 +26,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen>
     with SingleTickerProviderStateMixin {
   String _fullName = '';
-  String _email = '';
   String _phone = '';
   String _address = '';
   String _bio = '';
@@ -34,6 +34,9 @@ class _ProfileScreenState extends State<ProfileScreen>
   late final AnimationController _introController;
   late final Animation<double> _fadeInAnimation;
   late final Animation<Offset> _slideAnimation;
+
+  String get _authenticatedEmail =>
+      sanitizeValue(FirebaseAuth.instance.currentUser?.email);
 
   @override
   void initState() {
@@ -69,13 +72,13 @@ class _ProfileScreenState extends State<ProfileScreen>
   void _seedProfileFromAuth() {
     final user = FirebaseAuth.instance.currentUser;
     _fullName = resolvePrimaryName(user);
-    _email = sanitizeValue(user?.email);
     _phone = sanitizeValue(user?.phoneNumber);
   }
 
   Future<void> _loadStoredProfile() async {
     final prefs = await SharedPreferences.getInstance();
     final storedAvatar = prefs.getString(ProfileConstants.avatarKey);
+    await prefs.remove(ProfileConstants.emailKey);
 
     if (!mounted) {
       return;
@@ -84,7 +87,6 @@ class _ProfileScreenState extends State<ProfileScreen>
     setState(() {
       _fullName =
           prefs.getString(ProfileConstants.nameKey)?.trim() ?? _fullName;
-      _email = prefs.getString(ProfileConstants.emailKey)?.trim() ?? _email;
       _phone = prefs.getString(ProfileConstants.phoneKey)?.trim() ?? _phone;
       _address =
           prefs.getString(ProfileConstants.addressKey)?.trim() ?? _address;
@@ -94,18 +96,26 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   Future<void> _saveField(ProfileEditableField field, String value) async {
+    if (!field.isEditable) {
+      return;
+    }
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(field.storageKey, value);
   }
 
   Future<void> _showEditSheet(ProfileEditableField field) async {
+    if (!field.isEditable) {
+      return;
+    }
+
     final result = await showProfileEditSheet(
       context,
       field: field,
       initialValue: profileValueForField(
         field: field,
         fullName: _fullName,
-        email: _email,
+        email: _authenticatedEmail,
         phone: _phone,
         address: _address,
         bio: _bio,
@@ -122,7 +132,6 @@ class _ProfileScreenState extends State<ProfileScreen>
           _fullName = result;
           break;
         case ProfileEditableField.email:
-          _email = result;
           break;
         case ProfileEditableField.phone:
           _phone = result;
@@ -182,7 +191,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     return profileDisplayValueForField(
       field: field,
       fullName: _fullName,
-      email: _email,
+      email: _authenticatedEmail,
       phone: _phone,
       address: _address,
       bio: _bio,
@@ -208,7 +217,15 @@ class _ProfileScreenState extends State<ProfileScreen>
       return;
     }
 
+    final navigator = Navigator.of(context);
+
     await FirebaseAuth.instance.signOut();
+
+    if (!mounted) {
+      return;
+    }
+
+    navigator.pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
   }
 
   @override
@@ -243,7 +260,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     primaryName: profileDisplayValueForField(
                       field: ProfileEditableField.fullName,
                       fullName: _fullName,
-                      email: _email,
+                      email: _authenticatedEmail,
                       phone: _phone,
                       address: _address,
                       bio: _bio,

@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownsTrailPhotoFolder(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isValidTrailPhotoUpload(uid, trailId) {
+      return request.resource != null
+        && request.resource.contentType.matches('image/.*')
+        && request.resource.metadata.uid == uid
+        && request.resource.metadata.trailId == trailId;
+    }
+
+    match /trail_photos/{uid}/{trailId}/{photoFile} {
+      allow read: if ownsTrailPhotoFolder(uid);
+      allow create, update: if ownsTrailPhotoFolder(uid)
+        && isValidTrailPhotoUpload(uid, trailId);
+      allow delete: if ownsTrailPhotoFolder(uid);
+    }
+  }
+}

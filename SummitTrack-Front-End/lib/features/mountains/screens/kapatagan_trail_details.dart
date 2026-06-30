@@ -12,6 +12,7 @@ class KapataganTrailDetailsScreen extends StatelessWidget {
     return TrailDetailScreen(
       trail: kapataganTrail,
       parentRoute: AppRoutes.mountain(AppRoutes.mtApoMountainId),
+      trailPhotoId: 'kapatagan',
     );
   }
 }

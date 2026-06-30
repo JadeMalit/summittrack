@@ -44,7 +44,6 @@ class AppRouter {
         _AuthGuard(
           currentLocation: location,
           requireAuth: false,
-          redirectTo: AppRoutes.redirectFromUri(uri),
           child: SignInScreen(
             redirectTo: AppRoutes.redirectFromUri(uri) ?? AppRoutes.home,
           ),
@@ -58,7 +57,6 @@ class AppRouter {
         _AuthGuard(
           currentLocation: location,
           requireAuth: false,
-          redirectTo: AppRoutes.redirectFromUri(uri),
           // File name ay register_screen.dart pero ang Class ay SignUpScreen
           child: SignUpScreen(
             redirectTo: AppRoutes.redirectFromUri(uri) ?? AppRoutes.home,
@@ -255,13 +253,11 @@ class _AuthGuard extends StatefulWidget {
     required this.currentLocation,
     required this.requireAuth,
     required this.child,
-    this.redirectTo,
   });
 
   final String currentLocation;
   final bool requireAuth;
   final Widget child;
-  final String? redirectTo;
 
   @override
   State<_AuthGuard> createState() => _AuthGuardState();
@@ -328,9 +324,7 @@ class _AuthGuardState extends State<_AuthGuard> {
             return widget.child;
           }
 
-          return _RouteRedirect(
-            targetLocation: AppRoutes.resolveRedirectTarget(widget.redirectTo),
-          );
+          return _RouteRedirect(targetLocation: AppRoutes.home);
         }
 
         return widget.child;

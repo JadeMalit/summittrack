@@ -1,0 +1,490 @@
+import 'dart:developer' as developer;
+import 'dart:typed_data';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
+import '../models/trail_photo_model.dart';
+
+class TrailPhotoException implements Exception {
+  const TrailPhotoException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+class TrailPhotoService {
+  static const staCruzSibulanTrailId = 'sta_cruz_sibulan';
+  static const kapataganTrailId = 'kapatagan';
+  static const _permissionMessage =
+      'You do not have permission to access these photos.';
+
+  TrailPhotoService({
+    FirebaseAuth? auth,
+    FirebaseFirestore? firestore,
+    FirebaseStorage? storage,
+  }) : _auth = auth ?? FirebaseAuth.instance,
+       _firestore = firestore ?? FirebaseFirestore.instance,
+       _storage = storage ?? FirebaseStorage.instance;
+
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
+  final FirebaseStorage _storage;
+
+  String? get currentUserId => _auth.currentUser?.uid;
+
+  Future<TrailPhotoModel> uploadPhoto({
+    required Uint8List bytes,
+    required String fileName,
+    String? contentType,
+    String trailId = staCruzSibulanTrailId,
+  }) async {
+    if (bytes.isEmpty) {
+      throw const TrailPhotoException('The selected photo is empty.');
+    }
+
+    final user = _requireUser();
+    final normalizedTrailId = _safeTrailId(trailId);
+    final photoDocument = _photoCollection(user.uid, normalizedTrailId).doc();
+    final safeFileName = _safeFileName(fileName, photoDocument.id);
+    final fileExtension = _extensionFor(safeFileName);
+    final storagePath =
+        'trail_photos/${user.uid}/$normalizedTrailId/${photoDocument.id}.$fileExtension';
+    final storageRef = _storage.ref(storagePath);
+    _debugLog(
+      'uploadPhoto',
+      'uid=${user.uid}, email=${user.email}, trailId=$normalizedTrailId, '
+          'firestorePath=${_photoCollectionPath(user.uid, normalizedTrailId)}/${photoDocument.id}, '
+          'storagePath=$storagePath',
+    );
+
+    try {
+      await storageRef.putData(
+        bytes,
+        SettableMetadata(
+          contentType: _contentTypeFor(contentType, safeFileName),
+          customMetadata: {
+            'uid': user.uid,
+            if (user.email != null) 'ownerEmail': user.email!,
+            'trailId': normalizedTrailId,
+            'originalFileName': safeFileName,
+          },
+        ),
+      );
+
+      final photoUrl = await storageRef.getDownloadURL();
+      _debugLog(
+        'uploadPhoto',
+        'upload complete uid=${user.uid}, trailId=$normalizedTrailId, '
+            'storagePath=$storagePath',
+      );
+      final now = DateTime.now().toUtc();
+      final photo = TrailPhotoModel(
+        id: photoDocument.id,
+        uid: user.uid,
+        trailId: normalizedTrailId,
+        downloadUrl: photoUrl,
+        storagePath: storagePath,
+        createdAt: now,
+        updatedAt: now,
+        fileName: safeFileName,
+        ownerEmail: user.email,
+      );
+
+      await savePhotoMetadata(
+        photo,
+        userId: user.uid,
+        trailId: normalizedTrailId,
+      );
+
+      return photo;
+    } catch (error) {
+      _logFirebaseError('uploadPhoto', error);
+      await _deleteStorageObjectQuietly(storagePath);
+
+      if (error is TrailPhotoException) {
+        rethrow;
+      }
+
+      throw TrailPhotoException(
+        _firebaseMessage(
+          error,
+          fallback: 'Unable to save photos right now. Please try again.',
+        ),
+      );
+    }
+  }
+
+  Future<void> savePhotoMetadata(
+    TrailPhotoModel photo, {
+    String? userId,
+    String? trailId,
+  }) async {
+    final uid = _requireOwnedUserId(userId);
+    final normalizedTrailId = _safeTrailId(trailId ?? photo.trailId);
+    _debugLog(
+      'savePhotoMetadata',
+      'uid=$uid, trailId=$normalizedTrailId, '
+          'firestorePath=${_photoCollectionPath(uid, normalizedTrailId)}/${photo.id}, '
+          'storagePath=${photo.storagePath}',
+    );
+    if (photo.uid.isNotEmpty && photo.uid != uid) {
+      throw const TrailPhotoException(_permissionMessage);
+    }
+    final normalizedStoragePath = _normalizeStoragePath(photo.storagePath);
+    if (normalizedStoragePath.isNotEmpty &&
+        !_storagePathBelongsToUser(normalizedStoragePath, uid)) {
+      throw const TrailPhotoException(_permissionMessage);
+    }
+
+    await _photoCollection(uid, normalizedTrailId)
+        .doc(photo.id)
+        .set(
+          photo
+              .copyWith(
+                uid: uid,
+                trailId: normalizedTrailId,
+                storagePath: normalizedStoragePath,
+                ownerEmail: _auth.currentUser?.email,
+              )
+              .toFirestore(),
+        );
+  }
+
+  Future<List<TrailPhotoModel>> fetchUserPhotos({
+    String? userId,
+    String trailId = staCruzSibulanTrailId,
+  }) async {
+    final uid = userId ?? currentUserId;
+    if (uid == null) {
+      _debugLog(
+        'fetchUserPhotos',
+        'skip load because currentUser.uid is null; trailId=$trailId',
+      );
+      return <TrailPhotoModel>[];
+    }
+
+    final currentUid = currentUserId;
+    if (currentUid == null) {
+      _debugLog(
+        'fetchUserPhotos',
+        'skip load because FirebaseAuth.currentUser is null; requestedUid=$uid, trailId=$trailId',
+      );
+      return <TrailPhotoModel>[];
+    }
+    if (uid != currentUid) {
+      _debugLog(
+        'fetchUserPhotos',
+        'blocked mismatched uid requestedUid=$uid, currentUid=$currentUid, trailId=$trailId',
+      );
+      throw const TrailPhotoException(_permissionMessage);
+    }
+
+    final normalizedTrailId = _safeTrailId(trailId);
+    final firestorePath = _photoCollectionPath(uid, normalizedTrailId);
+    _debugLog(
+      'fetchUserPhotos',
+      'query start uid=$uid, email=${_auth.currentUser?.email}, trailId=$normalizedTrailId, '
+          'firestorePath=$firestorePath',
+    );
+
+    try {
+      final snapshot = await _photoCollection(uid, normalizedTrailId).get();
+
+      final photos = snapshot.docs
+          .map(TrailPhotoModel.fromFirestore)
+          .map(
+            (photo) => photo.copyWith(
+              uid: photo.uid.isEmpty ? uid : photo.uid,
+              trailId: photo.trailId.isEmpty
+                  ? normalizedTrailId
+                  : photo.trailId,
+              storagePath: _normalizeStoragePath(photo.storagePath),
+            ),
+          )
+          .where(
+            (photo) =>
+                photo.downloadUrl.isNotEmpty &&
+                photo.uid == uid &&
+                photo.trailId == normalizedTrailId &&
+                (photo.storagePath.isEmpty ||
+                    _storagePathBelongsToUser(photo.storagePath, uid)),
+          )
+          .toList();
+      photos.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      _debugLog(
+        'fetchUserPhotos',
+        'query complete uid=$uid, trailId=$normalizedTrailId, '
+            'rawCount=${snapshot.docs.length}, resultCount=${photos.length}',
+      );
+
+      return photos;
+    } catch (error) {
+      _logFirebaseError('fetchUserPhotos', error);
+      throw TrailPhotoException(
+        _firebaseMessage(
+          error,
+          fallback: 'Unable to load saved photos right now.',
+        ),
+      );
+    }
+  }
+
+  Future<void> deletePhoto(
+    TrailPhotoModel photo, {
+    String? userId,
+    String? trailId,
+  }) async {
+    final uid = _requireOwnedUserId(userId);
+    final normalizedTrailId = _safeTrailId(trailId ?? photo.trailId);
+    _debugLog(
+      'deletePhoto',
+      'uid=$uid, trailId=$normalizedTrailId, '
+          'firestorePath=${_photoCollectionPath(uid, normalizedTrailId)}/${photo.id}, '
+          'storagePath=${photo.storagePath}',
+    );
+    if (photo.uid.isNotEmpty && photo.uid != uid) {
+      throw const TrailPhotoException(_permissionMessage);
+    }
+
+    await deletePhotoFromStorage(
+      _normalizeStoragePath(photo.storagePath),
+      userId: uid,
+    );
+    await deletePhotoFromFirestore(
+      photo.id,
+      userId: uid,
+      trailId: normalizedTrailId,
+    );
+  }
+
+  Future<void> deletePhotoFromStorage(
+    String storagePath, {
+    String? userId,
+  }) async {
+    final normalizedStoragePath = _normalizeStoragePath(storagePath);
+    if (normalizedStoragePath.isEmpty) {
+      return;
+    }
+    final uid = userId ?? currentUserId;
+    if (uid != null && !_storagePathBelongsToUser(normalizedStoragePath, uid)) {
+      _debugLog(
+        'deletePhotoFromStorage',
+        'blocked mismatched storage path uid=$uid, storagePath=$normalizedStoragePath',
+      );
+      throw const TrailPhotoException(_permissionMessage);
+    }
+    _debugLog(
+      'deletePhotoFromStorage',
+      'delete start uid=$uid, storagePath=$normalizedStoragePath',
+    );
+
+    try {
+      await _storage.ref(normalizedStoragePath).delete();
+    } on FirebaseException catch (error) {
+      _logFirebaseError('deletePhotoFromStorage', error);
+      if (error.code == 'object-not-found') {
+        return;
+      }
+
+      throw TrailPhotoException(
+        _firebaseMessage(
+          error,
+          fallback: 'Unable to delete that photo from storage.',
+        ),
+      );
+    }
+  }
+
+  Future<void> deletePhotoFromFirestore(
+    String photoId, {
+    String? userId,
+    String trailId = staCruzSibulanTrailId,
+  }) async {
+    final uid = _requireOwnedUserId(userId);
+    final normalizedTrailId = _safeTrailId(trailId);
+    _debugLog(
+      'deletePhotoFromFirestore',
+      'delete start uid=$uid, trailId=$normalizedTrailId, '
+          'firestorePath=${_photoCollectionPath(uid, normalizedTrailId)}/$photoId',
+    );
+
+    try {
+      await _photoCollection(uid, normalizedTrailId).doc(photoId).delete();
+    } catch (error) {
+      _logFirebaseError('deletePhotoFromFirestore', error);
+      throw TrailPhotoException(
+        _firebaseMessage(
+          error,
+          fallback: 'Unable to delete that photo from your account.',
+        ),
+      );
+    }
+  }
+
+  CollectionReference<Map<String, dynamic>> _photoCollection(
+    String userId,
+    String trailId,
+  ) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('trail_photos')
+        .doc(trailId)
+        .collection('photos');
+  }
+
+  String _photoCollectionPath(String userId, String trailId) {
+    return 'users/$userId/trail_photos/$trailId/photos';
+  }
+
+  User _requireUser() {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw const TrailPhotoException(
+        'Please sign in first before saving photos.',
+      );
+    }
+
+    return user;
+  }
+
+  String _requireOwnedUserId(String? requestedUserId) {
+    final user = _requireUser();
+    final uid = requestedUserId ?? user.uid;
+    if (uid != user.uid) {
+      throw const TrailPhotoException(_permissionMessage);
+    }
+
+    return uid;
+  }
+
+  Future<void> _deleteStorageObjectQuietly(String storagePath) async {
+    try {
+      await _storage.ref(storagePath).delete();
+    } on FirebaseException catch (error) {
+      if (error.code != 'object-not-found') {
+        return;
+      }
+    } catch (_) {
+      return;
+    }
+  }
+
+  String _safeFileName(String fileName, String photoId) {
+    final trimmedName = fileName.trim();
+    final fallback = 'trail-photo-$photoId.jpg';
+    final candidate = trimmedName.isEmpty ? fallback : trimmedName;
+
+    return candidate.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '-');
+  }
+
+  String _safeTrailId(String trailId) {
+    final normalized = trailId
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9_-]'), '_')
+        .replaceAll(RegExp(r'_+'), '_');
+
+    return normalized.isEmpty ? staCruzSibulanTrailId : normalized;
+  }
+
+  bool _storagePathBelongsToUser(String storagePath, String userId) {
+    final normalizedStoragePath = _normalizeStoragePath(storagePath);
+    return normalizedStoragePath == 'trail_photos/$userId' ||
+        normalizedStoragePath.startsWith('trail_photos/$userId/');
+  }
+
+  String _normalizeStoragePath(String storagePath) {
+    final trimmedPath = _decodePath(storagePath.trim().replaceAll(r'\', '/'));
+    if (trimmedPath.isEmpty) {
+      return '';
+    }
+
+    final storageRootIndex = trimmedPath.indexOf('trail_photos/');
+    if (storageRootIndex != -1) {
+      return trimmedPath.substring(storageRootIndex);
+    }
+
+    return trimmedPath.replaceFirst(RegExp(r'^/+'), '');
+  }
+
+  String _decodePath(String path) {
+    try {
+      return Uri.decodeFull(path);
+    } on FormatException {
+      return path;
+    }
+  }
+
+  String _extensionFor(String fileName) {
+    final lowerName = fileName.toLowerCase();
+    final dotIndex = lowerName.lastIndexOf('.');
+    if (dotIndex == -1 || dotIndex == lowerName.length - 1) {
+      return 'jpg';
+    }
+
+    final extension = lowerName.substring(dotIndex + 1);
+    const supportedExtensions = {'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'};
+
+    return supportedExtensions.contains(extension) ? extension : 'jpg';
+  }
+
+  String _contentTypeFor(String? contentType, String fileName) {
+    final normalizedContentType = contentType?.toLowerCase();
+    if (normalizedContentType != null &&
+        normalizedContentType.startsWith('image/')) {
+      return normalizedContentType;
+    }
+
+    return switch (_extensionFor(fileName)) {
+      'png' => 'image/png',
+      'webp' => 'image/webp',
+      'heic' => 'image/heic',
+      'heif' => 'image/heif',
+      _ => 'image/jpeg',
+    };
+  }
+
+  String _firebaseMessage(Object error, {required String fallback}) {
+    if (error is TrailPhotoException) {
+      return error.message;
+    }
+
+    if (error is FirebaseException) {
+      return switch (error.code) {
+        'permission-denied' =>
+          'You do not have permission to access these photos.',
+        'unauthorized' => 'You do not have permission to access these photos.',
+        'unavailable' => 'Network connection is unavailable. Please try again.',
+        'network-request-failed' =>
+          'Network connection is unavailable. Please try again.',
+        'deadline-exceeded' =>
+          'Network connection is unavailable. Please try again.',
+        'unauthenticated' => 'Please sign in first before saving photos.',
+        _ => fallback,
+      };
+    }
+
+    return fallback;
+  }
+
+  void _debugLog(String functionName, String message) {
+    developer.log(message, name: 'TrailPhotoService.$functionName');
+  }
+
+  void _logFirebaseError(String functionName, Object error) {
+    if (error is FirebaseException) {
+      _debugLog(
+        functionName,
+        'FirebaseException code=${error.code}, message=${error.message}, plugin=${error.plugin}',
+      );
+      return;
+    }
+
+    _debugLog(functionName, 'errorType=${error.runtimeType}, error=$error');
+  }
+}
