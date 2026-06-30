@@ -7,6 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/routing/app_routes.dart';
 import '../../helpers/gmail_email_validator.dart';
+import '../../services/google_auth_service.dart';
+import '../../widgets/google_sign_in_button.dart';
 import '../../widgets/video_background.dart';
 
 class RegistrationAuthFlow {
@@ -36,6 +38,7 @@ class _SignUpScreenState extends State<SignUpScreen>
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmController = TextEditingController();
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
   final nameFocusNode = FocusNode();
   final emailFocusNode = FocusNode();
   final passwordFocusNode = FocusNode();
@@ -47,6 +50,7 @@ class _SignUpScreenState extends State<SignUpScreen>
   static const _inputCursorColor = Color(0xFF4CAF50);
 
   bool loading = false;
+  bool googleLoading = false;
   bool hidePass = true;
   bool hideConfirm = true;
   bool _didPrecacheAssets = false;
@@ -58,6 +62,8 @@ class _SignUpScreenState extends State<SignUpScreen>
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+
+  bool get _isBusy => loading || googleLoading;
 
   @override
   void initState() {
@@ -109,7 +115,7 @@ class _SignUpScreenState extends State<SignUpScreen>
   }
 
   Future<void> signUp() async {
-    if (loading) return;
+    if (_isBusy) return;
 
     final email = normalizeGmailEmail(emailController.text);
     final password = passwordController.text;
@@ -190,6 +196,9 @@ class _SignUpScreenState extends State<SignUpScreen>
             'uid': userCredential.user!.uid,
             'name': nameController.text.trim(),
             'email': email,
+            'authProvider': 'password',
+            'providers': ['password'],
+            'emailVerified': userCredential.user!.emailVerified,
             'createdAt': Timestamp.now(),
           });
 
@@ -262,6 +271,52 @@ class _SignUpScreenState extends State<SignUpScreen>
       RegistrationAuthFlow.finish();
       if (mounted) {
         setState(() => loading = false);
+      }
+    }
+  }
+
+  Future<void> _continueWithGoogle() async {
+    if (_isBusy) return;
+
+    FocusScope.of(context).unfocus();
+    ScaffoldMessenger.of(context).clearSnackBars();
+
+    try {
+      setState(() => googleLoading = true);
+      RegistrationAuthFlow.start();
+
+      await _googleAuthService.signInOrRegisterWithGoogle();
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(widget.redirectTo, (route) => false);
+    } on GoogleAuthServiceException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message), backgroundColor: Colors.red),
+      );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Unable to connect with Google right now."),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      RegistrationAuthFlow.finish();
+      if (mounted) {
+        setState(() => googleLoading = false);
       }
     }
   }
@@ -484,7 +539,7 @@ class _SignUpScreenState extends State<SignUpScreen>
   }
 
   Future<void> _goToSignIn() async {
-    if (_navigatingToSignIn || loading) return;
+    if (_navigatingToSignIn || _isBusy) return;
 
     _navigatingToSignIn = true;
     FocusScope.of(context).unfocus();
@@ -557,7 +612,7 @@ class _SignUpScreenState extends State<SignUpScreen>
     );
 
     return PopScope(
-      canPop: !loading,
+      canPop: !_isBusy,
       child: Scaffold(
         backgroundColor: VideoBackground.fallbackBackgroundColor,
         body: VideoBackground(
@@ -816,7 +871,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                           ),
                                         ),
                                       ),
-                                      onPressed: signUp,
+                                      onPressed: _isBusy ? null : signUp,
                                       child: Text(
                                         "REGISTER",
                                         style: GoogleFonts.poppins(
@@ -829,6 +884,17 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     ),
                                   ),
                                 ),
+                          const SizedBox(height: 14),
+                          FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 300),
+                              child: GoogleSignInButton(
+                                isLoading: googleLoading,
+                                onPressed: _isBusy ? null : _continueWithGoogle,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),

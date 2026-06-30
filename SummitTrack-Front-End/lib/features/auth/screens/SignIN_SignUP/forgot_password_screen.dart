@@ -27,15 +27,37 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     if (!_formKey.currentState!.validate()) return;
 
+    final email = _emailController.text.trim();
+
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Ito ang mismong Firebase function na nagpapadala ng totoong reset code/link sa email
-      await FirebaseAuth.instance.sendPasswordResetEmail(
-        email: _emailController.text.trim(),
-      );
+      // Firebase's signed-out client API still needs this check to avoid
+      // offering password resets for Google-only accounts.
+      final signInMethods = await FirebaseAuth.instance
+          // ignore: deprecated_member_use
+          .fetchSignInMethodsForEmail(email);
+      final isGoogleOnlyAccount =
+          signInMethods.contains('google.com') &&
+          !signInMethods.contains('password');
+
+      if (isGoogleOnlyAccount) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'This email is connected with Google. Please sign in using Continue with Google instead.',
+            ),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
 
       if (!mounted) return;
 
@@ -55,6 +77,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         errorMessage = 'No user found with this email.';
       } else if (e.code == 'invalid-email') {
         errorMessage = 'The email address is badly formatted.';
+      } else if (e.code == 'network-request-failed') {
+        errorMessage = 'Please check your internet connection and try again.';
       }
 
       ScaffoldMessenger.of(context).showSnackBar(

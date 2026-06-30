@@ -9,7 +9,7 @@ import '../../../services/data_service.dart';
 import '../widgets/pre_hike_header_card.dart';
 import '../../hike/screens/weather.dart';
 import '../../navigation/button_functions/navbar_button_function.dart';
-import '../../navigation/widgets/animated_nav_icon.dart';
+import '../../navigation/widgets/main_bottom_navbar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -239,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: _HomeBottomNavigationBar(
+      bottomNavigationBar: MainBottomNavbar(
         currentIndex: selectedIndex,
         tapSequence: _navTapSequence,
         lastTappedIndex: _lastTappedNavIndex,
@@ -889,8 +889,20 @@ class _MountainCardState extends State<_MountainCard> {
 
   Widget _buildMountainImage(double width) {
     final mountain = widget.mountain;
-    final imageAsset = mountain.name == 'Mt. Apo'
+    final imageAsset = mountain.name == 'Mt. Batulao'
+        ? 'assets/images/mt_batulao_home.png'
+        : mountain.name == 'Mt. Apo'
         ? 'assets/images/mt_apo_enhanced.png'
+        : mountain.name == 'Mt. Pulag'
+        ? 'assets/images/mt_pulag_home.jpg'
+        : mountain.name == 'Mt. Mayon'
+        ? 'assets/images/mayon_home.png'
+        : mountain.name == 'Mt. Ulap'
+        ? 'assets/images/mt_ulap.jpg'
+        : mountain.name == 'Mt. Daraitan'
+        ? 'assets/images/mt_daraitan_home.png'
+        : mountain.name == 'Mt. Maculot'
+        ? 'assets/images/mt_maculot_home.png'
         : mountain.imageAsset ?? 'assets/images/apo.jpg';
 
     return ClipRRect(
@@ -1028,128 +1040,6 @@ class _InfoChip extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _HomeBottomNavigationBar extends StatelessWidget {
-  const _HomeBottomNavigationBar({
-    required this.currentIndex,
-    required this.tapSequence,
-    required this.lastTappedIndex,
-    required this.onTap,
-  });
-
-  final int currentIndex;
-  final int tapSequence;
-  final int lastTappedIndex;
-  final ValueChanged<int> onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.appColors;
-
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-        child: Container(
-          decoration: BoxDecoration(
-            color: colors.navBackground,
-            borderRadius: BorderRadius.circular(26),
-            boxShadow: [
-              BoxShadow(
-                color: colors.shadow,
-                blurRadius: 24,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(26),
-            child: BottomNavigationBar(
-              currentIndex: currentIndex,
-              onTap: onTap,
-              type: BottomNavigationBarType.fixed,
-              backgroundColor: colors.navBackground,
-              elevation: 0,
-              selectedItemColor: colors.accent,
-              unselectedItemColor: colors.textSecondary,
-              showSelectedLabels: false,
-              showUnselectedLabels: false,
-              items: [
-                _buildNavItem(
-                  index: profileNavbarIndex,
-                  currentIndex: currentIndex,
-                  tapSequence: tapSequence,
-                  lastTappedIndex: lastTappedIndex,
-                  icon: Icons.person_rounded,
-                  activeColor: colors.accent,
-                  inactiveColor: colors.textSecondary,
-                  liftOnActive: true,
-                ),
-                _buildNavItem(
-                  index: homeNavbarIndex,
-                  currentIndex: currentIndex,
-                  tapSequence: tapSequence,
-                  lastTappedIndex: lastTappedIndex,
-                  icon: Icons.home_rounded,
-                  activeColor: colors.accent,
-                  inactiveColor: colors.textSecondary,
-                ),
-                _buildNavItem(
-                  index: weatherNavbarIndex,
-                  currentIndex: currentIndex,
-                  tapSequence: tapSequence,
-                  lastTappedIndex: lastTappedIndex,
-                  icon: Icons.cloud_rounded,
-                  activeColor: colors.accent,
-                  inactiveColor: colors.textSecondary,
-                ),
-                _buildNavItem(
-                  index: settingsNavbarIndex,
-                  currentIndex: currentIndex,
-                  tapSequence: tapSequence,
-                  lastTappedIndex: lastTappedIndex,
-                  icon: Icons.settings_rounded,
-                  activeColor: colors.accent,
-                  inactiveColor: colors.textSecondary,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  BottomNavigationBarItem _buildNavItem({
-    required int index,
-    required int currentIndex,
-    required int tapSequence,
-    required int lastTappedIndex,
-    required IconData icon,
-    required Color activeColor,
-    required Color inactiveColor,
-    bool liftOnActive = false,
-  }) {
-    final bool isActive = currentIndex == index;
-    final String keyId = isActive && lastTappedIndex == index
-        ? 'nav-$index-$tapSequence'
-        : 'nav-$index';
-
-    return BottomNavigationBarItem(
-      label: '',
-      icon: KeyedSubtree(
-        key: ValueKey<String>(keyId),
-        child: AnimatedNavIcon(
-          icon: icon,
-          isActive: isActive,
-          activeColor: activeColor,
-          inactiveColor: inactiveColor,
-          isLifted: liftOnActive,
-        ),
       ),
     );
   }

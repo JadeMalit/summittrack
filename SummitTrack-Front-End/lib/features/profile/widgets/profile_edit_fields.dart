@@ -42,10 +42,17 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _controller;
 
+  String get _normalizedValue =>
+      normalizeProfileFieldValue(widget.field, _controller.text);
+
+  bool get _isInputValid => widget.field.validate(_controller.text) == null;
+
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.initialValue);
+    _controller = TextEditingController(
+      text: normalizeProfileFieldValue(widget.field, widget.initialValue),
+    );
   }
 
   @override
@@ -55,11 +62,12 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
   }
 
   void _submit() {
-    if (!_formKey.currentState!.validate()) {
+    if (!_isInputValid) {
+      _formKey.currentState!.validate();
       return;
     }
 
-    Navigator.of(context).pop(_controller.text.trim());
+    Navigator.of(context).pop(_normalizedValue);
   }
 
   @override
@@ -112,10 +120,14 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                     textInputAction: TextInputAction.done,
                     maxLines: widget.field.maxLines,
                     minLines: widget.field.maxLines > 1 ? 3 : 1,
-                    inputFormatters: widget.field.inputFormatters,
+                    inputFormatters: profileInputFormattersForField(
+                      widget.field,
+                    ),
                     validator: widget.field.validate,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    onChanged: (_) => setState(() {}),
                     onFieldSubmitted: (_) {
-                      if (widget.field.maxLines == 1) {
+                      if (widget.field.maxLines == 1 && _isInputValid) {
                         _submit();
                       }
                     },
@@ -173,10 +185,16 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _submit,
+                          onPressed: _isInputValid ? _submit : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colors.primary,
                             foregroundColor: Colors.white,
+                            disabledBackgroundColor: colors.primary.withValues(
+                              alpha: 0.45,
+                            ),
+                            disabledForegroundColor: Colors.white.withValues(
+                              alpha: 0.78,
+                            ),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),

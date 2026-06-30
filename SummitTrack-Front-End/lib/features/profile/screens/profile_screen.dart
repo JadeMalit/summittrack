@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,6 +9,7 @@ import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../helpers/profile_constants.dart';
 import '../helpers/profile_models.dart';
+import '../helpers/profile_validators.dart';
 import '../helpers/profile_value_helpers.dart';
 import '../widgets/profile_avatar_section.dart';
 import '../widgets/profile_background.dart';
@@ -100,8 +102,41 @@ class _ProfileScreenState extends State<ProfileScreen>
       return;
     }
 
+    final normalizedValue = normalizeProfileFieldValue(field, value);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(field.storageKey, value);
+    await prefs.setString(field.storageKey, normalizedValue);
+
+    if (field == ProfileEditableField.fullName) {
+      await _syncFullName(normalizedValue);
+    }
+  }
+
+  Future<void> _syncFullName(String fullName) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || fullName.isEmpty) {
+      return;
+    }
+
+    try {
+      await user.updateDisplayName(fullName);
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'name': fullName,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      await user.reload();
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Full name was updated locally, but we could not sync it right now.',
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _showEditSheet(ProfileEditableField field) async {

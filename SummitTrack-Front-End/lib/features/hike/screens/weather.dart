@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../services/weather_service.dart';
 import '../../navigation/button_functions/navbar_button_function.dart';
-import '../../navigation/widgets/animated_nav_icon.dart';
+import '../../navigation/widgets/main_bottom_navbar.dart';
 import '../widgets/weather/weather_forecast_card.dart';
 import '../widgets/weather/weather_header.dart';
 import '../widgets/weather/weather_safety_card.dart';
@@ -19,7 +19,9 @@ class WeatherScreen extends StatefulWidget {
 class _WeatherScreenState extends State<WeatherScreen>
     with SingleTickerProviderStateMixin {
   final WeatherService weatherService = WeatherService();
-  int selectedIndex = 2;
+  int selectedIndex = weatherNavbarIndex;
+  int _navTapSequence = 0;
+  int _lastTappedNavIndex = weatherNavbarIndex;
 
   final List<String> mountains = [
     "Mount Ulap",
@@ -104,6 +106,47 @@ class _WeatherScreenState extends State<WeatherScreen>
         });
       }
     }
+  }
+
+  void updateSelectedIndex(int index, {bool isUserTap = false}) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      selectedIndex = index;
+      _lastTappedNavIndex = index;
+
+      if (isUserTap) {
+        _navTapSequence++;
+      }
+    });
+  }
+
+  Future<void> _handleBottomNavigationTap(int index) async {
+    updateSelectedIndex(index, isUserTap: true);
+
+    if (index == homeNavbarIndex) {
+      Navigator.pop(context);
+      return;
+    }
+
+    await handleNavbarButtonTap(
+      context,
+      index,
+      onHomeSelected: () {
+        Navigator.pop(context);
+      },
+      onWeatherSelected: () {
+        updateSelectedIndex(weatherNavbarIndex);
+      },
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    updateSelectedIndex(weatherNavbarIndex);
   }
 
   String getHikingStatus(int rainChance) {
@@ -362,66 +405,11 @@ class _WeatherScreenState extends State<WeatherScreen>
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: MainBottomNavbar(
         currentIndex: selectedIndex,
-        onTap: (index) {
-          if (index == 1) {
-            Navigator.pop(context);
-          } else {
-            handleNavbarButtonTap(
-              context,
-              index,
-              onHomeSelected: () => Navigator.pop(context),
-              onWeatherSelected: () {
-                if (mounted) setState(() => selectedIndex = 2);
-              },
-            );
-          }
-        },
-        backgroundColor: colors.navBackground,
-        selectedItemColor: colors.accent,
-        unselectedItemColor: colors.textSecondary,
-        type: BottomNavigationBarType.fixed,
-        elevation: 16,
-        items: [
-          BottomNavigationBarItem(
-            icon: AnimatedNavIcon(
-              icon: Icons.person_rounded,
-              isActive: selectedIndex == 0,
-              activeColor: colors.accent,
-              inactiveColor: colors.textSecondary,
-              isLifted: true,
-            ),
-            label: "",
-          ),
-          BottomNavigationBarItem(
-            icon: AnimatedNavIcon(
-              icon: Icons.home_rounded,
-              isActive: selectedIndex == 1,
-              activeColor: colors.accent,
-              inactiveColor: colors.textSecondary,
-            ),
-            label: "",
-          ),
-          BottomNavigationBarItem(
-            icon: AnimatedNavIcon(
-              icon: Icons.cloud_rounded,
-              isActive: selectedIndex == 2,
-              activeColor: colors.accent,
-              inactiveColor: colors.textSecondary,
-            ),
-            label: "",
-          ),
-          BottomNavigationBarItem(
-            icon: AnimatedNavIcon(
-              icon: Icons.settings_rounded,
-              isActive: selectedIndex == 3,
-              activeColor: colors.accent,
-              inactiveColor: colors.textSecondary,
-            ),
-            label: "",
-          ),
-        ],
+        tapSequence: _navTapSequence,
+        lastTappedIndex: _lastTappedNavIndex,
+        onTap: _handleBottomNavigationTap,
       ),
     );
   }
