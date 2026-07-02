@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/routing/app_routes.dart';
 import '../../helpers/gmail_email_validator.dart';
-import '../../services/google_auth_service.dart';
 import '../../widgets/google_sign_in_button.dart';
 import '../../widgets/video_background.dart';
 
@@ -38,7 +37,6 @@ class _SignUpScreenState extends State<SignUpScreen>
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmController = TextEditingController();
-  final GoogleAuthService _googleAuthService = GoogleAuthService();
   final nameFocusNode = FocusNode();
   final emailFocusNode = FocusNode();
   final passwordFocusNode = FocusNode();
@@ -49,8 +47,8 @@ class _SignUpScreenState extends State<SignUpScreen>
   static const _inputIconColor = Color(0xFF4F4F4F);
   static const _inputCursorColor = Color(0xFF4CAF50);
 
-  bool loading = false;
-  bool googleLoading = false;
+  bool _isRegisterLoading = false;
+  bool _isGoogleLoading = false;
   bool hidePass = true;
   bool hideConfirm = true;
   bool _didPrecacheAssets = false;
@@ -63,7 +61,7 @@ class _SignUpScreenState extends State<SignUpScreen>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  bool get _isBusy => loading || googleLoading;
+  bool get _isBusy => _isRegisterLoading || _isGoogleLoading;
 
   @override
   void initState() {
@@ -172,7 +170,7 @@ class _SignUpScreenState extends State<SignUpScreen>
 
     try {
       setState(() {
-        loading = true;
+        _isRegisterLoading = true;
         emailError = null;
         passwordError = null;
         confirmPasswordError = null;
@@ -212,7 +210,7 @@ class _SignUpScreenState extends State<SignUpScreen>
       }
 
       setState(() {
-        loading = false;
+        _isRegisterLoading = false;
         _clearRegisterForm();
       });
 
@@ -249,7 +247,7 @@ class _SignUpScreenState extends State<SignUpScreen>
         return;
       }
 
-      setState(() => loading = false);
+      setState(() => _isRegisterLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message), backgroundColor: Colors.red),
       );
@@ -263,60 +261,14 @@ class _SignUpScreenState extends State<SignUpScreen>
         return;
       }
 
-      setState(() => loading = false);
+      setState(() => _isRegisterLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
     } finally {
       RegistrationAuthFlow.finish();
       if (mounted) {
-        setState(() => loading = false);
-      }
-    }
-  }
-
-  Future<void> _continueWithGoogle() async {
-    if (_isBusy) return;
-
-    FocusScope.of(context).unfocus();
-    ScaffoldMessenger.of(context).clearSnackBars();
-
-    try {
-      setState(() => googleLoading = true);
-      RegistrationAuthFlow.start();
-
-      await _googleAuthService.signInOrRegisterWithGoogle();
-
-      if (!mounted) {
-        return;
-      }
-
-      Navigator.of(
-        context,
-      ).pushNamedAndRemoveUntil(widget.redirectTo, (route) => false);
-    } on GoogleAuthServiceException catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message), backgroundColor: Colors.red),
-      );
-    } catch (_) {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Unable to connect with Google right now."),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      RegistrationAuthFlow.finish();
-      if (mounted) {
-        setState(() => googleLoading = false);
+        setState(() => _isRegisterLoading = false);
       }
     }
   }
@@ -853,7 +805,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                           const SizedBox(height: 25),
 
                           /// SIGN UP BUTTON
-                          loading
+                          _isRegisterLoading
                               ? const CircularProgressIndicator(
                                   color: Colors.white,
                                 )
@@ -889,9 +841,18 @@ class _SignUpScreenState extends State<SignUpScreen>
                             opacity: _fadeAnimation,
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 300),
-                              child: GoogleSignInButton(
-                                isLoading: googleLoading,
-                                onPressed: _isBusy ? null : _continueWithGoogle,
+                              child: GoogleAuthButton(
+                                isBusy: _isBusy,
+                                nextRoute: AppRoutes.home,
+                                onAuthFlowStart: RegistrationAuthFlow.start,
+                                onAuthFlowFinish: RegistrationAuthFlow.finish,
+                                onLoadingChanged: (isLoading) {
+                                  if (_isGoogleLoading == isLoading) {
+                                    return;
+                                  }
+
+                                  setState(() => _isGoogleLoading = isLoading);
+                                },
                               ),
                             ),
                           ),

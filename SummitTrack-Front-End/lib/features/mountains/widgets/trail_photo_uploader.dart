@@ -40,6 +40,8 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
   String? _activeUserId;
   String? _activeTrailId;
   String? _lastSnackBarKey;
+  static const _permissionAccessMessage =
+      'You do not have permission to access these photos.';
 
   int get _photoCount => _savedPhotos.length + _pendingPhotos.length;
 
@@ -607,6 +609,13 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
     bool dedupe = false,
   }) {
     if (!mounted) {
+      return;
+    }
+
+    if (message == _permissionAccessMessage) {
+      debugPrint(
+        '[TrailPhotoUploader._showSnackBar] suppressed permission message',
+      );
       return;
     }
 

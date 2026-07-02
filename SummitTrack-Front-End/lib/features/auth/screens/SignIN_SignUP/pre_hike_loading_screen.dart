@@ -23,11 +23,13 @@ class PreHikeLoadingScreen extends StatefulWidget {
     super.key,
     required this.loginFuture,
     required this.nextRoute,
+    this.resolveNextRoute,
     this.minimumDuration = const Duration(milliseconds: 2600),
   });
 
   final Future<void> loginFuture;
   final String nextRoute;
+  final Future<String> Function()? resolveNextRoute;
   final Duration minimumDuration;
 
   @override
@@ -81,6 +83,9 @@ class _PreHikeLoadingScreenState extends State<PreHikeLoadingScreen>
 
     try {
       await widget.loginFuture;
+      final nextRoute = widget.resolveNextRoute == null
+          ? widget.nextRoute
+          : await widget.resolveNextRoute!();
 
       final remainingDuration = widget.minimumDuration - stopwatch.elapsed;
       if (remainingDuration > Duration.zero) {
@@ -94,7 +99,7 @@ class _PreHikeLoadingScreenState extends State<PreHikeLoadingScreen>
       _finishTransition();
       Navigator.of(
         context,
-      ).pushNamedAndRemoveUntil(widget.nextRoute, (route) => false);
+      ).pushNamedAndRemoveUntil(nextRoute, (route) => false);
     } catch (error) {
       if (!mounted) {
         return;

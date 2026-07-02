@@ -6,6 +6,20 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../models/user_model.dart';
 
+const Set<String> _googleAuthCancellationCodes = {
+  'cancelled',
+  'canceled',
+  'cancelled-popup-request',
+  'popup-closed-by-user',
+  'popup_closed_by_user',
+  'web-context-cancelled',
+  'user-cancelled',
+  'user_cancelled',
+  'sign_in_canceled',
+  'ERROR_ABORTED_BY_USER',
+  'missing-user',
+};
+
 class GoogleAuthResult {
   const GoogleAuthResult({
     required this.user,
@@ -25,6 +39,8 @@ class GoogleAuthServiceException implements Exception {
   final String message;
   final Object? cause;
 
+  bool get isCancellation => _googleAuthCancellationCodes.contains(code);
+
   @override
   String toString() => message;
 }
@@ -42,6 +58,8 @@ class GoogleAuthService {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
   final GoogleSignIn _googleSignIn;
+  static const _cancelledMessage =
+      'Google sign-in was cancelled. Please try again.';
 
   Future<GoogleAuthResult> signInOrRegisterWithGoogle() async {
     UserCredential? credential;
@@ -55,7 +73,7 @@ class GoogleAuthService {
       if (user == null) {
         throw const GoogleAuthServiceException(
           'missing-user',
-          'Google sign-in did not return a user. Please try again.',
+          _cancelledMessage,
         );
       }
 
@@ -133,10 +151,7 @@ class GoogleAuthService {
 
     final googleUser = await _googleSignIn.signIn();
     if (googleUser == null) {
-      throw const GoogleAuthServiceException(
-        'cancelled',
-        'Google sign-in was cancelled.',
-      );
+      throw const GoogleAuthServiceException('cancelled', _cancelledMessage);
     }
 
     await _guardAgainstPasswordOnlyAccount(googleUser.email);
@@ -174,11 +189,16 @@ class GoogleAuthService {
     await _firestore.runTransaction((transaction) async {
       final snapshot = await transaction.get(userRef);
       if (snapshot.exists) {
-        transaction.set(
-          userRef,
-          userModel.toProviderUpdateMap(),
-          SetOptions(merge: true),
-        );
+        final existingData = snapshot.data();
+        final providerUpdate = userModel.toProviderUpdateMap();
+        if (_hasSavedString(existingData, 'name')) {
+          providerUpdate.remove('name');
+        }
+        if (_hasSavedString(existingData, 'photoUrl')) {
+          providerUpdate.remove('photoUrl');
+        }
+
+        transaction.set(userRef, providerUpdate, SetOptions(merge: true));
       } else {
         createdUserRecord = true;
         transaction.set(userRef, userModel.toCreateMap());
@@ -186,6 +206,11 @@ class GoogleAuthService {
     });
 
     return createdUserRecord;
+  }
+
+  bool _hasSavedString(Map<String, dynamic>? data, String field) {
+    final value = data?[field];
+    return value is String && value.trim().isNotEmpty;
   }
 
   bool get _supportsNativeGoogleSignIn {
@@ -214,11 +239,9 @@ class GoogleAuthService {
       case 'popup-closed-by-user':
       case 'web-context-cancelled':
       case 'cancelled-popup-request':
-        return GoogleAuthServiceException(
-          error.code,
-          'Google sign-in was cancelled.',
-          error,
-        );
+      case 'user-cancelled':
+      case 'user_cancelled':
+        return GoogleAuthServiceException(error.code, _cancelledMessage, error);
       case 'popup-blocked':
         return GoogleAuthServiceException(
           error.code,
@@ -243,11 +266,12 @@ class GoogleAuthService {
   GoogleAuthServiceException _mapPlatformError(PlatformException error) {
     switch (error.code) {
       case 'sign_in_canceled':
-        return GoogleAuthServiceException(
-          error.code,
-          'Google sign-in was cancelled.',
-          error,
-        );
+      case 'ERROR_ABORTED_BY_USER':
+      case 'canceled':
+      case 'cancelled':
+      case 'user-cancelled':
+      case 'user_cancelled':
+        return GoogleAuthServiceException(error.code, _cancelledMessage, error);
       case 'network_error':
         return GoogleAuthServiceException(
           error.code,

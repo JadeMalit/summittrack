@@ -76,7 +76,7 @@ class MountainsScreen extends StatelessWidget {
                       contentPadding: const EdgeInsets.all(10),
                       title: Text(mountain.name),
                       subtitle: Text(
-                        'Elevation: ${mountain.elevation}m, Location: ${mountain.location}',
+                        'Elevation: ${mountain.elevationLabel}, Location: ${mountain.location}',
                       ),
                       onTap: () {
                         openMountainScreen(context, mountain);

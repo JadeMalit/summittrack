@@ -8,7 +8,7 @@ class Mountain {
   final List<String> trails;
   final String? imageAsset;
 
-  Mountain({
+  const Mountain({
     required this.name,
     required this.region,
     required this.elevation,
@@ -18,4 +18,11 @@ class Mountain {
     this.trails = const [],
     this.imageAsset,
   });
+
+  bool get hasSpecifiedElevation => elevation > 0;
+
+  String get elevationLabel =>
+      hasSpecifiedElevation ? '$elevation m' : 'Not specified';
+
+  bool get hasTrails => trails.isNotEmpty;
 }

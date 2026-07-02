@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../core/routing/app_routes.dart';
+import '../../../core/state/app_mode_provider.dart';
 import '../../profile/button_functions/profile_button_function.dart';
 import '../../settings/button_functions/settings_button_function.dart';
 
@@ -17,6 +18,12 @@ Future<void> handleNavbarButtonTap(
   VoidCallback? onHomeSelected,
   FutureOr<void> Function()? onWeatherSelected,
 }) async {
+  if (AppModeProvider.instance.isOfflineMode && index != homeNavbarIndex) {
+    onHomeSelected?.call();
+    await showOfflineFeatureUnavailableDialog(context);
+    return;
+  }
+
   switch (index) {
     case profileNavbarIndex:
       await openProfileScreen(context);
@@ -36,6 +43,28 @@ Future<void> handleNavbarButtonTap(
   }
 }
 
+Future<void> showOfflineFeatureUnavailableDialog(BuildContext context) async {
+  if (!context.mounted) {
+    return;
+  }
+
+  await showDialog<void>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Offline Mode'),
+        content: const Text('This feature is only available online.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 int navbarIndexForRouteName(String? routeName) {
   final location = AppRoutes.normalizeLocation(routeName);
   final path = Uri.parse(location).path;
@@ -43,6 +72,8 @@ int navbarIndexForRouteName(String? routeName) {
   switch (path) {
     case AppRoutes.profile:
       return profileNavbarIndex;
+    case AppRoutes.weather:
+      return weatherNavbarIndex;
     case AppRoutes.settings:
       return settingsNavbarIndex;
     case AppRoutes.home:

@@ -3,18 +3,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/trail_data/Sta.Cruz details.dart';
+import '../state/app_mode_provider.dart';
 import 'app_routes.dart';
 import '../../features/auth/screens/SignIN_SignUP/pre_hike_loading_screen.dart';
 import '../../features/auth/screens/SignIN_SignUP/signin.dart';
 import '../../features/auth/screens/SignIN_SignUP/forgot_password_screen.dart';
 import '../../features/auth/screens/SignIN_SignUP/register_screen.dart';
 import '../../features/auth/widgets/video_background.dart';
-import '../../features/dashboard/screens/home.dart';
+import '../../features/navigation/button_functions/navbar_button_function.dart';
+import '../../features/navigation/widgets/main_navigation_shell.dart';
 import '../../features/mountains/screens/kapatagan_trail_details.dart';
-import '../../features/mountains/screens/mountain_detail_screen.dart';
 import '../../features/mountains/screens/mt_apo.dart';
-import '../../features/mountains/screens/mt_pulag.dart'; 
-import '../../features/mountains/screens/mt_mayon.dart'; 
+import '../../features/mountains/screens/mt_pulag.dart';
+import '../../features/mountains/screens/mt_mayon.dart';
 import '../../features/mountains/screens/mt_batulao.dart';
 import '../../features/mountains/screens/mt_ulap.dart'; // <--- IMPORTS PARA KAY ULAP
 import '../../features/mountains/screens/mt_daraitan.dart'; // <--- IDINAGDAG ANG IMPORT NI DARAITAN SCREEN
@@ -23,17 +24,14 @@ import '../../features/mountains/screens/mt_pico_de_loro.dart'; // <--- IDINAGDA
 import '../../features/mountains/screens/mt_pinatubo.dart'; // <--- IDINAGDAG ANG IMPORT NI PINATUBO SCREEN
 import '../../features/mountains/screens/mt_guiting_guiting.dart'; // <--- IDINAGDAG ANG IMPORT NI GUITING-GUITING SCREEN
 import '../../features/mountains/screens/trail_detail_screen.dart';
-import '../../features/profile/screens/profile.dart';
-import '../../features/settings/screens/settings.dart';
-import '../../services/data_service.dart';
-import '../../data/trail_data/ambangeg_trail_data.dart'; 
-import '../../data/trail_data/akiki_trail_data.dart';    
+import '../../data/trail_data/ambangeg_trail_data.dart';
+import '../../data/trail_data/akiki_trail_data.dart';
 import '../../data/trail_data/tawangan_trail_data.dart';
 import '../../data/trail_data/ambaguio_trail_data.dart';
-import '../../data/trail_data/buyohan_trail_data.dart'; 
+import '../../data/trail_data/buyohan_trail_data.dart';
 import '../../data/trail_data/anoling_trail_data.dart';
 import '../../data/trail_data/miisi_trail_data.dart';
-import '../../data/trail_data/old_trail_data.dart'; 
+import '../../data/trail_data/old_trail_data.dart';
 import '../../data/trail_data/new_trail_data.dart';
 import '../../data/trail_data/ambanao_paoay_data.dart'; // <--- BAGONG UTILS NI ULAP
 import '../../data/trail_data/gungal_rock_data.dart';
@@ -69,7 +67,7 @@ class AppRouter {
         _AuthGuard(
           currentLocation: location,
           requireAuth: true,
-          child: const HomeScreen(),
+          child: const MainNavigationShell(initialIndex: homeNavbarIndex),
         ),
       );
     }
@@ -117,7 +115,18 @@ class AppRouter {
         _AuthGuard(
           currentLocation: location,
           requireAuth: true,
-          child: const ProfileScreen(),
+          child: const MainNavigationShell(initialIndex: profileNavbarIndex),
+        ),
+      );
+    }
+
+    if (uri.path == AppRoutes.weather) {
+      return _route(
+        settings,
+        _AuthGuard(
+          currentLocation: location,
+          requireAuth: true,
+          child: const MainNavigationShell(initialIndex: weatherNavbarIndex),
         ),
       );
     }
@@ -128,7 +137,7 @@ class AppRouter {
         _AuthGuard(
           currentLocation: location,
           requireAuth: true,
-          child: const SettingsScreen(),
+          child: const MainNavigationShell(initialIndex: settingsNavbarIndex),
         ),
       );
     }
@@ -236,7 +245,8 @@ class AppRouter {
       }
 
       // IDINAGDAG: Intercept para kay Mt. Guiting-Guiting Screen
-      if (mountainId.toLowerCase() == 'g2' || mountainId.toLowerCase().contains('guiting')) {
+      if (mountainId.toLowerCase() == 'g2' ||
+          mountainId.toLowerCase().contains('guiting')) {
         return _route(
           settings,
           _AuthGuard(
@@ -282,8 +292,7 @@ class AppRouter {
       }
 
       // --- MT. PULAG TRAILS ---
-      if (mountainId == AppRoutes.mtPulagMountainId &&
-          trailId == 'ambangeg') {
+      if (mountainId == AppRoutes.mtPulagMountainId && trailId == 'ambangeg') {
         return _route(
           settings,
           _AuthGuard(
@@ -298,8 +307,7 @@ class AppRouter {
         );
       }
 
-      if (mountainId == AppRoutes.mtPulagMountainId &&
-          trailId == 'akiki') {
+      if (mountainId == AppRoutes.mtPulagMountainId && trailId == 'akiki') {
         return _route(
           settings,
           _AuthGuard(
@@ -314,8 +322,7 @@ class AppRouter {
         );
       }
 
-      if (mountainId == AppRoutes.mtPulagMountainId &&
-          trailId == 'tawangan') {
+      if (mountainId == AppRoutes.mtPulagMountainId && trailId == 'tawangan') {
         return _route(
           settings,
           _AuthGuard(
@@ -330,8 +337,7 @@ class AppRouter {
         );
       }
 
-      if (mountainId == AppRoutes.mtPulagMountainId &&
-          trailId == 'ambaguio') {
+      if (mountainId == AppRoutes.mtPulagMountainId && trailId == 'ambaguio') {
         return _route(
           settings,
           _AuthGuard(
@@ -400,7 +406,7 @@ class AppRouter {
               currentLocation: location,
               requireAuth: true,
               child: TrailDetailScreen(
-                trail: buyohanTrail, 
+                trail: buyohanTrail,
                 parentRoute: AppRoutes.mountain(mountainId),
                 trailPhotoId: 'buyohan_trail',
               ),
@@ -698,7 +704,8 @@ class AppRouter {
       }
 
       // --- MT. GUITING-GUITING TRAILS (IDINAGDAG) ---
-      if (mountainId.toLowerCase() == 'g2' || mountainId.toLowerCase().contains('guiting')) {
+      if (mountainId.toLowerCase() == 'g2' ||
+          mountainId.toLowerCase().contains('guiting')) {
         if (trailId == 'tampayan') {
           return _route(
             settings,
@@ -853,14 +860,19 @@ class _AuthGuardState extends State<_AuthGuard> {
   @override
   void initState() {
     super.initState();
-    _bootstrapAlreadyComplete = _authBootstrapComplete;
-    if (!_bootstrapAlreadyComplete) {
+    final isOfflineMode = AppModeProvider.instance.isOfflineMode;
+    _bootstrapAlreadyComplete = _authBootstrapComplete || isOfflineMode;
+    if (!_bootstrapAlreadyComplete && !isOfflineMode) {
       _bootstrapFuture = _ensureAuthBootstrap();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (AppModeProvider.instance.isOfflineMode) {
+      return _buildWithOfflineMode();
+    }
+
     if (_bootstrapAlreadyComplete) {
       return _buildWithAuthState();
     }
@@ -875,6 +887,16 @@ class _AuthGuardState extends State<_AuthGuard> {
         return _buildWithAuthState();
       },
     );
+  }
+
+  Widget _buildWithOfflineMode() {
+    if (AppModeProvider.instance.isRouteAllowedInOfflineMode(
+      widget.currentLocation,
+    )) {
+      return widget.child;
+    }
+
+    return const _OfflineRestrictedRouteScreen();
   }
 
   Widget _buildWithAuthState() {
@@ -895,15 +917,16 @@ class _AuthGuardState extends State<_AuthGuard> {
         }
 
         if (user != null) {
-          final publicRoutePath = Uri.parse(widget.currentLocation).path;
-          final isLoginRoute = publicRoutePath == AppRoutes.login;
-          if (isLoginRoute && PreHikeLoginTransition.isActive) {
-            return widget.child;
-          }
+          final path = Uri.parse(
+            AppRoutes.normalizeLocation(widget.currentLocation),
+          ).path;
+          final shouldShowSignInAfterOfflineMode =
+              path == AppRoutes.login &&
+              AppModeProvider.instance.shouldShowSignInAfterOfflineMode;
 
-          final isSignupRoute = publicRoutePath == AppRoutes.signup;
-          if (RegistrationAuthFlow.isActive &&
-              (isLoginRoute || isSignupRoute)) {
+          if (PreHikeLoginTransition.isActive ||
+              RegistrationAuthFlow.isActive ||
+              shouldShowSignInAfterOfflineMode) {
             return widget.child;
           }
 
@@ -913,6 +936,65 @@ class _AuthGuardState extends State<_AuthGuard> {
         return widget.child;
       },
     );
+  }
+}
+
+class _OfflineRestrictedRouteScreen extends StatefulWidget {
+  const _OfflineRestrictedRouteScreen();
+
+  @override
+  State<_OfflineRestrictedRouteScreen> createState() =>
+      _OfflineRestrictedRouteScreenState();
+}
+
+class _OfflineRestrictedRouteScreenState
+    extends State<_OfflineRestrictedRouteScreen> {
+  bool _handled = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_handled) {
+      return;
+    }
+
+    _handled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) {
+        return;
+      }
+
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Offline Mode'),
+            content: const Text('This feature is only available online.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const _AuthLoadingScreen();
   }
 }
 

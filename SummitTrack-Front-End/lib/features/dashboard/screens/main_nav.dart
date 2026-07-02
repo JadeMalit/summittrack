@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../../core/theme/app_colors.dart';
+import '../../../shared/widgets/shared_bottom_navbar.dart';
 import '../../hike/screens/hike.dart';
 import '../../hike/screens/reflections.dart';
 import '../../mountains/screens/mountains.dart'; // Mountain screen for the list
 import '../../profile/screens/profile.dart'; // Profile screen
-import '../../navigation/widgets/animated_nav_icon.dart';
 import 'home.dart'; // HomeScreen
 
 class MainNav extends StatefulWidget {
@@ -18,6 +17,8 @@ class MainNav extends StatefulWidget {
 
 class _MainNavState extends State<MainNav> {
   int _currentIndex = 0;
+  int _navTapSequence = 0;
+  int _lastTappedIndex = 0;
 
   // List of screens
   final List<Widget> _screens = [
@@ -36,8 +37,6 @@ class _MainNavState extends State<MainNav> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.appColors;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -45,60 +44,44 @@ class _MainNavState extends State<MainNav> {
         ), // Display user name in the AppBar
       ),
       body: _screens[_currentIndex], // Display the screen based on selected tab
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: SharedBottomNavbar(
         currentIndex: _currentIndex,
+        tapSequence: _navTapSequence,
+        lastTappedIndex: _lastTappedIndex,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
+            _lastTappedIndex = index;
+            _navTapSequence++;
           });
         },
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-            icon: AnimatedNavIcon(
-              icon: Icons.home_rounded,
-              isActive: _currentIndex == 0,
-              activeColor: colors.accent,
-              inactiveColor: colors.textSecondary,
-            ),
-            label: 'Home',
+        showOfflineHomeOnly: false,
+        items: const [
+          SharedBottomNavbarItem(
+            index: 0,
+            icon: Icons.home_rounded,
+            tooltip: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: AnimatedNavIcon(
-              icon: Icons.terrain_rounded,
-              isActive: _currentIndex == 1,
-              activeColor: colors.accent,
-              inactiveColor: colors.textSecondary,
-            ),
-            label: 'Mountains',
+          SharedBottomNavbarItem(
+            index: 1,
+            icon: Icons.terrain_rounded,
+            tooltip: 'Mountains',
           ),
-          BottomNavigationBarItem(
-            icon: AnimatedNavIcon(
-              icon: Icons.person_rounded,
-              isActive: _currentIndex == 2,
-              activeColor: colors.accent,
-              inactiveColor: colors.textSecondary,
-              isLifted: true,
-            ),
-            label: 'Profile',
+          SharedBottomNavbarItem(
+            index: 2,
+            icon: Icons.person_rounded,
+            liftOnActive: true,
+            tooltip: 'Profile',
           ),
-          BottomNavigationBarItem(
-            icon: AnimatedNavIcon(
-              icon: Icons.hiking_rounded,
-              isActive: _currentIndex == 3,
-              activeColor: colors.accent,
-              inactiveColor: colors.textSecondary,
-            ),
-            label: 'Hike',
+          SharedBottomNavbarItem(
+            index: 3,
+            icon: Icons.hiking_rounded,
+            tooltip: 'Hike',
           ),
-          BottomNavigationBarItem(
-            icon: AnimatedNavIcon(
-              icon: Icons.book_rounded,
-              isActive: _currentIndex == 4,
-              activeColor: colors.accent,
-              inactiveColor: colors.textSecondary,
-            ),
-            label: 'Reflections',
+          SharedBottomNavbarItem(
+            index: 4,
+            icon: Icons.book_rounded,
+            tooltip: 'Reflections',
           ),
         ],
       ),

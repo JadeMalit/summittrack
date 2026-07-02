@@ -1,3 +1,4 @@
+import '../data/trail_data/additional_mountains_data.dart';
 import '../data/trail_data/mountain.dart';
 
 class DataService {
@@ -101,6 +102,7 @@ class DataService {
         description:
             'A major challenge for experienced hikers, known for its jagged ridges and demanding trails.',
       ),
+      ...additionalMountainsData,
     ];
   }
 }

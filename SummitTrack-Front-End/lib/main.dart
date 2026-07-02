@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker_android/image_picker_android.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 
+import 'core/connectivity/internet_status_controller.dart';
 import 'core/routing/app_router.dart';
 import 'core/routing/app_route_observer.dart';
 import 'core/theme/app_theme.dart';
@@ -44,10 +45,16 @@ class SummitTrackApp extends StatelessWidget {
           themeAnimationCurve: AppTheme.animationCurve,
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
+          navigatorKey: appNavigatorKey,
           navigatorObservers: [appRouteObserver],
           onGenerateRoute: AppRouter.onGenerateRoute,
           onGenerateInitialRoutes: AppRouter.onGenerateInitialRoutes,
           onUnknownRoute: AppRouter.onUnknownRoute,
+          builder: (context, child) {
+            return InternetStatusController(
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
         );
       },
     );

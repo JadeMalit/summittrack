@@ -3,6 +3,7 @@ class AppRoutes {
   static const login = '/login';
   static const signup = '/signup';
   static const profile = '/profile';
+  static const weather = '/weather';
   static const settings = '/settings';
 
   static const mtApoMountainId = 'mt-apo';
@@ -37,7 +38,7 @@ class AppRoutes {
     final uri = Uri.parse(normalized);
     final path = uri.path;
 
-    if (path == login || path == signup) {
+    if (path == login || path == signup || path == profile) {
       return home;
     }
 

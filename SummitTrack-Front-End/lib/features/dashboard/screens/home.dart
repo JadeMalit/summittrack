@@ -3,13 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../core/routing/mountain_screen_resolver.dart';
+import '../../../core/state/app_mode_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/trail_data/mountain.dart';
+import '../../offline/data/offline_mountains_data.dart';
 import '../../../services/data_service.dart';
 import '../widgets/pre_hike_header_card.dart';
-import '../../hike/screens/weather.dart';
-import '../../navigation/button_functions/navbar_button_function.dart';
-import '../../navigation/widgets/main_bottom_navbar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,14 +21,15 @@ class _HomeScreenState extends State<HomeScreen> {
   late final List<Mountain> _allMountains;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  int selectedIndex = homeNavbarIndex;
-  int _navTapSequence = 0;
-  int _lastTappedNavIndex = homeNavbarIndex;
 
   @override
   void initState() {
     super.initState();
-    _allMountains = List<Mountain>.unmodifiable(DataService.getMountains());
+    _allMountains = List<Mountain>.unmodifiable(
+      AppModeProvider.instance.isOfflineMode
+          ? offlineMountainsData
+          : DataService.getMountains(),
+    );
   }
 
   @override
@@ -38,58 +38,13 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void updateSelectedIndex(int index, {bool isUserTap = false}) {
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      selectedIndex = index;
-      _lastTappedNavIndex = index;
-
-      if (isUserTap) {
-        _navTapSequence++;
-      }
-    });
-  }
-
-  void _syncSelectedIndexWithCurrentRoute() {
-    updateSelectedIndex(
-      navbarIndexForRouteName(ModalRoute.of(context)?.settings.name),
-    );
-  }
-
-  Future<void> _handleBottomNavigationTap(int index) async {
-    updateSelectedIndex(index, isUserTap: true);
-
-    await handleNavbarButtonTap(
-      context,
-      index,
-      onHomeSelected: () {
-        updateSelectedIndex(homeNavbarIndex);
-      },
-      onWeatherSelected: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const WeatherScreen()),
-        );
-      },
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    _syncSelectedIndexWithCurrentRoute();
-  }
-
   List<Mountain> get _filteredMountains {
     if (_searchQuery.isEmpty) {
       return _allMountains;
     }
 
     return _allMountains.where((mountain) {
-      return _normalizeSearchTerm(mountain.name).contains(_searchQuery);
+      return _searchableMountainText(mountain).contains(_searchQuery);
     }).toList();
   }
 
@@ -126,6 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final textPrimary = colors.textPrimary;
     final textSecondary = colors.textSecondary;
     final mountains = _filteredMountains;
+    final isOfflineMode = AppModeProvider.instance.isOfflineMode;
     final hasActiveSearch = _searchQuery.isNotEmpty;
     final resultCountLabel = mountains.length == 1
         ? '1 mountain'
@@ -155,18 +111,31 @@ class _HomeScreenState extends State<HomeScreen> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
               SliverToBoxAdapter(child: PreHikeHeaderCard()),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                  child: _StatsSection(
-                    darkGreen: darkGreen,
-                    mediumGreen: mediumGreen,
-                    lightGreen: lightGreen,
-                    textPrimary: textPrimary,
-                    textSecondary: textSecondary,
+              if (isOfflineMode)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                    child: _OfflineHomeNotice(
+                      mediumGreen: mediumGreen,
+                      lightGreen: lightGreen,
+                      textPrimary: textPrimary,
+                      textSecondary: textSecondary,
+                    ),
+                  ),
+                )
+              else
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                    child: _StatsSection(
+                      darkGreen: darkGreen,
+                      mediumGreen: mediumGreen,
+                      lightGreen: lightGreen,
+                      textPrimary: textPrimary,
+                      textSecondary: textSecondary,
+                    ),
                   ),
                 ),
-              ),
               const SliverToBoxAdapter(child: SizedBox(height: 18)),
               SliverToBoxAdapter(
                 child: Padding(
@@ -239,12 +208,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: MainBottomNavbar(
-        currentIndex: selectedIndex,
-        tapSequence: _navTapSequence,
-        lastTappedIndex: _lastTappedNavIndex,
-        onTap: _handleBottomNavigationTap,
-      ),
     );
   }
 }
@@ -255,6 +218,89 @@ String _normalizeSearchTerm(String value) {
       .toLowerCase()
       .replaceAll(RegExp(r'[^a-z0-9\s]'), ' ')
       .replaceAll(RegExp(r'\s+'), ' ');
+}
+
+String _searchableMountainText(Mountain mountain) {
+  final normalizedName = _normalizeSearchTerm(mountain.name);
+  final mountAlias = normalizedName.replaceFirst(RegExp(r'^mt\b'), 'mount');
+
+  return '$normalizedName $mountAlias';
+}
+
+class _OfflineHomeNotice extends StatelessWidget {
+  const _OfflineHomeNotice({
+    required this.mediumGreen,
+    required this.lightGreen,
+    required this.textPrimary,
+    required this.textSecondary,
+  });
+
+  final Color mediumGreen;
+  final Color lightGreen;
+  final Color textPrimary;
+  final Color textSecondary;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: colors.border),
+        boxShadow: [
+          BoxShadow(
+            color: colors.shadow,
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: lightGreen,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(Icons.offline_bolt_rounded, color: mediumGreen),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Offline Mode',
+                  style: TextStyle(
+                    color: textPrimary,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  'Limited access only. You can view mountain information from the Home screen.',
+                  style: TextStyle(
+                    color: textSecondary,
+                    fontSize: 13.5,
+                    height: 1.4,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _StatsSection extends StatelessWidget {
@@ -889,30 +935,42 @@ class _MountainCardState extends State<_MountainCard> {
 
   Widget _buildMountainImage(double width) {
     final mountain = widget.mountain;
-    final imageAsset = mountain.name == 'Mt. Batulao'
-        ? 'assets/images/mt_batulao_home.png'
-        : mountain.name == 'Mt. Apo'
-        ? 'assets/images/mt_apo_enhanced.png'
-        : mountain.name == 'Mt. Pulag'
-        ? 'assets/images/mt_pulag_home.jpg'
-        : mountain.name == 'Mt. Mayon'
-        ? 'assets/images/mayon_home.png'
-        : mountain.name == 'Mt. Ulap'
-        ? 'assets/images/mt_ulap.jpg'
-        : mountain.name == 'Mt. Daraitan'
-        ? 'assets/images/mt_daraitan_home.png'
-        : mountain.name == 'Mt. Maculot'
-        ? 'assets/images/mt_maculot_home.png'
-        : mountain.imageAsset ?? 'assets/images/apo.jpg';
+    final imageAsset = _homeImageAssetFor(mountain);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: SizedBox(
         width: width,
         height: 128,
-        child: Image.asset(imageAsset, fit: BoxFit.cover),
+        child: imageAsset == null
+            ? _MountainImagePlaceholder(
+                backgroundColor: widget.lightGreen,
+                foregroundColor: widget.mediumGreen,
+              )
+            : Image.asset(imageAsset, fit: BoxFit.cover),
       ),
     );
+  }
+
+  String? _homeImageAssetFor(Mountain mountain) {
+    switch (mountain.name) {
+      case 'Mt. Batulao':
+        return 'assets/images/mt_batulao_home.png';
+      case 'Mt. Apo':
+        return 'assets/images/mt_apo_enhanced.png';
+      case 'Mt. Pulag':
+        return 'assets/images/mt_pulag_home.jpg';
+      case 'Mt. Mayon':
+        return 'assets/images/mayon_home.png';
+      case 'Mt. Ulap':
+        return 'assets/images/mt_ulap.jpg';
+      case 'Mt. Daraitan':
+        return 'assets/images/mt_daraitan_home.png';
+      case 'Mt. Maculot':
+        return 'assets/images/mt_maculot_home.png';
+      default:
+        return mountain.imageAsset;
+    }
   }
 
   Widget _buildMountainDetails() {
@@ -934,7 +992,7 @@ class _MountainCardState extends State<_MountainCard> {
             ),
             _InfoChip(
               icon: Icons.vertical_align_top_rounded,
-              label: '${mountain.elevation} m',
+              label: mountain.elevationLabel,
               backgroundColor: widget.lightGreen,
               foregroundColor: widget.mediumGreen,
             ),
@@ -1001,6 +1059,26 @@ class _MountainCardState extends State<_MountainCard> {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _MountainImagePlaceholder extends StatelessWidget {
+  const _MountainImagePlaceholder({
+    required this.backgroundColor,
+    required this.foregroundColor,
+  });
+
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: backgroundColor,
+      child: Center(
+        child: Icon(Icons.terrain_rounded, color: foregroundColor, size: 42),
+      ),
     );
   }
 }

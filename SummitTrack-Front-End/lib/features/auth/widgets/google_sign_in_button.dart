@@ -1,7 +1,206 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '../services/google_auth_service.dart';
+import '../screens/SignIN_SignUP/pre_hike_loading_screen.dart';
+
+class GoogleAuthButton extends StatefulWidget {
+  const GoogleAuthButton({
+    super.key,
+    required this.nextRoute,
+    this.isBusy = false,
+    this.text = 'Continue with Google',
+    this.minimumDuration = const Duration(seconds: 2),
+    this.showLoadingScreenDuringAuth = false,
+    this.onLoadingChanged,
+    this.onAuthFlowStart,
+    this.onAuthFlowFinish,
+  });
+
+  final String nextRoute;
+  final bool isBusy;
+  final String text;
+  final Duration minimumDuration;
+  final bool showLoadingScreenDuringAuth;
+  final ValueChanged<bool>? onLoadingChanged;
+  final VoidCallback? onAuthFlowStart;
+  final VoidCallback? onAuthFlowFinish;
+
+  @override
+  State<GoogleAuthButton> createState() => _GoogleAuthButtonState();
+}
+
+class _GoogleAuthButtonState extends State<GoogleAuthButton> {
+  static const _googleSignInCancelledMessage =
+      'Google sign-in was cancelled. Please try again.';
+
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
+  bool _isLoading = false;
+
+  bool get _isButtonBusy => widget.isBusy || _isLoading;
+
+  Future<void> _continueWithGoogle() async {
+    if (_isButtonBusy) return;
+
+    FocusScope.of(context).unfocus();
+    ScaffoldMessenger.of(context).clearSnackBars();
+    _setLoading(true);
+    widget.onAuthFlowStart?.call();
+
+    try {
+      await _signInOrRegisterWithGoogle();
+
+      if (!mounted || FirebaseAuth.instance.currentUser == null) {
+        return;
+      }
+
+      if (widget.showLoadingScreenDuringAuth) {
+        await _showLoadingScreenForGoogleAuth();
+        return;
+      }
+
+      await Navigator.of(context).push<Object?>(
+        MaterialPageRoute(
+          builder: (_) => PreHikeLoadingScreen(
+            loginFuture: Future<void>.value(),
+            nextRoute: widget.nextRoute,
+            minimumDuration: widget.minimumDuration,
+          ),
+        ),
+      );
+    } on GoogleAuthServiceException catch (error) {
+      if (error.isCancellation) {
+        _showGoogleAuthError(error);
+        return;
+      }
+
+      _showGoogleAuthError(error);
+    } on FirebaseAuthException catch (error) {
+      if (_isFirebaseAuthCancellation(error)) {
+        _showGoogleAuthError(error);
+        return;
+      }
+
+      _showGoogleAuthError(error);
+    } catch (error) {
+      _showGoogleAuthError(error);
+    } finally {
+      widget.onAuthFlowFinish?.call();
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _showLoadingScreenForGoogleAuth() async {
+    if (!mounted || FirebaseAuth.instance.currentUser == null) {
+      return;
+    }
+
+    final authError = await Navigator.of(context).push<Object?>(
+      MaterialPageRoute(
+        builder: (_) => PreHikeLoadingScreen(
+          loginFuture: Future<void>.value(),
+          nextRoute: widget.nextRoute,
+          minimumDuration: widget.minimumDuration,
+        ),
+      ),
+    );
+
+    if (authError != null && !_isGoogleAuthCancellation(authError)) {
+      _showGoogleAuthError(authError);
+    }
+  }
+
+  Future<void> _signInOrRegisterWithGoogle() {
+    return _googleAuthService.signInOrRegisterWithGoogle().then<void>((_) {});
+  }
+
+  void _showGoogleAuthError(Object error) {
+    if (error is GoogleAuthServiceException) {
+      _showError(error.message);
+      return;
+    }
+
+    if (error is FirebaseAuthException) {
+      _showError(_googleAuthMessageForFirebaseError(error));
+      return;
+    }
+
+    _showError('Unable to connect with Google right now.');
+  }
+
+  String _googleAuthMessageForFirebaseError(FirebaseAuthException error) {
+    switch (error.code) {
+      case 'popup-closed-by-user':
+      case 'web-context-cancelled':
+      case 'cancelled-popup-request':
+      case 'user-cancelled':
+      case 'user_cancelled':
+        return _googleSignInCancelledMessage;
+      case 'network-request-failed':
+        return 'No internet connection. Please check your network and try again.';
+      case 'popup-blocked':
+        return 'Your browser blocked the Google sign-in popup. Please allow popups and try again.';
+      default:
+        return 'Unable to connect with Google right now. Please try again.';
+    }
+  }
+
+  bool _isGoogleAuthCancellation(Object error) {
+    if (error is GoogleAuthServiceException) {
+      return error.isCancellation;
+    }
+
+    if (error is FirebaseAuthException) {
+      return _isFirebaseAuthCancellation(error);
+    }
+
+    return false;
+  }
+
+  bool _isFirebaseAuthCancellation(FirebaseAuthException error) {
+    switch (error.code) {
+      case 'popup-closed-by-user':
+      case 'web-context-cancelled':
+      case 'cancelled-popup-request':
+      case 'user-cancelled':
+      case 'user_cancelled':
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  void _setLoading(bool isLoading) {
+    if (!mounted || _isLoading == isLoading) {
+      return;
+    }
+
+    setState(() => _isLoading = isLoading);
+    widget.onLoadingChanged?.call(isLoading);
+  }
+
+  void _showError(String message) {
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GoogleSignInButton(
+      text: widget.text,
+      isLoading: _isLoading,
+      onPressed: _isButtonBusy ? null : _continueWithGoogle,
+    );
+  }
+}
 
 class GoogleSignInButton extends StatelessWidget {
   const GoogleSignInButton({

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/state/app_mode_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/trail_data/trail_data.dart';
 import '../../hike/screens/lets_hike_calendar_weather_modal.dart';
@@ -26,6 +27,7 @@ class TrailDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.appColors;
     final bottomInset = MediaQuery.of(context).padding.bottom;
+    final isOfflineMode = AppModeProvider.instance.isOfflineMode;
 
     return Scaffold(
       backgroundColor: context.isDarkMode
@@ -98,18 +100,64 @@ class TrailDetailScreen extends StatelessWidget {
                       const SizedBox(height: 10),
                       const _TrailMapCard(),
                     ],
-                    const SizedBox(height: 18),
-                    const _SectionHeading(title: 'Add Your Photo'),
-                    const SizedBox(height: 10),
-                    TrailPhotoUploader(trailId: trailPhotoId),
-                    const SizedBox(height: 22),
-                    _LetsHikeButton(trailName: trail.name),
+                    if (isOfflineMode) ...[
+                      const SizedBox(height: 18),
+                      const _SectionHeading(title: 'Offline Access'),
+                      const SizedBox(height: 10),
+                      const _OfflineTrailAccessCard(),
+                    ] else ...[
+                      const SizedBox(height: 18),
+                      const _SectionHeading(title: 'Add Your Photo'),
+                      const SizedBox(height: 10),
+                      TrailPhotoUploader(trailId: trailPhotoId),
+                      const SizedBox(height: 22),
+                      _LetsHikeButton(trailName: trail.name),
+                    ],
                   ],
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _OfflineTrailAccessCard extends StatelessWidget {
+  const _OfflineTrailAccessCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.isDarkMode ? colors.surface : const Color(0xFFF5F1E8),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: context.isDarkMode ? colors.border : const Color(0xFFC9C1B1),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.offline_bolt_rounded, color: colors.accent, size: 26),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Photo uploads and hike planning are available when you are online.',
+              style: GoogleFonts.poppins(
+                color: colors.textSecondary,
+                fontSize: 13.5,
+                height: 1.45,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
