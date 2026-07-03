@@ -16,8 +16,6 @@ class MainNav extends StatefulWidget {
 
 class _MainNavState extends State<MainNav> {
   int _currentIndex = 0;
-  int _navTapSequence = 0;
-  int _lastTappedIndex = 0;
 
   // List of screens
   final List<Widget> _screens = [
@@ -46,13 +44,9 @@ class _MainNavState extends State<MainNav> {
       body: _screens[_currentIndex], // Display the screen based on selected tab
       bottomNavigationBar: SharedBottomNavbar(
         currentIndex: _currentIndex,
-        tapSequence: _navTapSequence,
-        lastTappedIndex: _lastTappedIndex,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
-            _lastTappedIndex = index;
-            _navTapSequence++;
           });
         },
         showOfflineHomeOnly: false,

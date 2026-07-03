@@ -22,14 +22,11 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
   LocalHistoryEntry? _tabHistoryEntry;
   bool _isRemovingTabHistory = false;
   late int _currentIndex;
-  late int _lastTappedNavIndex;
-  int _navTapSequence = 0;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = _normalizeIndex(widget.initialIndex);
-    _lastTappedNavIndex = _currentIndex;
     _pages[_currentIndex] = _createPage(_currentIndex);
   }
 
@@ -65,11 +62,6 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
 
     setState(() {
       _currentIndex = nextIndex;
-      _lastTappedNavIndex = nextIndex;
-
-      if (isUserTap) {
-        _navTapSequence++;
-      }
 
       _pages.putIfAbsent(nextIndex, () => _createPage(nextIndex));
     });
@@ -172,8 +164,6 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
       ),
       bottomNavigationBar: SharedBottomNavbar(
         currentIndex: _currentIndex,
-        tapSequence: _navTapSequence,
-        lastTappedIndex: _lastTappedNavIndex,
         onTap: _handleBottomNavigationTap,
       ),
     );

@@ -47,16 +47,12 @@ class SharedBottomNavbar extends StatelessWidget {
   const SharedBottomNavbar({
     super.key,
     required this.currentIndex,
-    required this.tapSequence,
-    required this.lastTappedIndex,
     required this.onTap,
     this.items = defaultSharedBottomNavbarItems,
     this.showOfflineHomeOnly = true,
   });
 
   final int currentIndex;
-  final int tapSequence;
-  final int lastTappedIndex;
   final ValueChanged<int> onTap;
   final List<SharedBottomNavbarItem> items;
   final bool showOfflineHomeOnly;
@@ -112,8 +108,6 @@ class SharedBottomNavbar extends StatelessWidget {
                       _buildNavItem(
                         item: item,
                         currentIndex: resolvedCurrentIndex,
-                        tapSequence: tapSequence,
-                        lastTappedIndex: lastTappedIndex,
                         activeColor: colors.accent,
                         inactiveColor: colors.textSecondary,
                       ),
@@ -130,27 +124,19 @@ class SharedBottomNavbar extends StatelessWidget {
   BottomNavigationBarItem _buildNavItem({
     required SharedBottomNavbarItem item,
     required int currentIndex,
-    required int tapSequence,
-    required int lastTappedIndex,
     required Color activeColor,
     required Color inactiveColor,
   }) {
     final isActive = currentIndex == item.index;
-    final keyId = isActive && lastTappedIndex == item.index
-        ? 'nav-${item.index}-$tapSequence'
-        : 'nav-${item.index}';
 
     return BottomNavigationBarItem(
       label: item.tooltip ?? '',
-      icon: KeyedSubtree(
-        key: ValueKey<String>(keyId),
-        child: AnimatedNavIcon(
-          icon: item.icon,
-          isActive: isActive,
-          activeColor: activeColor,
-          inactiveColor: inactiveColor,
-          isLifted: item.liftOnActive,
-        ),
+      icon: AnimatedNavIcon(
+        icon: item.icon,
+        isActive: isActive,
+        activeColor: activeColor,
+        inactiveColor: inactiveColor,
+        isLifted: item.liftOnActive,
       ),
     );
   }
