@@ -11,7 +11,11 @@ import '../../features/mountains/screens/mt_daraitan.dart';
 import '../../features/mountains/screens/mt_maculot.dart'; 
 import '../../features/mountains/screens/mt_pico_de_loro.dart'; 
 import '../../features/mountains/screens/mt_pinatubo.dart'; 
-import '../../features/mountains/screens/mt_guiting_guiting.dart'; // <--- IDINAGDAG ANG IMPORT NI GUITING-GUITING SCREEN
+import '../../features/mountains/screens/mt_guiting_guiting.dart'; 
+import '../../features/mountains/screens/mt_manabu.dart'; 
+import '../../features/mountains/screens/mt_gulugod_baboy.dart'; 
+import '../../features/mountains/screens/mt_maynoba.dart'; 
+import '../../features/mountains/screens/mt_catuno.dart'; // <--- IDINAGDAG ANG IMPORT NI CATUNO SCREEN
 import 'app_routes.dart';
 
 String? mountainRouteFor(Mountain mountain) {
@@ -34,8 +38,16 @@ String? mountainRouteFor(Mountain mountain) {
       return '/mountain/picodeloro';
     case 'Mt. Pinatubo': 
       return '/mountain/pinatubo';
-    case 'Mt. Guiting-Guiting': // <--- IDINAGDAG: Para sa click action mula sa Home card
+    case 'Mt. Guiting-Guiting': 
       return '/mountain/g2';
+    case 'Mt. Manabu': 
+      return '/mountain/manabu';
+    case 'Mt. Gulugod Baboy': 
+      return '/mountain/gulugodbaboy';
+    case 'Mt. Maynoba': 
+      return '/mountain/maynoba';
+    case 'Mt. Catuno': // <--- IDINAGDAG: Para sa click action mula sa Home card
+      return '/mountain/catuno';
     default:
       return null;
   }
@@ -70,7 +82,19 @@ Widget buildMountainScreen(Mountain mountain) {
     return const MtPinatuboScreen(); 
   }
   if (mountain.name == 'Mt. Guiting-Guiting') {
-    return const MtGuitingGuitingScreen(); // <--- IDINAGDAG: Diretso na sa 3 action buttons natin!
+    return const MtGuitingGuitingScreen(); 
+  }
+  if (mountain.name == 'Mt. Manabu') {
+    return const MtManabuScreen(); 
+  }
+  if (mountain.name == 'Mt. Gulugod Baboy') {
+    return const MtGulugodBaboyScreen(); 
+  }
+  if (mountain.name == 'Mt. Maynoba') {
+    return const MtMaynobaScreen(); 
+  }
+  if (mountain.name == 'Mt. Catuno') {
+    return const MtCatunoScreen(); // <--- IDINAGDAG: Diretso na sa 4 action buttons natin!
   }
 
   return MountainDetailScreen(mountain: mountain);

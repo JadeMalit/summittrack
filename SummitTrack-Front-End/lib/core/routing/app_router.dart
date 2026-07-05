@@ -23,6 +23,9 @@ import '../../features/mountains/screens/mt_maculot.dart'; // <--- IDINAGDAG ANG
 import '../../features/mountains/screens/mt_pico_de_loro.dart'; // <--- IDINAGDAG ANG IMPORT NI PICO DE LORO SCREEN
 import '../../features/mountains/screens/mt_pinatubo.dart'; // <--- IDINAGDAG ANG IMPORT NI PINATUBO SCREEN
 import '../../features/mountains/screens/mt_guiting_guiting.dart'; // <--- IDINAGDAG ANG IMPORT NI GUITING-GUITING SCREEN
+import '../../features/mountains/screens/mt_manabu.dart'; // <--- IDINAGDAG ANG IMPORT NI MANABU SCREEN
+import '../../features/mountains/screens/mt_gulugod_baboy.dart'; // <--- IDINAGDAG ANG IMPORT NI GULUGOD BABOY SCREEN
+import '../../features/mountains/screens/mt_maynoba.dart'; // <--- IDINAGDAG ANG IMPORT NI MAYNOBA SCREEN
 import '../../features/mountains/screens/trail_detail_screen.dart';
 import '../../data/trail_data/ambangeg_trail_data.dart';
 import '../../data/trail_data/akiki_trail_data.dart';
@@ -52,6 +55,22 @@ import '../../data/trail_data/pinatubo_porac_data.dart';
 import '../../data/trail_data/g2_tampayan_data.dart'; // <--- IDINAGDAG ANG UTILS NI MT. GUITING-GUITING
 import '../../data/trail_data/g2_olango_data.dart';
 import '../../data/trail_data/g2_traverse_data.dart';
+import '../../data/trail_data/manabu_main_data.dart'; // <--- IDINAGDAG ANG UTILS NI MT. MANABU
+import '../../data/trail_data/manabu_grotto_data.dart';
+import '../../data/trail_data/manabu_traverse_data.dart';
+import '../../data/trail_data/gulugod_anilao_data.dart'; // <--- IDINAGDAG ANG UTILS NI MT. GULUGOD BABOY
+import '../../data/trail_data/gulugod_laurel_data.dart';
+import '../../data/trail_data/gulugod_san_teodoro_data.dart';
+import '../../data/trail_data/gulugod_campsite_data.dart';
+import '../../data/trail_data/maynoba_circuit_data.dart'; // <--- IDINAGDAG ANG UTILS NI MT. MAYNOBA
+import '../../data/trail_data/maynoba_waterfalls_data.dart';
+import '../../data/trail_data/maynoba_campsite_data.dart';
+import '../../data/trail_data/maynoba_traverse_data.dart';
+import '../../data/trail_data/catuno_summit_data.dart';
+import '../../data/trail_data/catuno_lubog_data.dart';
+import '../../data/trail_data/catuno_explorer_data.dart';
+import '../../data/trail_data/catuno_river_data.dart';
+import '../../features/mountains/screens/mt_catuno.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -244,7 +263,6 @@ class AppRouter {
         );
       }
 
-      // IDINAGDAG: Intercept para kay Mt. Guiting-Guiting Screen
       if (mountainId.toLowerCase() == 'g2' ||
           mountainId.toLowerCase().contains('guiting')) {
         return _route(
@@ -256,6 +274,50 @@ class AppRouter {
           ),
         );
       }
+
+      if (mountainId.toLowerCase().contains('manabu')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtManabuScreen(),
+          ),
+        );
+      }
+
+      if (mountainId.toLowerCase().contains('gulugod') || mountainId.toLowerCase().contains('baboy')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtGulugodBaboyScreen(),
+          ),
+        );
+      }
+
+      if (mountainId.toLowerCase().contains('maynoba')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtMaynobaScreen(),
+          ),
+        );
+      }
+
+      if (mountainId.toLowerCase().contains('catuno') || mountainId.toLowerCase().contains('katingno') || mountainId.toLowerCase().contains('cutuno')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtCatunoScreen(),
+          ),
+        );
+      }
     }
 
     if (segments.length == 4 &&
@@ -263,6 +325,13 @@ class AppRouter {
         segments[2] == 'trail') {
       final mountainId = segments[1];
       final trailId = segments[3];
+
+      if (mountainId.toLowerCase().contains('catuno') || mountainId.toLowerCase().contains('katingno') || mountainId.toLowerCase().contains('cutuno')) {
+        if (trailId == 'summit') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: catunoSummitTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'catuno_summit')));
+        if (trailId == 'lubog') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: catunoLubogTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'catuno_lubog')));
+        if (trailId == 'explorer') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: catunoExplorerTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'catuno_explorer')));
+        if (trailId == 'river') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: catunoRiverTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'catuno_river')));
+      }
 
       if (mountainId == AppRoutes.mtApoMountainId &&
           trailId == AppRoutes.staCruzTrailId) {
@@ -291,7 +360,6 @@ class AppRouter {
         );
       }
 
-      // --- MT. PULAG TRAILS ---
       if (mountainId == AppRoutes.mtPulagMountainId && trailId == 'ambangeg') {
         return _route(
           settings,
@@ -352,7 +420,6 @@ class AppRouter {
         );
       }
 
-      // --- MT. MAYON TRAILS ---
       if (mountainId.toLowerCase().contains('mayon')) {
         if (trailId == 'buyohan') {
           return _route(
@@ -415,7 +482,6 @@ class AppRouter {
         }
       }
 
-      // --- MT. BATULAO TRAILS ---
       if (mountainId.toLowerCase().contains('batulao')) {
         if (trailId == 'old') {
           return _route(
@@ -448,7 +514,6 @@ class AppRouter {
         }
       }
 
-      // --- MT. ULAP TRAILS ---
       if (mountainId.toLowerCase().contains('ulap')) {
         if (trailId == 'ambanao') {
           return _route(
@@ -496,7 +561,6 @@ class AppRouter {
         }
       }
 
-      // --- MT. DARAITAN TRAILS ---
       if (mountainId.toLowerCase().contains('daraitan')) {
         if (trailId == 'summit') {
           return _route(
@@ -544,7 +608,6 @@ class AppRouter {
         }
       }
 
-      // --- MT. MACULOT TRAILS ---
       if (mountainId.toLowerCase().contains('maculot')) {
         if (trailId == 'rockies') {
           return _route(
@@ -607,7 +670,6 @@ class AppRouter {
         }
       }
 
-      // --- MT. PICO DE LORO TRAILS ---
       if (mountainId.toLowerCase().contains('picodeloro')) {
         if (trailId == 'main') {
           return _route(
@@ -655,7 +717,6 @@ class AppRouter {
         }
       }
 
-      // --- MT. PINATUBO TRAILS ---
       if (mountainId.toLowerCase().contains('pinatubo')) {
         if (trailId == 'capas') {
           return _route(
@@ -703,7 +764,6 @@ class AppRouter {
         }
       }
 
-      // --- MT. GUITING-GUITING TRAILS (IDINAGDAG) ---
       if (mountainId.toLowerCase() == 'g2' ||
           mountainId.toLowerCase().contains('guiting')) {
         if (trailId == 'tampayan') {
@@ -746,6 +806,177 @@ class AppRouter {
                 trail: g2TraverseTrail,
                 parentRoute: AppRoutes.mountain(mountainId),
                 trailPhotoId: 'g2_traverse',
+              ),
+            ),
+          );
+        }
+      }
+
+      if (mountainId.toLowerCase().contains('manabu')) {
+        if (trailId == 'main') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: manabuMainTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'manabu_main',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'grotto') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: manabuGrottoTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'manabu_grotto',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'traverse') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: manabuTraverseTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'manabu_traverse',
+              ),
+            ),
+          );
+        }
+      }
+
+      if (mountainId.toLowerCase().contains('gulugod') || mountainId.toLowerCase().contains('baboy')) {
+        if (trailId == 'anilao') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: gulugodAnilaoTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'gulugod_anilao',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'laurel') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: gulugodLaurelTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'gulugod_laurel',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'santeodoro') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: gulugodSanTeodoroTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'gulugod_santeodoro',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'campsite') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: gulugodCampsiteTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'gulugod_campsite',
+              ),
+            ),
+          );
+        }
+      }
+
+      if (mountainId.toLowerCase().contains('maynoba')) {
+        if (trailId == 'circuit') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: maynobaCircuitTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'maynoba_circuit',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'waterfalls') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: maynobaWaterfallsTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'maynoba_waterfalls',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'campsite') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: maynobaCampsiteTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'maynoba_campsite',
+              ),
+            ),
+          );
+        }
+
+        if (trailId == 'traverse') {
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: maynobaTraverseTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'maynoba_traverse',
               ),
             ),
           );
