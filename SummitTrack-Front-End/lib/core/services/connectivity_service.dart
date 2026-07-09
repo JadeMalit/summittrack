@@ -1,17 +1,51 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import 'native_dns_lookup.dart'
+    if (dart.library.io) 'native_dns_lookup_io.dart'
+    as native_dns;
+
 enum InternetConnectionStatus { unknown, checking, online, offline }
 
+typedef ConnectivityResultsReader =
+    Future<List<ConnectivityResult>?> Function();
+typedef NativeDnsLookup = Future<bool?> Function(String host, Duration timeout);
+typedef HttpsGet = Future<http.Response> Function(Uri uri);
+
 class ConnectivityService {
-  ConnectivityService._();
+  ConnectivityService._({
+    ConnectivityResultsReader? connectivityResultsReader,
+    NativeDnsLookup? nativeDnsLookup,
+    bool? nativeDnsLookupSupported,
+    HttpsGet? httpsGet,
+  }) : _connectivityResultsReader = connectivityResultsReader,
+       _nativeDnsLookup = nativeDnsLookup ?? native_dns.canResolveHost,
+       _nativeDnsLookupSupported =
+           nativeDnsLookupSupported ?? native_dns.isSupported,
+       _httpsGet = httpsGet ?? http.get;
+
+  @visibleForTesting
+  ConnectivityService.testing({
+    ConnectivityResultsReader? connectivityResultsReader,
+    NativeDnsLookup? nativeDnsLookup,
+    bool? nativeDnsLookupSupported,
+    HttpsGet? httpsGet,
+  }) : this._(
+         connectivityResultsReader: connectivityResultsReader,
+         nativeDnsLookup: nativeDnsLookup,
+         nativeDnsLookupSupported: nativeDnsLookupSupported,
+         httpsGet: httpsGet,
+       );
 
   static final ConnectivityService instance = ConnectivityService._();
   final Connectivity _connectivity = Connectivity();
+  final ConnectivityResultsReader? _connectivityResultsReader;
+  final NativeDnsLookup _nativeDnsLookup;
+  final bool _nativeDnsLookupSupported;
+  final HttpsGet _httpsGet;
 
   static const List<String> _lookupHosts = [
     'google.com',
@@ -43,6 +77,10 @@ class ConnectivityService {
     final maxAttempts = attempts < 1 ? 1 : attempts;
 
     for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      if (attempt == 0) {
+        _log('platform: ${kIsWeb ? 'web' : 'native'}');
+      }
+
       final connectivityResults = await _safeConnectivityResults();
       final hasNetworkTransport = _hasNetworkTransport(connectivityResults);
       final formattedConnectivity = _formatConnectivityResults(
@@ -56,6 +94,7 @@ class ConnectivityService {
       );
       _log('connectivity result: $formattedConnectivity');
       _log('hasNetworkTransport: $hasNetworkTransport');
+      _log('network transport available: $hasNetworkTransport');
 
       final hasAccess = hasNetworkTransport
           ? await _hasInternetAccess()
@@ -68,6 +107,8 @@ class ConnectivityService {
 
       if (hasAccess) {
         _log('offline confirmed false');
+        _log('final state: ONLINE');
+        _log('no internet modal: false');
         return InternetConnectionStatus.online;
       }
 
@@ -77,6 +118,7 @@ class ConnectivityService {
     }
 
     _log('offline confirmed true');
+    _log('final state: OFFLINE');
     return InternetConnectionStatus.offline;
   }
 
@@ -87,7 +129,9 @@ class ConnectivityService {
 
   Future<List<ConnectivityResult>?> _safeConnectivityResults() async {
     try {
-      return await _connectivity.checkConnectivity().timeout(_timeout);
+      final readConnectivity =
+          _connectivityResultsReader ?? _connectivity.checkConnectivity;
+      return await readConnectivity().timeout(_timeout);
     } on TimeoutException catch (error) {
       _log(
         'connectivity result unavailable with exact exception: '
@@ -114,15 +158,26 @@ class ConnectivityService {
   Future<bool> _hasInternetAccess() async {
     final hasDnsAccess = await _hasDnsAccess();
     if (hasDnsAccess) {
+      _log('internet confirmed: true');
       return true;
     }
 
-    return _hasHttpsFallbackAccess();
+    final hasHttpsFallbackAccess = await _hasHttpsFallbackAccess();
+    _log('internet confirmed: $hasHttpsFallbackAccess');
+    return hasHttpsFallbackAccess;
   }
 
   Future<bool> _hasDnsAccess() async {
+    if (!_nativeDnsLookupSupported) {
+      final reason = kIsWeb
+          ? 'unsupported on web'
+          : 'unsupported on this platform';
+      _log('native DNS lookup skipped: $reason');
+      return false;
+    }
+
     final results = await Future.wait(_lookupHosts.map(_canResolveHost));
-    return results.any((hasAccess) => hasAccess);
+    return results.any((hasAccess) => hasAccess == true);
   }
 
   Future<bool> _hasHttpsFallbackAccess() async {
@@ -132,14 +187,16 @@ class ConnectivityService {
     return results.any((hasAccess) => hasAccess);
   }
 
-  Future<bool> _canResolveHost(String host) async {
+  Future<bool?> _canResolveHost(String host) async {
     _log('DNS lookup started for $host');
 
     try {
-      final addresses = await InternetAddress.lookup(host).timeout(_timeout);
-      final hasAddress = addresses.any((address) {
-        return address.rawAddress.isNotEmpty;
-      });
+      final hasAddress = await _nativeDnsLookup(host, _timeout);
+
+      if (hasAddress == null) {
+        _log('DNS lookup skipped for $host: unsupported on this platform');
+        return null;
+      }
 
       if (hasAddress) {
         _log('DNS lookup success for $host');
@@ -157,6 +214,12 @@ class ConnectivityService {
         '${error.runtimeType}: $error',
       );
       return false;
+    } on UnsupportedError catch (error) {
+      _log(
+        'DNS lookup skipped for $host with exact exception: '
+        '${error.runtimeType}: $error',
+      );
+      return null;
     } catch (error) {
       _log(
         'DNS lookup failed for $host with exact exception: '
@@ -170,7 +233,7 @@ class ConnectivityService {
     _log('HTTPS fallback started for $url');
 
     try {
-      final response = await http.get(Uri.parse(url)).timeout(_timeout);
+      final response = await _httpsGet(Uri.parse(url)).timeout(_timeout);
       final isReachable =
           response.statusCode >= 200 && response.statusCode < 500;
 

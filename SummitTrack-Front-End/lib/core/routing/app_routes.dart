@@ -5,6 +5,8 @@ class AppRoutes {
   static const profile = '/profile';
   static const weather = '/weather';
   static const settings = '/settings';
+  static const hikeNavigation = '/navigation/hike';
+  static const graphHopperConnectionTest = '/debug/graphhopper';
 
   static const mtApoMountainId = 'mt-apo';
   static const mtPulagMountainId = 'mt-pulag';

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../widgets/animated_mt_apo_banner.dart'; 
 import '../widgets/custom_back_button.dart';
@@ -12,7 +11,6 @@ class MtUlapScreen extends StatelessWidget {
   static const _backgroundColor = Color(0xFFE3DDCF);
   static const _cardColor = Color(0xFFF4EFE5);
   static const _buttonColor = Color(0xFFB98914); 
-  static const _buttonShadow = Color(0xFF6A4A09);
   static const _headerImage = 'assets/images/sta_cruz_sibulan_trail.png'; 
 
   @override

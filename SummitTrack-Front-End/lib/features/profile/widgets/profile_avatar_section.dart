@@ -20,15 +20,6 @@ class ProfileAvatarSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    final hasLocalPhoto = avatarBytes != null && avatarBytes!.isNotEmpty;
-    final hasNetworkPhoto = photoUrl != null && photoUrl!.trim().isNotEmpty;
-
-    ImageProvider<Object>? imageProvider;
-    if (hasLocalPhoto) {
-      imageProvider = MemoryImage(avatarBytes!);
-    } else if (hasNetworkPhoto) {
-      imageProvider = NetworkImage(photoUrl!);
-    }
 
     return Stack(
       clipBehavior: Clip.none,
@@ -60,18 +51,10 @@ class ProfileAvatarSection extends StatelessWidget {
             child: ClipOval(
               child: DecoratedBox(
                 decoration: BoxDecoration(color: colors.surfaceMuted),
-                child: imageProvider != null
-                    ? Image(
-                        image: imageProvider,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                      )
-                    : Icon(
-                        Icons.person_outline_rounded,
-                        size: 50,
-                        color: colors.textPrimary,
-                      ),
+                child: _AvatarImage(
+                  photoUrl: photoUrl,
+                  avatarBytes: avatarBytes,
+                ),
               ),
             ),
           ),
@@ -117,5 +100,69 @@ class ProfileAvatarSection extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class _AvatarImage extends StatelessWidget {
+  const _AvatarImage({required this.photoUrl, required this.avatarBytes});
+
+  final String? photoUrl;
+  final Uint8List? avatarBytes;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasLocalPhoto = avatarBytes != null && avatarBytes!.isNotEmpty;
+    if (hasLocalPhoto) {
+      return Image.memory(
+        avatarBytes!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        gaplessPlayback: true,
+        filterQuality: FilterQuality.medium,
+        errorBuilder: (context, error, stackTrace) {
+          return _NetworkAvatarImage(photoUrl: photoUrl);
+        },
+      );
+    }
+
+    return _NetworkAvatarImage(photoUrl: photoUrl);
+  }
+}
+
+class _NetworkAvatarImage extends StatelessWidget {
+  const _NetworkAvatarImage({required this.photoUrl});
+
+  final String? photoUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final normalizedPhotoUrl = photoUrl?.trim() ?? '';
+    if (normalizedPhotoUrl.isEmpty) {
+      return _AvatarPlaceholderIcon(color: context.appColors.textPrimary);
+    }
+
+    return Image.network(
+      normalizedPhotoUrl,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      gaplessPlayback: true,
+      filterQuality: FilterQuality.medium,
+      errorBuilder: (context, error, stackTrace) {
+        return _AvatarPlaceholderIcon(color: context.appColors.textPrimary);
+      },
+    );
+  }
+}
+
+class _AvatarPlaceholderIcon extends StatelessWidget {
+  const _AvatarPlaceholderIcon({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(Icons.person_outline_rounded, size: 50, color: color);
   }
 }

@@ -40,6 +40,7 @@ class _InternetStatusControllerState extends State<InternetStatusController>
 
   InternetConnectionStatus _lastKnownConnectionState =
       InternetConnectionStatus.unknown;
+  _ConnectionCheckTrigger? _pendingConnectionCheckTrigger;
   bool _isInitialConnectionCheckComplete = false;
   bool _isCheckingConnection = false;
   bool _isTransitionModalShowing = false;
@@ -81,6 +82,10 @@ class _InternetStatusControllerState extends State<InternetStatusController>
   }
 
   void _startMonitoringConnection() {
+    if (_connectivitySubscription != null) {
+      return;
+    }
+
     _connectivitySubscription = _connectivityService.onConnectivityChanged
         .listen((_) {
           _scheduleConnectionCheck(_ConnectionCheckTrigger.connectivityChange);
@@ -110,11 +115,17 @@ class _InternetStatusControllerState extends State<InternetStatusController>
   }
 
   Future<void> _checkConnection(_ConnectionCheckTrigger trigger) async {
-    if (!mounted || _isCheckingConnection) {
+    if (!mounted) {
       return;
     }
 
     final checkSerial = ++_connectionCheckSerial;
+
+    if (_isCheckingConnection) {
+      _pendingConnectionCheckTrigger = trigger;
+      return;
+    }
+
     _isCheckingConnection = true;
 
     try {
@@ -143,8 +154,15 @@ class _InternetStatusControllerState extends State<InternetStatusController>
 
       _applyConnectionStatus(status);
     } finally {
-      if (mounted && checkSerial == _connectionCheckSerial) {
+      if (mounted) {
         _isCheckingConnection = false;
+
+        if (checkSerial != _connectionCheckSerial) {
+          final pendingTrigger =
+              _pendingConnectionCheckTrigger ?? _ConnectionCheckTrigger.poll;
+          _pendingConnectionCheckTrigger = null;
+          unawaited(_checkConnection(pendingTrigger));
+        }
       }
     }
   }

@@ -40,6 +40,39 @@ class _ProfileScreenState extends State<ProfileScreen>
   String get _authenticatedEmail =>
       sanitizeValue(FirebaseAuth.instance.currentUser?.email);
 
+  String _scopedStorageKey(String baseKey) {
+    final user = FirebaseAuth.instance.currentUser;
+    final uid = sanitizeValue(user?.uid);
+    if (uid.isNotEmpty) {
+      return '${baseKey}_$uid';
+    }
+
+    final email = sanitizeValue(user?.email).toLowerCase();
+    if (email.isNotEmpty) {
+      return '${baseKey}_$email';
+    }
+
+    return baseKey;
+  }
+
+  String? _readScopedPreference(
+    SharedPreferences prefs,
+    String baseKey, {
+    bool allowLegacyFallback = true,
+  }) {
+    final scopedKey = _scopedStorageKey(baseKey);
+    final scopedValue = prefs.getString(scopedKey);
+    if (scopedValue != null) {
+      return scopedValue;
+    }
+
+    if (!allowLegacyFallback || scopedKey == baseKey) {
+      return null;
+    }
+
+    return prefs.getString(baseKey);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -79,8 +112,23 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   Future<void> _loadStoredProfile() async {
     final prefs = await SharedPreferences.getInstance();
-    final storedAvatar = prefs.getString(ProfileConstants.avatarKey);
+    final hasGooglePhoto = sanitizeValue(
+      FirebaseAuth.instance.currentUser?.photoURL,
+    ).isNotEmpty;
+    final scopedAvatarKey = _scopedStorageKey(ProfileConstants.avatarKey);
+    final storedAvatar = _readScopedPreference(
+      prefs,
+      ProfileConstants.avatarKey,
+      allowLegacyFallback: !hasGooglePhoto,
+    );
+    final decodedAvatar = _decodeAvatar(storedAvatar);
     await prefs.remove(ProfileConstants.emailKey);
+    if (storedAvatar != null && decodedAvatar == null) {
+      await prefs.remove(scopedAvatarKey);
+      if (!hasGooglePhoto && scopedAvatarKey != ProfileConstants.avatarKey) {
+        await prefs.remove(ProfileConstants.avatarKey);
+      }
+    }
 
     if (!mounted) {
       return;
@@ -88,12 +136,17 @@ class _ProfileScreenState extends State<ProfileScreen>
 
     setState(() {
       _fullName =
-          prefs.getString(ProfileConstants.nameKey)?.trim() ?? _fullName;
-      _phone = prefs.getString(ProfileConstants.phoneKey)?.trim() ?? _phone;
+          _readScopedPreference(prefs, ProfileConstants.nameKey)?.trim() ??
+          _fullName;
+      _phone =
+          _readScopedPreference(prefs, ProfileConstants.phoneKey)?.trim() ??
+          _phone;
       _address =
-          prefs.getString(ProfileConstants.addressKey)?.trim() ?? _address;
-      _bio = prefs.getString(ProfileConstants.bioKey)?.trim() ?? _bio;
-      _avatarBytes = _decodeAvatar(storedAvatar);
+          _readScopedPreference(prefs, ProfileConstants.addressKey)?.trim() ??
+          _address;
+      _bio =
+          _readScopedPreference(prefs, ProfileConstants.bioKey)?.trim() ?? _bio;
+      _avatarBytes = decodedAvatar;
     });
   }
 
@@ -104,7 +157,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
     final normalizedValue = normalizeProfileFieldValue(field, value);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(field.storageKey, normalizedValue);
+    await prefs.setString(_scopedStorageKey(field.storageKey), normalizedValue);
 
     if (field == ProfileEditableField.fullName) {
       await _syncFullName(normalizedValue);
@@ -202,7 +255,10 @@ class _ProfileScreenState extends State<ProfileScreen>
       }
 
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(ProfileConstants.avatarKey, base64Encode(bytes));
+      await prefs.setString(
+        _scopedStorageKey(ProfileConstants.avatarKey),
+        base64Encode(bytes),
+      );
 
       if (!mounted) {
         return;
@@ -267,98 +323,111 @@ class _ProfileScreenState extends State<ProfileScreen>
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     final colors = context.appColors;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bottomNavClearance =
+        (bottomPadding > ProfileConstants.floatingNavReservedHeight
+            ? bottomPadding
+            : ProfileConstants.floatingNavReservedHeight) +
+        ProfileConstants.floatingNavTopGap;
 
     return Scaffold(
       backgroundColor: colors.background,
-      body: SafeArea(
-        child: FadeTransition(
-          opacity: _fadeInAnimation,
-          child: SlideTransition(
-            position: _slideAnimation,
-            child: Stack(
-              children: [
-                const Positioned.fill(child: ProfileBackground()),
-                Positioned(
-                  top: ProfileConstants.headerTopPadding,
-                  left: ProfileConstants.headerHorizontalPadding,
-                  right: ProfileConstants.headerHorizontalPadding,
-                  child: ProfileHeader(
-                    onBackTap: () => Navigator.of(context).maybePop(),
-                  ),
-                ),
-                Positioned(
-                  left: ProfileConstants.headerHorizontalPadding,
-                  right: ProfileConstants.headerHorizontalPadding,
-                  top: ProfileConstants.cardTopOffset,
-                  bottom: 0,
-                  child: ProfileInfoCard(
-                    primaryName: profileDisplayValueForField(
-                      field: ProfileEditableField.fullName,
-                      fullName: _fullName,
-                      email: _authenticatedEmail,
-                      phone: _phone,
-                      address: _address,
-                      bio: _bio,
-                      currentUser: FirebaseAuth.instance.currentUser,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: ProfileBackground()),
+          SafeArea(
+            bottom: false,
+            child: FadeTransition(
+              opacity: _fadeInAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: ProfileConstants.headerTopPadding,
+                      left: ProfileConstants.headerHorizontalPadding,
+                      right: ProfileConstants.headerHorizontalPadding,
+                      child: ProfileHeader(
+                        onBackTap: () => Navigator.of(context).maybePop(),
+                      ),
                     ),
-                    details: [
-                      ProfileDetail(
-                        field: ProfileEditableField.fullName,
-                        label: 'Full Name / Username',
-                        value: _displayValueForField(
-                          ProfileEditableField.fullName,
+                    Positioned(
+                      left: ProfileConstants.headerHorizontalPadding,
+                      right: ProfileConstants.headerHorizontalPadding,
+                      top: ProfileConstants.cardTopOffset,
+                      bottom: bottomNavClearance,
+                      child: ProfileInfoCard(
+                        primaryName: profileDisplayValueForField(
+                          field: ProfileEditableField.fullName,
+                          fullName: _fullName,
+                          email: _authenticatedEmail,
+                          phone: _phone,
+                          address: _address,
+                          bio: _bio,
+                          currentUser: FirebaseAuth.instance.currentUser,
                         ),
+                        details: [
+                          ProfileDetail(
+                            field: ProfileEditableField.fullName,
+                            label: 'Full Name / Username',
+                            value: _displayValueForField(
+                              ProfileEditableField.fullName,
+                            ),
+                          ),
+                          ProfileDetail(
+                            field: ProfileEditableField.email,
+                            label: 'Email',
+                            value: _displayValueForField(
+                              ProfileEditableField.email,
+                            ),
+                          ),
+                          ProfileDetail(
+                            field: ProfileEditableField.phone,
+                            label: 'Phone Number',
+                            value: _displayValueForField(
+                              ProfileEditableField.phone,
+                            ),
+                          ),
+                          ProfileDetail(
+                            field: ProfileEditableField.address,
+                            label: 'Address',
+                            value: _displayValueForField(
+                              ProfileEditableField.address,
+                            ),
+                          ),
+                          ProfileDetail(
+                            field: ProfileEditableField.bio,
+                            label: 'Bio',
+                            value: _displayValueForField(
+                              ProfileEditableField.bio,
+                            ),
+                          ),
+                        ],
+                        onDetailTap: _showEditSheet,
+                        onLogout: _handleLogout,
+                        entryAnimation: _introController,
                       ),
-                      ProfileDetail(
-                        field: ProfileEditableField.email,
-                        label: 'Email',
-                        value: _displayValueForField(
-                          ProfileEditableField.email,
-                        ),
-                      ),
-                      ProfileDetail(
-                        field: ProfileEditableField.phone,
-                        label: 'Phone Number',
-                        value: _displayValueForField(
-                          ProfileEditableField.phone,
-                        ),
-                      ),
-                      ProfileDetail(
-                        field: ProfileEditableField.address,
-                        label: 'Address',
-                        value: _displayValueForField(
-                          ProfileEditableField.address,
-                        ),
-                      ),
-                      ProfileDetail(
-                        field: ProfileEditableField.bio,
-                        label: 'Bio',
-                        value: _displayValueForField(ProfileEditableField.bio),
-                      ),
-                    ],
-                    onDetailTap: _showEditSheet,
-                    onLogout: _handleLogout,
-                    entryAnimation: _introController,
-                  ),
-                ),
-                Positioned(
-                  top:
-                      ProfileConstants.cardTopOffset -
-                      ProfileConstants.avatarOverlap,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: ProfileAvatarSection(
-                      photoUrl: user?.photoURL,
-                      avatarBytes: _avatarBytes,
-                      onAddPhoto: _pickProfileImage,
                     ),
-                  ),
+                    Positioned(
+                      top:
+                          ProfileConstants.cardTopOffset -
+                          ProfileConstants.avatarOverlap,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: ProfileAvatarSection(
+                          photoUrl: user?.photoURL,
+                          avatarBytes: _avatarBytes,
+                          onAddPhoto: _pickProfileImage,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

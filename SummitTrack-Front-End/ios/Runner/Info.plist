@@ -47,5 +47,7 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>SummitTrack lets you choose trail photos from your library and save them to your account.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>SummitTrack uses your location while the app is open to show your hiking position and route guidance.</string>
 </dict>
 </plist>

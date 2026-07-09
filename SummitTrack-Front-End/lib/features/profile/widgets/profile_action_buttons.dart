@@ -40,13 +40,6 @@ class ProfileLogoutButton extends StatelessWidget {
               colors: [colors.primary, colors.primaryPressed],
             ),
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: colors.shadow,
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-            ],
           ),
           child: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),

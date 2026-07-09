@@ -73,14 +73,12 @@ class _GoogleAuthButtonState extends State<GoogleAuthButton> {
       );
     } on GoogleAuthServiceException catch (error) {
       if (error.isCancellation) {
-        _showGoogleAuthError(error);
         return;
       }
 
       _showGoogleAuthError(error);
     } on FirebaseAuthException catch (error) {
       if (_isFirebaseAuthCancellation(error)) {
-        _showGoogleAuthError(error);
         return;
       }
 
@@ -143,6 +141,8 @@ class _GoogleAuthButtonState extends State<GoogleAuthButton> {
         return 'No internet connection. Please check your network and try again.';
       case 'popup-blocked':
         return 'Your browser blocked the Google sign-in popup. Please allow popups and try again.';
+      case 'operation-not-allowed':
+        return 'Google sign-in is not enabled yet. Please enable the Google provider in Firebase Authentication.';
       default:
         return 'Unable to connect with Google right now. Please try again.';
     }

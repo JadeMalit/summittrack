@@ -6,6 +6,7 @@ import '../../../features/hike/screens/weather.dart';
 import '../../../features/profile/screens/profile.dart';
 import '../../../features/settings/screens/settings.dart';
 import '../../../shared/widgets/shared_bottom_navbar.dart';
+import '../../../widgets/page_transition_wrapper.dart';
 import '../button_functions/navbar_button_function.dart';
 
 class MainNavigationShell extends StatefulWidget {
@@ -149,19 +150,8 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          for (final entry in _pages.entries)
-            Offstage(
-              offstage: entry.key != _currentIndex,
-              child: TickerMode(
-                enabled: entry.key == _currentIndex,
-                child: entry.value,
-              ),
-            ),
-        ],
-      ),
+      extendBody: true,
+      body: PageTransitionWrapper(currentIndex: _currentIndex, pages: _pages),
       bottomNavigationBar: SharedBottomNavbar(
         currentIndex: _currentIndex,
         onTap: _handleBottomNavigationTap,

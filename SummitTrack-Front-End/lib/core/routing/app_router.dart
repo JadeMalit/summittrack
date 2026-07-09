@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import '../../data/trail_data/Sta.Cruz details.dart';
 import '../state/app_mode_provider.dart';
 import 'app_routes.dart';
@@ -12,6 +11,9 @@ import '../../features/auth/screens/SignIN_SignUP/register_screen.dart';
 import '../../features/auth/widgets/video_background.dart';
 import '../../features/navigation/button_functions/navbar_button_function.dart';
 import '../../features/navigation/widgets/main_navigation_shell.dart';
+import '../../models/hike_navigation_start_request.dart';
+import '../../screens/navigation/graphhopper_connection_test_screen.dart';
+import '../../screens/navigation/hike_navigation_screen.dart';
 import '../../features/mountains/screens/kapatagan_trail_details.dart';
 import '../../features/mountains/screens/mt_apo.dart';
 import '../../features/mountains/screens/mt_pulag.dart';
@@ -159,6 +161,25 @@ class AppRouter {
           child: const MainNavigationShell(initialIndex: settingsNavbarIndex),
         ),
       );
+    }
+
+    if (uri.path == AppRoutes.hikeNavigation) {
+      final startRequest = settings.arguments is HikeNavigationStartRequest
+          ? settings.arguments as HikeNavigationStartRequest
+          : null;
+
+      return _route(
+        settings,
+        _AuthGuard(
+          currentLocation: location,
+          requireAuth: true,
+          child: HikeNavigationScreen(startRequest: startRequest),
+        ),
+      );
+    }
+
+    if (kDebugMode && uri.path == AppRoutes.graphHopperConnectionTest) {
+      return _route(settings, const GraphHopperConnectionTestScreen());
     }
 
     if (segments.length == 2 && segments.first == 'mountain') {
@@ -343,6 +364,7 @@ class AppRouter {
             child: TrailDetailScreen(
               trail: staCruzSibulanTrail,
               parentRoute: AppRoutes.mountain(mountainId),
+              navigationTrailId: AppRoutes.staCruzTrailId,
             ),
           ),
         );

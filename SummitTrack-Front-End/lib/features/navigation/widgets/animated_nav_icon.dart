@@ -19,12 +19,12 @@ class AnimatedNavIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLiftedActive = isLifted && isActive;
-    final iconSize = isActive ? 26.0 : 24.0;
+    final iconSize = isActive ? 24.0 : 22.0;
     final color = isActive ? activeColor : inactiveColor;
     final iconContent = Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isLiftedActive ? 14 : 0,
-        vertical: isLiftedActive ? 10 : 0,
+        horizontal: isLiftedActive ? 10 : 0,
+        vertical: isLiftedActive ? 8 : 0,
       ),
       decoration: isLiftedActive
           ? BoxDecoration(
@@ -44,13 +44,13 @@ class AnimatedNavIcon extends StatelessWidget {
     );
 
     return SizedBox(
-      width: 58,
-      height: 54,
+      width: 48,
+      height: 48,
       child: Center(
         child: Transform.translate(
-          offset: isLiftedActive ? const Offset(0, -7) : Offset.zero,
+          offset: isLiftedActive ? const Offset(0, -3) : Offset.zero,
           child: Transform.scale(
-            scale: isLiftedActive ? 1.12 : 1,
+            scale: isLiftedActive ? 1.06 : 1,
             child: iconContent,
           ),
         ),

@@ -28,6 +28,8 @@ class ProfileConstants {
   static const double topBarHeight = 56;
   static const double cardTopOffset = 78;
   static const double avatarOverlap = 54;
+  static const double floatingNavReservedHeight = 66;
+  static const double floatingNavTopGap = 18;
   static const double detailItemHeight = 44;
   static const double detailItemStart = 0.22;
   static const double detailItemStep = 0.08;

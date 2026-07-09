@@ -2,9 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/state/app_mode_provider.dart';
+import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../data/navigation/navigation_trails.dart';
 import '../../../data/trail_data/trail_data.dart';
+import '../../../models/hike_navigation_metadata.dart';
+import '../../../screens/navigation/hike_navigation_confirmation.dart';
+import '../../../services/tracking/hike_tracking_service.dart';
+import '../../hike/models/scheduled_hike.dart';
 import '../../hike/screens/lets_hike_calendar_weather_modal.dart';
+import '../../hike/services/hike_schedule_store.dart';
+import '../../hike/utils/mountain_schedule_identity.dart';
 import '../widgets/first_aid_emergency_tips.dart';
 import '../widgets/foldable_trail_checklist_card.dart';
 import '../widgets/trail_photo_uploader.dart';
@@ -15,11 +23,13 @@ class TrailDetailScreen extends StatelessWidget {
     required this.trail,
     required this.parentRoute,
     this.trailPhotoId = 'sta_cruz_sibulan',
+    this.navigationTrailId,
   });
 
   final TrailData trail;
   final String parentRoute;
   final String trailPhotoId;
+  final String? navigationTrailId;
 
   static const _backgroundColor = Color(0xFFE3DDCF);
 
@@ -28,6 +38,13 @@ class TrailDetailScreen extends StatelessWidget {
     final colors = context.appColors;
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final isOfflineMode = AppModeProvider.instance.isOfflineMode;
+    final mountainId = MountainScheduleIdentity.idFromRoute(parentRoute);
+    final mountainName = MountainScheduleIdentity.displayNameForMountainId(
+      mountainId,
+    );
+    final navigationMetadata = NavigationTrails.forTrailId(
+      navigationTrailId ?? trailPhotoId,
+    );
 
     return Scaffold(
       backgroundColor: context.isDarkMode
@@ -106,12 +123,23 @@ class TrailDetailScreen extends StatelessWidget {
                       const SizedBox(height: 10),
                       const _OfflineTrailAccessCard(),
                     ] else ...[
+                      if (navigationMetadata?.isNavigationEnabled == true) ...[
+                        const SizedBox(height: 18),
+                        const _SectionHeading(title: 'Navigation'),
+                        const SizedBox(height: 10),
+                        _StartNavigationButton(metadata: navigationMetadata!),
+                      ],
                       const SizedBox(height: 18),
                       const _SectionHeading(title: 'Add Your Photo'),
                       const SizedBox(height: 10),
                       TrailPhotoUploader(trailId: trailPhotoId),
                       const SizedBox(height: 22),
-                      _LetsHikeButton(trailName: trail.name),
+                      _LetsHikeButton(
+                        mountainId: mountainId,
+                        mountainName: mountainName,
+                        trailId: trailPhotoId,
+                        trailName: trail.name,
+                      ),
                     ],
                   ],
                 ),
@@ -122,6 +150,29 @@ class TrailDetailScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> _handleStartNavigation(
+  BuildContext context,
+  HikeNavigationMetadata metadata,
+) async {
+  if (HikeTrackingService.instance.hasActiveSession) {
+    Navigator.of(context).pushNamed(AppRoutes.hikeNavigation);
+    return;
+  }
+
+  final startRequest = await showHikeNavigationConfirmation(
+    context: context,
+    metadata: metadata,
+  );
+
+  if (startRequest == null || !context.mounted) {
+    return;
+  }
+
+  Navigator.of(
+    context,
+  ).pushNamed(AppRoutes.hikeNavigation, arguments: startRequest);
 }
 
 class _OfflineTrailAccessCard extends StatelessWidget {
@@ -509,9 +560,80 @@ class _MapLegendChip extends StatelessWidget {
   }
 }
 
-class _LetsHikeButton extends StatelessWidget {
-  const _LetsHikeButton({required this.trailName});
+class _StartNavigationButton extends StatelessWidget {
+  const _StartNavigationButton({required this.metadata});
 
+  final HikeNavigationMetadata metadata;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+
+    return SizedBox(
+      width: double.infinity,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: context.isDarkMode
+                ? [const Color(0xFF1D4ED8), colors.accent]
+                : const [Color(0xFF1D4ED8), Color(0xFF3FA65B)],
+          ),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: colors.shadow,
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: ElevatedButton(
+          onPressed: () => _handleStartNavigation(context, metadata),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            padding: const EdgeInsets.symmetric(vertical: 18),
+            minimumSize: const Size.fromHeight(64),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.navigation_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Start Navigation',
+                style: GoogleFonts.fredoka(
+                  fontSize: 21,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LetsHikeButton extends StatelessWidget {
+  const _LetsHikeButton({
+    required this.mountainId,
+    required this.mountainName,
+    required this.trailId,
+    required this.trailName,
+  });
+
+  final String mountainId;
+  final String mountainName;
+  final String trailId;
   final String trailName;
 
   @override
@@ -541,24 +663,7 @@ class _LetsHikeButton extends StatelessWidget {
           ],
         ),
         child: ElevatedButton(
-          onPressed: () async {
-            final selectedDate = await showLetsHikeCalendarWeatherModal(
-              context: context,
-              trailName: trailName,
-            );
-
-            if (selectedDate == null || !context.mounted) {
-              return;
-            }
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Hike date confirmed: ${_formatHikeDate(selectedDate)}',
-                ),
-              ),
-            );
-          },
+          onPressed: () => _handleLetsHike(context),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
@@ -582,6 +687,75 @@ class _LetsHikeButton extends StatelessWidget {
     );
   }
 
+  Future<void> _handleLetsHike(BuildContext context) async {
+    final selectedDate = await showLetsHikeCalendarWeatherModal(
+      context: context,
+      trailName: trailName,
+    );
+
+    if (selectedDate == null || !context.mounted) {
+      return;
+    }
+
+    if (_isPastHikeDate(selectedDate)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select today or a future date.')),
+      );
+      return;
+    }
+
+    final scheduledHike = ScheduledHike.create(
+      mountainId: mountainId,
+      mountainName: mountainName,
+      trailId: trailId,
+      trailName: trailName,
+      hikeDate: selectedDate,
+    );
+
+    try {
+      await HikeScheduleStore.instance.saveScheduledHike(scheduledHike);
+    } on ArgumentError catch (_) {
+      if (!context.mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select today or a future date.')),
+      );
+      return;
+    } on HikeScheduleException catch (error) {
+      if (!context.mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+      return;
+    } catch (_) {
+      if (!context.mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to save hike date. Please try again.'),
+        ),
+      );
+      return;
+    }
+
+    if (!context.mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Hike date confirmed: ${_formatHikeDate(selectedDate)}'),
+      ),
+    );
+  }
+
   String _formatHikeDate(DateTime date) {
     const months = [
       'January',
@@ -599,6 +773,16 @@ class _LetsHikeButton extends StatelessWidget {
     ];
 
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  bool _isPastHikeDate(DateTime date) {
+    final today = _dateOnly(DateTime.now());
+    final hikeDate = _dateOnly(date);
+    return hikeDate.isBefore(today);
+  }
+
+  DateTime _dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
   }
 }
 

@@ -17,9 +17,31 @@ service cloud.firestore {
         && request.resource.data.storagePath.matches('^trail_photos/' + uid + '/' + trailId + '/[^/]+$');
     }
 
+    function ownsScheduledHikeData(uid) {
+      return request.resource.data.ownerUid == uid
+        && request.resource.data.userId == uid
+        && request.resource.data.id is string
+        && request.resource.data.mountainId is string
+        && request.resource.data.mountainName is string
+        && request.resource.data.trailId is string
+        && request.resource.data.trailName is string
+        && request.resource.data.hikeDate is timestamp
+        && request.resource.data.hikeDateKey is string
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+    }
+
     match /users/{uid} {
       allow read: if ownsUserDocument(uid);
       allow create, update, delete: if ownsUserDocument(uid);
+
+      match /scheduled_hikes/{hikeId} {
+        allow read: if ownsUserDocument(uid);
+        allow create, update: if ownsUserDocument(uid)
+          && ownsScheduledHikeData(uid)
+          && request.resource.data.id == hikeId;
+        allow delete: if ownsUserDocument(uid);
+      }
 
       match /trail_photos/{trailId}/photos/{photoId} {
         allow read: if ownsUserDocument(uid);

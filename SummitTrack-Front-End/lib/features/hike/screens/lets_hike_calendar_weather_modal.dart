@@ -27,7 +27,8 @@ class LetsHikeCalendarWeatherModal extends StatefulWidget {
 }
 
 class _LetsHikeCalendarWeatherModalState
-    extends State<LetsHikeCalendarWeatherModal> {
+    extends State<LetsHikeCalendarWeatherModal>
+    with WidgetsBindingObserver {
   static const Color _panelColor = Color(0xFF0B120D);
   static const Color _cardColor = Color(0xFF121C14);
   static const Color _accentColor = Color(0xFF3FA65B);
@@ -42,10 +43,24 @@ class _LetsHikeCalendarWeatherModalState
   @override
   void initState() {
     super.initState();
-    final today = _dateOnly(DateTime.now());
+    WidgetsBinding.instance.addObserver(this);
+    final today = _today();
     _selectedDate = today;
     _visibleMonth = DateTime(today.year, today.month);
     _loadCurrentWeather();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _refreshSelectedDateAgainstToday();
+    }
   }
 
   Future<void> _loadCurrentWeather() async {
@@ -78,6 +93,8 @@ class _LetsHikeCalendarWeatherModalState
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final maxDialogHeight = screenSize.height * 0.88;
+    final today = _today();
+    final previewDate = _selectedDateForDisplay(today);
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -110,9 +127,10 @@ class _LetsHikeCalendarWeatherModalState
                   _buildCalendar(),
                   const SizedBox(height: 16),
                   _WeatherPreviewCard(
-                    selectedDate: _selectedDate,
-                    isLoading: _isLoadingWeather && _isToday(_selectedDate),
-                    weather: _weatherForDate(_selectedDate),
+                    selectedDate: previewDate,
+                    isLoading:
+                        _isLoadingWeather && _isSameDate(previewDate, today),
+                    weather: _weatherForDate(previewDate, today: today),
                   ),
                   const SizedBox(height: 18),
                   _buildActions(),
@@ -164,6 +182,9 @@ class _LetsHikeCalendarWeatherModalState
   }
 
   Widget _buildCalendar() {
+    final today = _today();
+    final selectedDate = _selectedDateForDisplay(today);
+
     return Container(
       decoration: BoxDecoration(
         color: _cardColor,
@@ -220,20 +241,18 @@ class _LetsHikeCalendarWeatherModalState
             mainAxisSpacing: 7,
             crossAxisSpacing: 7,
             physics: const NeverScrollableScrollPhysics(),
-            children: _calendarCells()
-                .map(
-                  (date) => _CalendarDateCell(
-                    date: date,
-                    isSelected:
-                        date != null && _isSameDate(date, _selectedDate),
-                    isToday: date != null && _isToday(date),
-                    isPast:
-                        date != null &&
-                        date.isBefore(_dateOnly(DateTime.now())),
-                    onTap: date == null ? null : () => _selectDate(date),
-                  ),
-                )
-                .toList(),
+            children: _calendarCells().map((date) {
+              final isPast = date != null && _isPastDate(date, today);
+
+              return _CalendarDateCell(
+                date: date,
+                isSelected:
+                    date != null && !isPast && _isSameDate(date, selectedDate),
+                isToday: date != null && _isSameDate(date, today),
+                isPast: isPast,
+                onTap: date == null || isPast ? null : () => _selectDate(date),
+              );
+            }).toList(),
           ),
         ],
       ),
@@ -263,7 +282,7 @@ class _LetsHikeCalendarWeatherModalState
         const SizedBox(width: 12),
         Expanded(
           child: ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(_selectedDate),
+            onPressed: _confirmSelection,
             style: ElevatedButton.styleFrom(
               backgroundColor: _accentColor,
               foregroundColor: Colors.white,
@@ -304,8 +323,9 @@ class _LetsHikeCalendarWeatherModalState
     return cells;
   }
 
-  _WeatherPreviewData _weatherForDate(DateTime date) {
-    if (_isToday(date) && _currentWeatherData != null) {
+  _WeatherPreviewData _weatherForDate(DateTime date, {DateTime? today}) {
+    final currentToday = today ?? _today();
+    if (_isSameDate(date, currentToday) && _currentWeatherData != null) {
       return _currentWeatherData!;
     }
 
@@ -313,9 +333,30 @@ class _LetsHikeCalendarWeatherModalState
   }
 
   void _selectDate(DateTime date) {
+    final selectedDate = _dateOnly(date);
+    if (_isPastDate(selectedDate, _today())) {
+      return;
+    }
+
     setState(() {
-      _selectedDate = _dateOnly(date);
+      _selectedDate = selectedDate;
     });
+  }
+
+  void _confirmSelection() {
+    final today = _today();
+    final selectedDate = _dateOnly(_selectedDate);
+
+    if (_isPastDate(selectedDate, today)) {
+      setState(() {
+        _selectedDate = today;
+        _visibleMonth = DateTime(today.year, today.month);
+      });
+      _showInvalidDateMessage();
+      return;
+    }
+
+    Navigator.of(context).pop(selectedDate);
   }
 
   void _goToPreviousMonth() {
@@ -330,8 +371,39 @@ class _LetsHikeCalendarWeatherModalState
     });
   }
 
-  bool _isToday(DateTime date) {
-    return _isSameDate(date, DateTime.now());
+  void _refreshSelectedDateAgainstToday() {
+    if (!mounted) {
+      return;
+    }
+
+    final today = _today();
+    if (!_isPastDate(_selectedDate, today)) {
+      return;
+    }
+
+    setState(() {
+      _selectedDate = today;
+      _visibleMonth = DateTime(today.year, today.month);
+    });
+  }
+
+  DateTime _selectedDateForDisplay(DateTime today) {
+    final selectedDate = _dateOnly(_selectedDate);
+    return _isPastDate(selectedDate, today) ? today : selectedDate;
+  }
+
+  void _showInvalidDateMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please select today or a future date.')),
+    );
+  }
+
+  static bool _isPastDate(DateTime date, DateTime today) {
+    return _dateOnly(date).isBefore(today);
+  }
+
+  static DateTime _today() {
+    return _dateOnly(DateTime.now());
   }
 
   static bool _isSameDate(DateTime first, DateTime second) {
@@ -480,16 +552,18 @@ class _CalendarDateCell extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final textColor = isSelected
-        ? Colors.white
-        : isPast
+    final textColor = isPast
         ? Colors.white.withValues(alpha: 0.28)
+        : isSelected
+        ? Colors.white
         : Colors.white.withValues(alpha: 0.88);
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
+        canRequestFocus: !isPast,
+        enableFeedback: !isPast,
         borderRadius: BorderRadius.circular(999),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
@@ -499,7 +573,7 @@ class _CalendarDateCell extends StatelessWidget {
             color: isSelected
                 ? _LetsHikeCalendarWeatherModalState._accentColor
                 : Colors.transparent,
-            border: isToday && !isSelected
+            border: isToday && !isSelected && !isPast
                 ? Border.all(
                     color: _LetsHikeCalendarWeatherModalState._accentColor,
                     width: 1.4,

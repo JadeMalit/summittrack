@@ -57,6 +57,14 @@ class SharedBottomNavbar extends StatelessWidget {
   final List<SharedBottomNavbarItem> items;
   final bool showOfflineHomeOnly;
 
+  static const double _height = 56;
+  static const double _horizontalMargin = 20;
+  static const double _bottomMargin = 10;
+  static const double _maxWidth = 360;
+  static const BorderRadius _borderRadius = BorderRadius.all(
+    Radius.circular(28),
+  );
+
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
@@ -75,69 +83,22 @@ class SharedBottomNavbar extends StatelessWidget {
             ? items.first.index
             : currentIndex;
 
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-            child: Container(
-              decoration: BoxDecoration(
-                color: colors.navBackground,
-                borderRadius: BorderRadius.circular(26),
-                boxShadow: [
-                  BoxShadow(
-                    color: colors.shadow,
-                    blurRadius: 24,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(26),
-                child: BottomNavigationBar(
-                  currentIndex: selectedPosition < 0 ? 0 : selectedPosition,
-                  onTap: (position) => onTap(items[position].index),
-                  type: BottomNavigationBarType.fixed,
-                  backgroundColor: colors.navBackground,
-                  elevation: 0,
-                  selectedItemColor: colors.accent,
-                  unselectedItemColor: colors.textSecondary,
-                  showSelectedLabels: false,
-                  showUnselectedLabels: false,
-                  items: [
-                    for (final item in items)
-                      _buildNavItem(
-                        item: item,
-                        currentIndex: resolvedCurrentIndex,
-                        activeColor: colors.accent,
-                        inactiveColor: colors.textSecondary,
-                      ),
-                  ],
+        return _FloatingNavFrame(
+          colors: colors,
+          child: Row(
+            children: [
+              for (final item in items)
+                _NavButton(
+                  item: item,
+                  isActive: resolvedCurrentIndex == item.index,
+                  activeColor: colors.accent,
+                  inactiveColor: colors.textSecondary,
+                  onTap: () => onTap(item.index),
                 ),
-              ),
-            ),
+            ],
           ),
         );
       },
-    );
-  }
-
-  BottomNavigationBarItem _buildNavItem({
-    required SharedBottomNavbarItem item,
-    required int currentIndex,
-    required Color activeColor,
-    required Color inactiveColor,
-  }) {
-    final isActive = currentIndex == item.index;
-
-    return BottomNavigationBarItem(
-      label: item.tooltip ?? '',
-      icon: AnimatedNavIcon(
-        icon: item.icon,
-        isActive: isActive,
-        activeColor: activeColor,
-        inactiveColor: inactiveColor,
-        isLifted: item.liftOnActive,
-      ),
     );
   }
 }
@@ -150,45 +111,143 @@ class _OfflineHomeNavbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _FloatingNavFrame(
+      colors: colors,
+      maxWidth: 76,
+      child: Tooltip(
+        message: 'Home',
+        child: Semantics(
+          button: true,
+          selected: true,
+          label: 'Home',
+          child: InkWell(
+            onTap: () => onTap(homeNavbarIndex),
+            borderRadius: SharedBottomNavbar._borderRadius,
+            child: SizedBox(
+              height: SharedBottomNavbar._height,
+              child: Center(
+                child: AnimatedNavIcon(
+                  icon: Icons.home_rounded,
+                  isActive: true,
+                  activeColor: colors.accent,
+                  inactiveColor: colors.textSecondary,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FloatingNavFrame extends StatelessWidget {
+  const _FloatingNavFrame({
+    required this.colors,
+    required this.child,
+    this.maxWidth = SharedBottomNavbar._maxWidth,
+  });
+
+  final AppColors colors;
+  final Widget child;
+  final double maxWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
+    final backgroundColor = isDark
+        ? colors.surfaceHigh.withValues(alpha: 0.96)
+        : colors.navBackground.withValues(alpha: 0.98);
+    final borderSide = BorderSide(
+      color: isDark
+          ? colors.border.withValues(alpha: 0.82)
+          : colors.textSecondary.withValues(alpha: 0.24),
+      width: 1,
+    );
+
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+        padding: const EdgeInsets.fromLTRB(
+          SharedBottomNavbar._horizontalMargin,
+          0,
+          SharedBottomNavbar._horizontalMargin,
+          SharedBottomNavbar._bottomMargin,
+        ),
         child: Align(
-          alignment: Alignment.center,
+          alignment: Alignment.bottomCenter,
           heightFactor: 1,
-          child: Container(
-            decoration: BoxDecoration(
-              color: colors.navBackground,
-              borderRadius: BorderRadius.circular(26),
-              boxShadow: [
-                BoxShadow(
-                  color: colors.shadow,
-                  blurRadius: 24,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Tooltip(
-              message: 'Home',
-              child: Material(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(26),
-                child: InkWell(
-                  onTap: () => onTap(homeNavbarIndex),
-                  borderRadius: BorderRadius.circular(26),
-                  child: SizedBox(
-                    width: 74,
-                    height: 62,
-                    child: Center(
-                      child: AnimatedNavIcon(
-                        icon: Icons.home_rounded,
-                        isActive: true,
-                        activeColor: colors.accent,
-                        inactiveColor: colors.textSecondary,
-                      ),
-                    ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: SharedBottomNavbar._borderRadius,
+                boxShadow: [
+                  BoxShadow(
+                    color: colors.shadow,
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
                   ),
+                ],
+              ),
+              child: Material(
+                color: backgroundColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: SharedBottomNavbar._borderRadius,
+                  side: borderSide,
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: SizedBox(
+                  height: SharedBottomNavbar._height,
+                  child: child,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavButton extends StatelessWidget {
+  const _NavButton({
+    required this.item,
+    required this.isActive,
+    required this.activeColor,
+    required this.inactiveColor,
+    required this.onTap,
+  });
+
+  final SharedBottomNavbarItem item;
+  final bool isActive;
+  final Color activeColor;
+  final Color inactiveColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tooltip = item.tooltip ?? '';
+
+    return Expanded(
+      child: Tooltip(
+        message: tooltip,
+        child: Semantics(
+          button: true,
+          selected: isActive,
+          label: tooltip,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(24),
+            child: SizedBox(
+              height: SharedBottomNavbar._height,
+              child: Center(
+                child: AnimatedNavIcon(
+                  icon: item.icon,
+                  isActive: isActive,
+                  activeColor: activeColor,
+                  inactiveColor: inactiveColor,
+                  isLifted: item.liftOnActive,
                 ),
               ),
             ),

@@ -1,7 +1,13 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../services/weather_service.dart';
+import '../models/scheduled_hike.dart';
+import '../services/hike_schedule_store.dart';
+import '../utils/mountain_schedule_identity.dart';
 import '../widgets/weather/weather_forecast_card.dart';
 import '../widgets/weather/weather_header.dart';
 import '../widgets/weather/weather_safety_card.dart';
@@ -16,7 +22,12 @@ class WeatherScreen extends StatefulWidget {
 
 class _WeatherScreenState extends State<WeatherScreen>
     with SingleTickerProviderStateMixin {
+  static const double _floatingNavHeight = 56;
+  static const double _floatingNavBottomMargin = 10;
+  static const double _floatingNavTopGap = 18;
+
   final WeatherService weatherService = WeatherService();
+  final HikeScheduleStore _scheduleStore = HikeScheduleStore.instance;
 
   final List<String> mountains = [
     "Mount Ulap",
@@ -70,12 +81,33 @@ class _WeatherScreenState extends State<WeatherScreen>
         );
 
     loadWeather();
+    _scheduleStore.addListener(_handleScheduleChanged);
+    _logWeatherSchedule('Refresh started');
+    unawaited(
+      _scheduleStore.load().whenComplete(() {
+        _logWeatherSchedule(
+          'Loaded schedules count: ${_scheduleStore.scheduledHikes.length}',
+        );
+      }),
+    );
   }
 
   @override
   void dispose() {
+    _scheduleStore.removeListener(_handleScheduleChanged);
     _entranceController.dispose();
     super.dispose();
+  }
+
+  void _handleScheduleChanged() {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {});
+    _logWeatherSchedule(
+      'Loaded schedules count: ${_scheduleStore.scheduledHikes.length}',
+    );
   }
 
   Future<void> loadWeather() async {
@@ -166,151 +198,145 @@ class _WeatherScreenState extends State<WeatherScreen>
   void _showMountainPicker(BuildContext context) {
     final colors = context.appColors;
     final isDark = context.isDarkMode;
+    final expandedMountainIds = <String>{};
 
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
-        return SafeArea(
-          top: false,
-          child: TweenAnimationBuilder<double>(
-            tween: Tween<double>(begin: 0, end: 1),
-            duration: const Duration(milliseconds: 260),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, child) {
-              return Transform.translate(
-                offset: Offset(0, 18 * (1 - value)),
-                child: Opacity(opacity: value, child: child),
-              );
-            },
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.5,
-              decoration: BoxDecoration(
-                color: isDark ? colors.surface : Colors.white,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(28),
-                  topRight: Radius.circular(28),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: colors.shadow.withValues(alpha: 0.7),
-                    blurRadius: 28,
-                    offset: const Offset(0, -8),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 12),
-                  Container(
-                    width: 46,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: colors.divider,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: colors.accent.withValues(alpha: 0.14),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Icon(
-                            Icons.terrain_rounded,
-                            color: colors.accent,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            "Select Mountain",
-                            style: TextStyle(
-                              color: colors.textPrimary,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Divider(color: colors.divider, height: 1),
-                  Expanded(
-                    child: ListView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                      itemCount: mountains.length,
-                      itemBuilder: (context, index) {
-                        final mountain = mountains[index];
-                        final isSelected = mountain == selectedMountain;
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final scheduledHikesByMountain = _scheduleStore
+                .upcomingByMountain();
 
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 3),
-                          child: Material(
-                            color: isSelected
-                                ? colors.accent.withValues(alpha: 0.12)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(16),
-                            child: ListTile(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+            return SafeArea(
+              top: false,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 260),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) {
+                  return Transform.translate(
+                    offset: Offset(0, 18 * (1 - value)),
+                    child: Opacity(opacity: value, child: child),
+                  );
+                },
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  decoration: BoxDecoration(
+                    color: isDark ? colors.surface : Colors.white,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colors.shadow.withValues(alpha: 0.7),
+                        blurRadius: 28,
+                        offset: const Offset(0, -8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      Container(
+                        width: 46,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: colors.divider,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: colors.accent.withValues(alpha: 0.14),
+                                borderRadius: BorderRadius.circular(14),
                               ),
-                              leading: Icon(
-                                Icons.hiking_rounded,
-                                color: isSelected
-                                    ? colors.accent
-                                    : colors.textSecondary,
+                              child: Icon(
+                                Icons.terrain_rounded,
+                                color: colors.accent,
                               ),
-                              title: Text(
-                                mountain,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                "Select Mountain",
                                 style: TextStyle(
-                                  color: isSelected
-                                      ? colors.textPrimary
-                                      : colors.textSecondary,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w800
-                                      : FontWeight.w600,
+                                  color: colors.textPrimary,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
                                 ),
                               ),
-                              trailing: AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 180),
-                                child: Icon(
-                                  isSelected
-                                      ? Icons.check_circle_rounded
-                                      : Icons.circle_outlined,
-                                  key: ValueKey(isSelected),
-                                  color: isSelected
-                                      ? colors.accent
-                                      : colors.divider,
-                                ),
-                              ),
-                              onTap: () {
+                            ),
+                          ],
+                        ),
+                      ),
+                      Divider(color: colors.divider, height: 1),
+                      Expanded(
+                        child: ListView.builder(
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          itemCount: mountains.length,
+                          itemBuilder: (context, index) {
+                            final mountain = mountains[index];
+                            final mountainId =
+                                MountainScheduleIdentity.idForWeatherName(
+                                  mountain,
+                                );
+                            final scheduledHikes =
+                                scheduledHikesByMountain[mountainId] ??
+                                const <ScheduledHike>[];
+                            final isSelected = mountain == selectedMountain;
+                            final isExpanded = expandedMountainIds.contains(
+                              mountainId,
+                            );
+
+                            return _MountainPickerRow(
+                              mountain: mountain,
+                              isSelected: isSelected,
+                              isExpanded: isExpanded,
+                              scheduledHikes: scheduledHikes,
+                              onSelect: () {
                                 setState(() {
                                   selectedMountain = mountain;
                                 });
                                 Navigator.pop(context);
                                 loadWeather();
                               },
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                              onToggleSchedule: scheduledHikes.isEmpty
+                                  ? null
+                                  : () {
+                                      setSheetState(() {
+                                        if (isExpanded) {
+                                          expandedMountainIds.remove(
+                                            mountainId,
+                                          );
+                                        } else {
+                                          expandedMountainIds.add(mountainId);
+                                        }
+                                      });
+                                    },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -324,6 +350,8 @@ class _WeatherScreenState extends State<WeatherScreen>
     final List<Color> bgTheme = getBGGradient(conditionText, context);
 
     return Scaffold(
+      extendBody: true,
+      backgroundColor: Colors.transparent,
       body: AnimatedContainer(
         duration: const Duration(milliseconds: 420),
         curve: Curves.easeOutCubic,
@@ -337,6 +365,7 @@ class _WeatherScreenState extends State<WeatherScreen>
           ),
         ),
         child: SafeArea(
+          bottom: false,
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 320),
             switchInCurve: Curves.easeOutCubic,
@@ -370,10 +399,11 @@ class _WeatherScreenState extends State<WeatherScreen>
     final safety = _safetyPresentation(rainChance);
     final accentColor = _conditionAccent(condition);
     final locationName = _locationName(location);
+    final nextHike = _nextScheduledHikeForSelectedMountain();
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 26),
+      padding: EdgeInsets.fromLTRB(20, 12, 20, _bottomContentPadding(context)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -385,6 +415,13 @@ class _WeatherScreenState extends State<WeatherScreen>
             accentColor: accentColor,
             onSelectMountain: () => _showMountainPicker(context),
           ),
+          if (nextHike != null) ...[
+            const SizedBox(height: 14),
+            _SlideUpSection(
+              delay: const Duration(milliseconds: 40),
+              child: _UpcomingHikeReminderCard(hike: nextHike),
+            ),
+          ],
           const SizedBox(height: 18),
           _SlideUpSection(
             delay: const Duration(milliseconds: 60),
@@ -453,6 +490,35 @@ class _WeatherScreenState extends State<WeatherScreen>
         ],
       ),
     );
+  }
+
+  ScheduledHike? _nextScheduledHikeForSelectedMountain() {
+    final mountainId = MountainScheduleIdentity.idForWeatherName(
+      selectedMountain,
+    );
+
+    final nextHike = _scheduleStore.nextUpcomingForMountain(mountainId);
+    if (nextHike != null) {
+      _logWeatherSchedule('Matched mountain: $mountainId');
+      _logWeatherSchedule(
+        'Matched date: ${ScheduledHike.dateKey(nextHike.hikeDate)}',
+      );
+    }
+
+    return nextHike;
+  }
+
+  static void _logWeatherSchedule(String message) {
+    if (kDebugMode) {
+      debugPrint('[WeatherSchedule] $message');
+    }
+  }
+
+  double _bottomContentPadding(BuildContext context) {
+    return MediaQuery.of(context).viewPadding.bottom +
+        _floatingNavHeight +
+        _floatingNavBottomMargin +
+        _floatingNavTopGap;
   }
 
   Widget _buildForecastSection(String fallbackCondition, dynamic fallbackTemp) {
@@ -763,6 +829,333 @@ class _SafetyPresentation {
   final IconData icon;
 }
 
+class _UpcomingHikeReminderCard extends StatelessWidget {
+  const _UpcomingHikeReminderCard({required this.hike});
+
+  final ScheduledHike hike;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final isToday = _isSameDate(hike.hikeDate, DateTime.now());
+    final accent = isToday ? colors.warning : colors.accent;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: context.isDarkMode
+            ? colors.surfaceHigh.withValues(alpha: 0.86)
+            : Colors.white.withValues(alpha: 0.74),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: accent.withValues(alpha: isToday ? 0.45 : 0.24),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colors.shadow.withValues(alpha: 0.42),
+            blurRadius: 14,
+            offset: const Offset(0, 7),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: context.isDarkMode ? 0.22 : 0.15),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              isToday ? Icons.hiking_rounded : Icons.event_available_rounded,
+              color: accent,
+              size: 23,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isToday ? 'Hike Today' : 'Upcoming Hike',
+                  style: TextStyle(
+                    color: accent,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isToday ? hike.trailName : _formatFullHikeDate(hike.hikeDate),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: colors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  isToday ? hike.mountainName : hike.trailName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: colors.textSecondary,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MountainPickerRow extends StatelessWidget {
+  const _MountainPickerRow({
+    required this.mountain,
+    required this.isSelected,
+    required this.isExpanded,
+    required this.scheduledHikes,
+    required this.onSelect,
+    required this.onToggleSchedule,
+  });
+
+  final String mountain;
+  final bool isSelected;
+  final bool isExpanded;
+  final List<ScheduledHike> scheduledHikes;
+  final VoidCallback onSelect;
+  final VoidCallback? onToggleSchedule;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final hasSchedule = scheduledHikes.isNotEmpty;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Material(
+        color: isSelected
+            ? colors.accent.withValues(alpha: 0.12)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          children: [
+            InkWell(
+              onTap: onSelect,
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  hasSchedule ? 11 : 12,
+                  hasSchedule ? 8 : 14,
+                  hasSchedule ? 11 : 12,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.hiking_rounded,
+                      color: isSelected ? colors.accent : colors.textSecondary,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        mountain,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: isSelected
+                              ? colors.textPrimary
+                              : colors.textSecondary,
+                          fontWeight: isSelected
+                              ? FontWeight.w800
+                              : FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if (hasSchedule) ...[
+                      const SizedBox(width: 8),
+                      _ScheduleDateBadge(date: scheduledHikes.first.hikeDate),
+                      const SizedBox(width: 4),
+                      IconButton(
+                        onPressed: onToggleSchedule,
+                        tooltip: isExpanded
+                            ? 'Hide scheduled hikes'
+                            : 'Show scheduled hikes',
+                        constraints: const BoxConstraints.tightFor(
+                          width: 34,
+                          height: 34,
+                        ),
+                        padding: EdgeInsets.zero,
+                        icon: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 180),
+                          child: Icon(
+                            isExpanded
+                                ? Icons.keyboard_arrow_up_rounded
+                                : Icons.keyboard_arrow_down_rounded,
+                            key: ValueKey(isExpanded),
+                            color: colors.accent,
+                          ),
+                        ),
+                      ),
+                    ] else
+                      SizedBox(
+                        width: 34,
+                        height: 34,
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 180),
+                          child: Icon(
+                            isSelected
+                                ? Icons.check_circle_rounded
+                                : Icons.circle_outlined,
+                            key: ValueKey(isSelected),
+                            color: isSelected ? colors.accent : colors.divider,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child: hasSchedule && isExpanded
+                  ? _MountainScheduleDetails(scheduledHikes: scheduledHikes)
+                  : const SizedBox(width: double.infinity),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ScheduleDateBadge extends StatelessWidget {
+  const _ScheduleDateBadge({required this.date});
+
+  final DateTime date;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: colors.accent.withValues(
+          alpha: context.isDarkMode ? 0.18 : 0.12,
+        ),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        _formatShortHikeDate(date),
+        style: TextStyle(
+          color: colors.accent,
+          fontSize: 11,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+class _MountainScheduleDetails extends StatelessWidget {
+  const _MountainScheduleDetails({required this.scheduledHikes});
+
+  final List<ScheduledHike> scheduledHikes;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(56, 0, 14, 12),
+      child: Column(
+        children: [
+          for (var index = 0; index < scheduledHikes.length; index++)
+            _MountainScheduleItem(
+              hike: scheduledHikes[index],
+              showTopPadding: index > 0,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MountainScheduleItem extends StatelessWidget {
+  const _MountainScheduleItem({
+    required this.hike,
+    required this.showTopPadding,
+  });
+
+  final ScheduledHike hike;
+  final bool showTopPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+
+    return Padding(
+      padding: EdgeInsets.only(top: showTopPadding ? 9 : 0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 7),
+            child: Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: colors.accent.withValues(alpha: 0.85),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _formatFullHikeDate(hike.hikeDate),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: colors.textPrimary,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  hike.trailName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: colors.textSecondary,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({required this.title, required this.color});
 
@@ -841,3 +1234,47 @@ class _EmptyForecastCard extends StatelessWidget {
     );
   }
 }
+
+bool _isSameDate(DateTime first, DateTime second) {
+  return first.year == second.year &&
+      first.month == second.month &&
+      first.day == second.day;
+}
+
+String _formatShortHikeDate(DateTime date) {
+  return "${_shortMonthNames[date.month - 1]} ${date.day}";
+}
+
+String _formatFullHikeDate(DateTime date) {
+  return "${_fullMonthNames[date.month - 1]} ${date.day}, ${date.year}";
+}
+
+const _shortMonthNames = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+const _fullMonthNames = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];

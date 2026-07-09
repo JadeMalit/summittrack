@@ -58,6 +58,7 @@ class _SignInScreenState extends State<SignInScreen>
   Timer? _connectivityChangeDebounceTimer;
   Timer? _offlineDialogTimer;
   int _connectivityCheckSerial = 0;
+  bool? _pendingConnectivityStartupCheck;
 
   bool get _isBusy => loading || _isGoogleLoading;
 
@@ -182,14 +183,17 @@ class _SignInScreenState extends State<SignInScreen>
       return;
     }
 
+    final checkSerial = ++_connectivityCheckSerial;
+
     if (_isCheckingConnectivity) {
+      _pendingConnectivityStartupCheck =
+          (_pendingConnectivityStartupCheck ?? false) || isStartupCheck;
       _logConnectivity(
-        'connectivity check skipped because another check is running',
+        'connectivity check queued because another check is running',
       );
       return;
     }
 
-    final checkSerial = ++_connectivityCheckSerial;
     _isCheckingConnectivity = true;
     final previousStatus = _connectionStatus;
     _setConnectionStatus(InternetConnectionStatus.checking);
@@ -220,8 +224,18 @@ class _SignInScreenState extends State<SignInScreen>
       _setConnectionStatus(InternetConnectionStatus.offline);
       _scheduleOfflineDialogCheck(checkSerial);
     } finally {
-      if (mounted && checkSerial == _connectivityCheckSerial) {
+      if (mounted) {
         _isCheckingConnectivity = false;
+
+        if (checkSerial != _connectivityCheckSerial) {
+          final pendingStartupCheck = _pendingConnectivityStartupCheck ?? false;
+          _pendingConnectivityStartupCheck = null;
+          unawaited(
+            _checkConnectionAndMaybeShowDialog(
+              isStartupCheck: pendingStartupCheck,
+            ),
+          );
+        }
       }
     }
   }

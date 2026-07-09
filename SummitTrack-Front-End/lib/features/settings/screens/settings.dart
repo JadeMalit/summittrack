@@ -17,7 +17,11 @@ class SettingsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colors.background,
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        titleSpacing: 20,
+        title: const Text('Settings'),
+      ),
       body: _SettingsThemeTransition(
         child: _SettingsBody(
           userName: userName,
@@ -122,15 +126,6 @@ class _SettingsBody extends StatelessWidget {
             children: [
               const _DarkModeSettingsTile(),
               _SettingsTile(
-                icon: Icons.account_circle_rounded,
-                title: 'Account',
-                subtitle: 'Profile and personal information',
-                onTap: () => onShowSnack(
-                  context,
-                  'Account settings are ready for hookup.',
-                ),
-              ),
-              _SettingsTile(
                 icon: Icons.notifications_rounded,
                 title: 'Notifications',
                 subtitle: 'Trail reminders and hike alerts',
@@ -141,7 +136,7 @@ class _SettingsBody extends StatelessWidget {
               ),
               _SettingsTile(
                 icon: Icons.security_rounded,
-                title: 'Privacy and security',
+                title: 'Privacy and Security',
                 subtitle: 'Manage app access and safety options',
                 onTap: () => onShowSnack(
                   context,

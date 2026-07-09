@@ -20,6 +20,16 @@ const Set<String> _googleAuthCancellationCodes = {
   'missing-user',
 };
 
+const _stepFlow = 'flow';
+const _stepWebPopup = 'web.signInWithPopup';
+const _stepNativeSignOut = 'native.signOutBeforePicker';
+const _stepAccountPicker = 'native.accountPicker';
+const _stepPasswordAccountGuard = 'firebase.fetchSignInMethodsForEmail';
+const _stepGoogleTokens = 'native.googleAuthenticationTokens';
+const _stepFirebaseCredential = 'firebase.createGoogleCredential';
+const _stepFirebaseCredentialSignIn = 'firebase.signInWithCredential';
+const _stepFirestoreProfileSave = 'firestore.saveGoogleUser';
+
 class GoogleAuthResult {
   const GoogleAuthResult({
     required this.user,
@@ -33,11 +43,17 @@ class GoogleAuthResult {
 }
 
 class GoogleAuthServiceException implements Exception {
-  const GoogleAuthServiceException(this.code, this.message, [this.cause]);
+  const GoogleAuthServiceException(
+    this.code,
+    this.message, [
+    this.cause,
+    this.step,
+  ]);
 
   final String code;
   final String message;
   final Object? cause;
+  final String? step;
 
   bool get isCancellation => _googleAuthCancellationCodes.contains(code);
 
@@ -53,27 +69,51 @@ class GoogleAuthService {
   }) : _auth = auth ?? FirebaseAuth.instance,
        _firestore = firestore ?? FirebaseFirestore.instance,
        _googleSignIn =
-           googleSignIn ?? GoogleSignIn(scopes: const ['email', 'profile']);
+           googleSignIn ??
+           GoogleSignIn(
+             scopes: const ['email', 'profile'],
+             serverClientId: _androidWebClientId,
+           );
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
   final GoogleSignIn _googleSignIn;
+  static const String _googleWebClientId = String.fromEnvironment(
+    'GOOGLE_WEB_CLIENT_ID',
+  );
+  static const String? _androidWebClientId = _googleWebClientId == ''
+      ? null
+      : _googleWebClientId;
   static const _cancelledMessage =
       'Google sign-in was cancelled. Please try again.';
+  static const _androidConfigMessage =
+      'Google sign-in is not configured correctly for this app. Please update Firebase Android SHA fingerprints and google-services.json.';
 
   Future<GoogleAuthResult> signInOrRegisterWithGoogle() async {
     UserCredential? credential;
 
     try {
+      _logGoogleAuthStep(
+        _stepFlow,
+        'start platform=${kIsWeb ? 'web' : defaultTargetPlatform.name}; '
+        'dartDefineServerClientId=${_androidWebClientId == null ? 'not-provided' : 'provided'}',
+      );
+
       credential = kIsWeb
           ? await _signInWithGooglePopup()
           : await _signInWithNativeGoogle();
 
       final user = credential.user;
       if (user == null) {
+        _logGoogleAuthStep(
+          _stepFirebaseCredentialSignIn,
+          'missing Firebase user',
+        );
         throw const GoogleAuthServiceException(
           'missing-user',
           _cancelledMessage,
+          null,
+          _stepFirebaseCredentialSignIn,
         );
       }
 
@@ -83,6 +123,8 @@ class GoogleAuthService {
         throw const GoogleAuthServiceException(
           'missing-email',
           'Your Google account did not share an email address.',
+          null,
+          _stepFirebaseCredentialSignIn,
         );
       }
 
@@ -91,10 +133,20 @@ class GoogleAuthService {
         throw const GoogleAuthServiceException(
           'email-not-verified',
           'Please use a verified Google email address.',
+          null,
+          _stepFirebaseCredentialSignIn,
         );
       }
 
-      final createdUserRecord = await _saveGoogleUser(user);
+      final createdUserRecord = await _runGoogleAuthStep(
+        _stepFirestoreProfileSave,
+        () => _saveGoogleUser(user),
+      );
+
+      _logGoogleAuthStep(
+        _stepFlow,
+        'success uidPresent=${user.uid.isNotEmpty}',
+      );
 
       return GoogleAuthResult(
         user: user,
@@ -136,7 +188,10 @@ class GoogleAuthService {
       ..addScope('profile')
       ..setCustomParameters({'prompt': 'select_account'});
 
-    return _auth.signInWithPopup(googleProvider);
+    return _runGoogleAuthStep(
+      _stepWebPopup,
+      () => _auth.signInWithPopup(googleProvider),
+    );
   }
 
   Future<UserCredential> _signInWithNativeGoogle() async {
@@ -147,22 +202,58 @@ class GoogleAuthService {
       );
     }
 
-    await _googleSignIn.signOut();
+    await _runGoogleAuthStep(_stepNativeSignOut, _googleSignIn.signOut);
 
-    final googleUser = await _googleSignIn.signIn();
+    final googleUser = await _runGoogleAuthStep(
+      _stepAccountPicker,
+      _googleSignIn.signIn,
+    );
     if (googleUser == null) {
-      throw const GoogleAuthServiceException('cancelled', _cancelledMessage);
+      _logGoogleAuthStep(_stepAccountPicker, 'cancelled by user');
+      throw const GoogleAuthServiceException(
+        'cancelled',
+        _cancelledMessage,
+        null,
+        _stepAccountPicker,
+      );
     }
 
-    await _guardAgainstPasswordOnlyAccount(googleUser.email);
-
-    final googleAuth = await googleUser.authentication;
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
+    await _runGoogleAuthStep(
+      _stepPasswordAccountGuard,
+      () => _guardAgainstPasswordOnlyAccount(googleUser.email),
     );
 
-    return _auth.signInWithCredential(credential);
+    final googleAuth = await _runGoogleAuthStep(
+      _stepGoogleTokens,
+      () => googleUser.authentication,
+    );
+    _logGoogleAuthStep(
+      _stepGoogleTokens,
+      'received accessToken=${_tokenPresence(googleAuth.accessToken)}; '
+      'idToken=${_tokenPresence(googleAuth.idToken)}',
+    );
+
+    if (googleAuth.accessToken == null && googleAuth.idToken == null) {
+      throw const GoogleAuthServiceException(
+        'missing-google-token',
+        'Google sign-in did not return authentication tokens. Please update the Firebase Android SHA fingerprints and google-services.json.',
+        null,
+        _stepGoogleTokens,
+      );
+    }
+
+    final credential = _runGoogleAuthSyncStep(
+      _stepFirebaseCredential,
+      () => GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      ),
+    );
+
+    return _runGoogleAuthStep(
+      _stepFirebaseCredentialSignIn,
+      () => _auth.signInWithCredential(credential),
+    );
   }
 
   Future<void> _guardAgainstPasswordOnlyAccount(String email) async {
@@ -254,6 +345,20 @@ class GoogleAuthService {
           'Google sign-in is not enabled yet. Please enable the Google provider in Firebase Authentication.',
           error,
         );
+      case 'invalid-api-key':
+      case 'app-not-authorized':
+        return GoogleAuthServiceException(
+          error.code,
+          'Firebase Authentication is not configured correctly for this Android app.',
+          error,
+        );
+      case 'invalid-credential':
+      case 'malformed-credential':
+        return GoogleAuthServiceException(
+          error.code,
+          _androidConfigMessage,
+          error,
+        );
       default:
         return GoogleAuthServiceException(
           error.code,
@@ -264,18 +369,39 @@ class GoogleAuthService {
   }
 
   GoogleAuthServiceException _mapPlatformError(PlatformException error) {
+    if (_isPlatformCancellation(error)) {
+      return GoogleAuthServiceException(error.code, _cancelledMessage, error);
+    }
+
+    if (_isPlatformNetworkError(error)) {
+      return GoogleAuthServiceException(
+        error.code,
+        'No internet connection. Please check your network and try again.',
+        error,
+      );
+    }
+
+    if (_isAndroidDeveloperConfigError(error)) {
+      return GoogleAuthServiceException(
+        error.code,
+        _androidConfigMessage,
+        error,
+      );
+    }
+
+    if (_isGooglePlayServicesError(error)) {
+      return GoogleAuthServiceException(
+        error.code,
+        'Google Play Services is unavailable or out of date on this phone. Please update Google Play Services and try again.',
+        error,
+      );
+    }
+
     switch (error.code) {
-      case 'sign_in_canceled':
-      case 'ERROR_ABORTED_BY_USER':
-      case 'canceled':
-      case 'cancelled':
-      case 'user-cancelled':
-      case 'user_cancelled':
-        return GoogleAuthServiceException(error.code, _cancelledMessage, error);
-      case 'network_error':
+      case GoogleSignIn.kSignInFailedError:
         return GoogleAuthServiceException(
           error.code,
-          'No internet connection. Please check your network and try again.',
+          'Unable to connect with Google right now. Please try again.',
           error,
         );
       default:
@@ -286,6 +412,145 @@ class GoogleAuthService {
         );
     }
   }
+
+  bool _isPlatformCancellation(PlatformException error) {
+    return _googleAuthCancellationCodes.contains(error.code) ||
+        error.code == GoogleSignIn.kSignInCanceledError ||
+        _containsApiExceptionStatus(error, 12501);
+  }
+
+  bool _isPlatformNetworkError(PlatformException error) {
+    return error.code == GoogleSignIn.kNetworkError ||
+        _containsApiExceptionStatus(error, 7) ||
+        _platformMessageContains(error, const ['NETWORK_ERROR']);
+  }
+
+  bool _isAndroidDeveloperConfigError(PlatformException error) {
+    return _containsApiExceptionStatus(error, 10) ||
+        _platformMessageContains(error, const ['DEVELOPER_ERROR']);
+  }
+
+  bool _isGooglePlayServicesError(PlatformException error) {
+    return _containsApiExceptionStatus(error, 1) ||
+        _containsApiExceptionStatus(error, 2) ||
+        _containsApiExceptionStatus(error, 3) ||
+        _containsApiExceptionStatus(error, 9) ||
+        _platformMessageContains(error, const [
+          'SERVICE_MISSING',
+          'SERVICE_VERSION_UPDATE_REQUIRED',
+          'SERVICE_DISABLED',
+          'SERVICE_INVALID',
+          'Google Play services',
+        ]);
+  }
+
+  bool _containsApiExceptionStatus(PlatformException error, int statusCode) {
+    final message = error.message ?? '';
+    return RegExp(
+      'ApiException:\\s*$statusCode\\b',
+      caseSensitive: false,
+    ).hasMatch(message);
+  }
+
+  bool _platformMessageContains(
+    PlatformException error,
+    Iterable<String> markers,
+  ) {
+    final message = '${error.code} ${error.message ?? ''}'.toLowerCase();
+    return markers.any((marker) => message.contains(marker.toLowerCase()));
+  }
+
+  Future<T> _runGoogleAuthStep<T>(
+    String step,
+    Future<T> Function() action,
+  ) async {
+    _logGoogleAuthStep(step, 'start');
+    try {
+      final result = await action();
+      _logGoogleAuthStep(step, 'success');
+      return result;
+    } catch (error, stackTrace) {
+      _logGoogleAuthFailure(step, error, stackTrace);
+      rethrow;
+    }
+  }
+
+  T _runGoogleAuthSyncStep<T>(String step, T Function() action) {
+    _logGoogleAuthStep(step, 'start');
+    try {
+      final result = action();
+      _logGoogleAuthStep(step, 'success');
+      return result;
+    } catch (error, stackTrace) {
+      _logGoogleAuthFailure(step, error, stackTrace);
+      rethrow;
+    }
+  }
+
+  void _logGoogleAuthStep(String step, String message) {
+    debugPrint('[GoogleAuthService][$step] $message');
+  }
+
+  void _logGoogleAuthFailure(String step, Object error, StackTrace stackTrace) {
+    final code = _diagnosticCode(error);
+    final message = _diagnosticMessage(error);
+    debugPrint('[GoogleAuthService][$step] failed');
+    debugPrint('[GoogleAuthService][$step] exceptionType=${error.runtimeType}');
+    if (code != null && code.isNotEmpty) {
+      debugPrint('[GoogleAuthService][$step] exceptionCode=$code');
+    }
+    if (message != null && message.isNotEmpty) {
+      debugPrint(
+        '[GoogleAuthService][$step] exceptionMessage=${_sanitizeDiagnosticMessage(message)}',
+      );
+    }
+    debugPrint('[GoogleAuthService][$step] stackTrace=$stackTrace');
+  }
+
+  String? _diagnosticCode(Object error) {
+    if (error is GoogleAuthServiceException) {
+      return error.code;
+    }
+    if (error is FirebaseException) {
+      return error.code;
+    }
+    if (error is PlatformException) {
+      return error.code;
+    }
+    return null;
+  }
+
+  String? _diagnosticMessage(Object error) {
+    if (error is GoogleAuthServiceException) {
+      return error.message;
+    }
+    if (error is FirebaseException) {
+      return error.message;
+    }
+    if (error is PlatformException) {
+      return error.message;
+    }
+    return error.toString();
+  }
+
+  String _sanitizeDiagnosticMessage(String message) {
+    var sanitized = message.replaceAll(
+      RegExp(r'eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+'),
+      '[REDACTED_JWT]',
+    );
+
+    sanitized = sanitized.replaceAllMapped(
+      RegExp(
+        r'\b(access[_-]?token|id[_-]?token|api[_-]?key|password|secret)=([^\s,;]+)',
+        caseSensitive: false,
+      ),
+      (match) => '${match.group(1)}=[REDACTED]',
+    );
+
+    return sanitized;
+  }
+
+  String _tokenPresence(String? token) => token == null ? 'absent' : 'present';
 
   Future<void> _safeSignOut() async {
     await _auth.signOut();

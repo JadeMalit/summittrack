@@ -24,7 +24,6 @@ class ProfileInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Container(
       width: double.infinity,
@@ -41,6 +40,8 @@ class ProfileInfoCard extends StatelessWidget {
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(30),
           topRight: Radius.circular(30),
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
         ),
         boxShadow: [
           BoxShadow(
@@ -57,7 +58,7 @@ class ProfileInfoCard extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Padding(
-                padding: EdgeInsets.fromLTRB(18, 70, 18, 24 + bottomInset),
+                padding: const EdgeInsets.fromLTRB(18, 70, 18, 24),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
