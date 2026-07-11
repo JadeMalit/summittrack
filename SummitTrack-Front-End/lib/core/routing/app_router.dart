@@ -73,6 +73,12 @@ import '../../data/trail_data/catuno_lubog_data.dart';
 import '../../data/trail_data/catuno_explorer_data.dart';
 import '../../data/trail_data/catuno_river_data.dart';
 import '../../features/mountains/screens/mt_catuno.dart';
+import '../../data/trail_data/lingguhob_trails.dart'; // <--- LINGGUHOB TRAILS IMPORT
+import '../../features/mountains/screens/mt_lingguhob.dart'; // <--- LINGGUHOB SCREEN IMPORT
+import '../../data/trail_data/arayat_trails.dart'; // <--- IDINAGDAG: ARAYAT TRAILS DATA IMPORT
+import '../../features/mountains/screens/mt_arayat.dart'; // <--- IDINAGDAG: ARAYAT SCREEN IMPORT
+import '../../data/trail_data/makiling_trails.dart'; // <--- IDINAGDAG: MAKILING TRAILS DATA IMPORT
+import '../../features/mountains/screens/mt_makiling.dart'; // <--- IDINAGDAG: MAKILING SCREEN IMPORT
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -339,6 +345,42 @@ class AppRouter {
           ),
         );
       }
+
+      // >>> IDINAGDAG: ROUTE PARA SA MT. LINGGUHOB SCREEN <<<
+      if (mountainId.toLowerCase().contains('lingguhob')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtLingguhobScreen(),
+          ),
+        );
+      }
+
+      // >>> IDINAGDAG: ROUTE PARA SA MT. ARAYAT SCREEN <<<
+      if (mountainId.toLowerCase().contains('arayat')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtArayatScreen(),
+          ),
+        );
+      }
+
+      // >>> IDINAGDAG: ROUTE PARA SA MT. MAKILING SCREEN <<<
+      if (mountainId.toLowerCase().contains('makiling')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtMakilingScreen(),
+          ),
+        );
+      }
     }
 
     if (segments.length == 4 &&
@@ -352,6 +394,29 @@ class AppRouter {
         if (trailId == 'lubog') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: catunoLubogTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'catuno_lubog')));
         if (trailId == 'explorer') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: catunoExplorerTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'catuno_explorer')));
         if (trailId == 'river') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: catunoRiverTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'catuno_river')));
+      }
+
+      // >>> IDINAGDAG: ROUTE PARA SA 3 TRAILS NI MT. LINGGUHOB <<<
+      if (mountainId.toLowerCase().contains('lingguhob')) {
+        if (trailId == 'bonbon') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: lingguhobBonbonTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'lingguhob_bonbon')));
+        if (trailId == 'itisan') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: lingguhobItisanTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'lingguhob_itisan')));
+        if (trailId == 'tuasan') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: lingguhobTuasanTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'lingguhob_tuasan')));
+      }
+
+      // >>> IDINAGDAG: ROUTE PARA SA 4 TRAILS NI MT. ARAYAT <<<
+      if (mountainId.toLowerCase().contains('arayat')) {
+        if (trailId == 'sanjuan') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: arayatSanJuanTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'arayat_sanjuan')));
+        if (trailId == 'magalang') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: arayatMagalangTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'arayat_magalang')));
+        if (trailId == 'traverse') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: arayatTraverseTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'arayat_traverse')));
+        if (trailId == 'pinnacle') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: arayatPinnacleTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'arayat_pinnacle')));
+      }
+
+      // >>> IDINAGDAG: ROUTE PARA SA 4 TRAILS NI MT. MAKILING <<<
+      if (mountainId.toLowerCase().contains('makiling')) {
+        if (trailId == 'uplb') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: makilingUplbTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'makiling_uplb')));
+        if (trailId == 'traverse') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: makilingTraverseTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'makiling_traverse')));
+        if (trailId == 'mudsprings') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: makilingMudspringsTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'makiling_mudsprings')));
+        if (trailId == 'flatrocks') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: makilingFlatrocksTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'makiling_flatrocks')));
       }
 
       if (mountainId == AppRoutes.mtApoMountainId &&

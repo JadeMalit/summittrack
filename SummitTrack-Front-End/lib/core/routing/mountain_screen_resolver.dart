@@ -16,6 +16,9 @@ import '../../features/mountains/screens/mt_manabu.dart';
 import '../../features/mountains/screens/mt_gulugod_baboy.dart'; 
 import '../../features/mountains/screens/mt_maynoba.dart'; 
 import '../../features/mountains/screens/mt_catuno.dart'; // <--- IDINAGDAG ANG IMPORT NI CATUNO SCREEN
+import '../../features/mountains/screens/mt_lingguhob.dart'; // <--- IDINAGDAG ANG IMPORT NI LINGGUHOB SCREEN
+import '../../features/mountains/screens/mt_arayat.dart'; // <--- IDINAGDAG: IMPORT NI ARAYAT SCREEN
+import '../../features/mountains/screens/mt_makiling.dart'; // <--- IDINAGDAG: IMPORT NI MAKILING SCREEN
 import 'app_routes.dart';
 
 String? mountainRouteFor(Mountain mountain) {
@@ -48,6 +51,12 @@ String? mountainRouteFor(Mountain mountain) {
       return '/mountain/maynoba';
     case 'Mt. Catuno': // <--- IDINAGDAG: Para sa click action mula sa Home card
       return '/mountain/catuno';
+    case 'Mt. Lingguhob': // <--- IDINAGDAG: Para sa click action ni Lingguhob
+      return '/mountain/lingguhob';
+    case 'Mt. Arayat': // <--- IDINAGDAG: Para sa click action ni Arayat
+      return '/mountain/arayat';
+    case 'Mt. Makiling': // <--- IDINAGDAG: Para sa click action ni Makiling
+      return '/mountain/makiling';
     default:
       return null;
   }
@@ -95,6 +104,15 @@ Widget buildMountainScreen(Mountain mountain) {
   }
   if (mountain.name == 'Mt. Catuno') {
     return const MtCatunoScreen(); // <--- IDINAGDAG: Diretso na sa 4 action buttons natin!
+  }
+  if (mountain.name == 'Mt. Lingguhob') {
+    return const MtLingguhobScreen(); // <--- IDINAGDAG: Buksan ang custom design layout natin!
+  }
+  if (mountain.name == 'Mt. Arayat') {
+    return const MtArayatScreen(); // <--- IDINAGDAG: Buksan ang custom design layout ni Arayat!
+  }
+  if (mountain.name == 'Mt. Makiling') {
+    return const MtMakilingScreen(); // <--- IDINAGDAG: Buksan ang custom design layout ni Makiling!
   }
 
   return MountainDetailScreen(mountain: mountain);
