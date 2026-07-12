@@ -15,10 +15,13 @@ import '../../features/mountains/screens/mt_guiting_guiting.dart';
 import '../../features/mountains/screens/mt_manabu.dart'; 
 import '../../features/mountains/screens/mt_gulugod_baboy.dart'; 
 import '../../features/mountains/screens/mt_maynoba.dart'; 
-import '../../features/mountains/screens/mt_catuno.dart'; // <--- IDINAGDAG ANG IMPORT NI CATUNO SCREEN
 import '../../features/mountains/screens/mt_lingguhob.dart'; // <--- IDINAGDAG ANG IMPORT NI LINGGUHOB SCREEN
 import '../../features/mountains/screens/mt_arayat.dart'; // <--- IDINAGDAG: IMPORT NI ARAYAT SCREEN
 import '../../features/mountains/screens/mt_makiling.dart'; // <--- IDINAGDAG: IMPORT NI MAKILING SCREEN
+import '../../features/mountains/screens/mt_damas.dart'; // <--- IDINAGDAG: IMPORT NI DAMAS SCREEN
+import '../../features/mountains/screens/mt_tugew.dart'; // <--- IDINAGDAG: IMPORT NI TUGEW SCREEN
+import '../../features/mountains/screens/mt_mariglem.dart'; // <--- IDINAGDAG: IMPORT NI MARIGLEM SCREEN
+import '../../features/mountains/screens/mt_cutuno.dart'; // <--- BINAGO: PURE CUTUNO SCREEN IMPORT
 import 'app_routes.dart';
 
 String? mountainRouteFor(Mountain mountain) {
@@ -49,14 +52,20 @@ String? mountainRouteFor(Mountain mountain) {
       return '/mountain/gulugodbaboy';
     case 'Mt. Maynoba': 
       return '/mountain/maynoba';
-    case 'Mt. Catuno': // <--- IDINAGDAG: Para sa click action mula sa Home card
-      return '/mountain/catuno';
     case 'Mt. Lingguhob': // <--- IDINAGDAG: Para sa click action ni Lingguhob
       return '/mountain/lingguhob';
     case 'Mt. Arayat': // <--- IDINAGDAG: Para sa click action ni Arayat
       return '/mountain/arayat';
     case 'Mt. Makiling': // <--- IDINAGDAG: Para sa click action ni Makiling
       return '/mountain/makiling';
+    case 'Mt. Damas': // <--- IDINAGDAG: Para sa click action ni Damas
+      return '/mountain/damas';
+    case 'Mt. Tugew': // <--- IDINAGDAG: Para sa click action ni Tugew
+      return '/mountain/tugew';
+    case 'Mt. Mariglem': // <--- IDINAGDAG: Para sa click action ni Mariglem
+      return '/mountain/mariglem';
+    case 'Mt. Cutuno': // <--- BINAGO: Pure Cutuno click target layout route
+      return '/mountain/cutuno';
     default:
       return null;
   }
@@ -102,9 +111,6 @@ Widget buildMountainScreen(Mountain mountain) {
   if (mountain.name == 'Mt. Maynoba') {
     return const MtMaynobaScreen(); 
   }
-  if (mountain.name == 'Mt. Catuno') {
-    return const MtCatunoScreen(); // <--- IDINAGDAG: Diretso na sa 4 action buttons natin!
-  }
   if (mountain.name == 'Mt. Lingguhob') {
     return const MtLingguhobScreen(); // <--- IDINAGDAG: Buksan ang custom design layout natin!
   }
@@ -113,6 +119,18 @@ Widget buildMountainScreen(Mountain mountain) {
   }
   if (mountain.name == 'Mt. Makiling') {
     return const MtMakilingScreen(); // <--- IDINAGDAG: Buksan ang custom design layout ni Makiling!
+  }
+  if (mountain.name == 'Mt. Damas') {
+    return const MtDamasScreen(); // <--- IDINAGDAG: Buksan ang custom design layout ni Damas!
+  }
+  if (mountain.name == 'Mt. Tugew') {
+    return const MtTugewScreen(); // <--- IDINAGDAG: Buksan ang custom design layout ni Tugew!
+  }
+  if (mountain.name == 'Mt. Mariglem') {
+    return const MtMariglemScreen(); // <--- IDINAGDAG: Buksan ang custom design layout ni Mariglem!
+  }
+  if (mountain.name == 'Mt. Cutuno') { // <--- BINAGO: Pure Cutuno action screen binding block
+    return const MtCutunoScreen(); 
   }
 
   return MountainDetailScreen(mountain: mountain);

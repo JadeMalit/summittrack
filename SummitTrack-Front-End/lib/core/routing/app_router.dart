@@ -68,17 +68,20 @@ import '../../data/trail_data/maynoba_circuit_data.dart'; // <--- IDINAGDAG ANG 
 import '../../data/trail_data/maynoba_waterfalls_data.dart';
 import '../../data/trail_data/maynoba_campsite_data.dart';
 import '../../data/trail_data/maynoba_traverse_data.dart';
-import '../../data/trail_data/catuno_summit_data.dart';
-import '../../data/trail_data/catuno_lubog_data.dart';
-import '../../data/trail_data/catuno_explorer_data.dart';
-import '../../data/trail_data/catuno_river_data.dart';
-import '../../features/mountains/screens/mt_catuno.dart';
 import '../../data/trail_data/lingguhob_trails.dart'; // <--- LINGGUHOB TRAILS IMPORT
 import '../../features/mountains/screens/mt_lingguhob.dart'; // <--- LINGGUHOB SCREEN IMPORT
 import '../../data/trail_data/arayat_trails.dart'; // <--- IDINAGDAG: ARAYAT TRAILS DATA IMPORT
 import '../../features/mountains/screens/mt_arayat.dart'; // <--- IDINAGDAG: ARAYAT SCREEN IMPORT
 import '../../data/trail_data/makiling_trails.dart'; // <--- IDINAGDAG: MAKILING TRAILS DATA IMPORT
 import '../../features/mountains/screens/mt_makiling.dart'; // <--- IDINAGDAG: MAKILING SCREEN IMPORT
+import '../../data/trail_data/damas_trails.dart'; // <--- IDINAGDAG: DAMAS TRAILS DATA IMPORT
+import '../../features/mountains/screens/mt_damas.dart'; // <--- IDINAGDAG: DAMAS SCREEN IMPORT
+import '../../data/trail_data/tugew_trails.dart'; // <--- IDINAGDAG: TUGEW TRAILS DATA IMPORT
+import '../../features/mountains/screens/mt_tugew.dart'; // <--- IDINAGDAG: TUGEW SCREEN IMPORT
+import '../../data/trail_data/mariglem_trails.dart'; // <--- IDINAGDAG: MARIGLEM TRAILS DATA IMPORT
+import '../../features/mountains/screens/mt_mariglem.dart'; // <--- IDINAGDAG: MARIGLEM SCREEN IMPORT
+import '../../data/trail_data/cutuno_trails.dart'; // <--- BINAGO: PURE CUTUNO TRAILS DATA IMPORT
+import '../../features/mountains/screens/mt_cutuno.dart'; // <--- BINAGO: PURE CUTUNO SCREEN IMPORT
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -335,17 +338,6 @@ class AppRouter {
         );
       }
 
-      if (mountainId.toLowerCase().contains('catuno') || mountainId.toLowerCase().contains('katingno') || mountainId.toLowerCase().contains('cutuno')) {
-        return _route(
-          settings,
-          _AuthGuard(
-            currentLocation: location,
-            requireAuth: true,
-            child: const MtCatunoScreen(),
-          ),
-        );
-      }
-
       // >>> IDINAGDAG: ROUTE PARA SA MT. LINGGUHOB SCREEN <<<
       if (mountainId.toLowerCase().contains('lingguhob')) {
         return _route(
@@ -381,6 +373,54 @@ class AppRouter {
           ),
         );
       }
+
+      // >>> IDINAGDAG: ROUTE PARA SA MT. DAMAS SCREEN <<<
+      if (mountainId.toLowerCase().contains('damas')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtDamasScreen(),
+          ),
+        );
+      }
+
+      // >>> IDINAGDAG: ROUTE PARA SA MT. TUGEW SCREEN <<<
+      if (mountainId.toLowerCase().contains('tugew')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtTugewScreen(),
+          ),
+        );
+      }
+
+      // >>> IDINAGDAG: ROUTE PARA SA MT. MARIGLEM SCREEN <<<
+      if (mountainId.toLowerCase().contains('mariglem')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtMariglemScreen(),
+          ),
+        );
+      }
+
+      // >>> BINAGO: PURE CUTUNO ROUTE TRACKER (TINANGGAL ANG CATUNO REMNANTS) <<<
+      if (mountainId.toLowerCase().contains('cutuno')) {
+        return _route(
+          settings,
+          _AuthGuard(
+            currentLocation: location,
+            requireAuth: true,
+            child: const MtCutunoScreen(),
+          ),
+        );
+      }
     }
 
     if (segments.length == 4 &&
@@ -388,13 +428,6 @@ class AppRouter {
         segments[2] == 'trail') {
       final mountainId = segments[1];
       final trailId = segments[3];
-
-      if (mountainId.toLowerCase().contains('catuno') || mountainId.toLowerCase().contains('katingno') || mountainId.toLowerCase().contains('cutuno')) {
-        if (trailId == 'summit') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: catunoSummitTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'catuno_summit')));
-        if (trailId == 'lubog') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: catunoLubogTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'catuno_lubog')));
-        if (trailId == 'explorer') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: catunoExplorerTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'catuno_explorer')));
-        if (trailId == 'river') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: catunoRiverTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'catuno_river')));
-      }
 
       // >>> IDINAGDAG: ROUTE PARA SA 3 TRAILS NI MT. LINGGUHOB <<<
       if (mountainId.toLowerCase().contains('lingguhob')) {
@@ -417,6 +450,42 @@ class AppRouter {
         if (trailId == 'traverse') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: makilingTraverseTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'makiling_traverse')));
         if (trailId == 'mudsprings') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: makilingMudspringsTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'makiling_mudsprings')));
         if (trailId == 'flatrocks') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: makilingFlatrocksTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'makiling_flatrocks')));
+      }
+
+      // >>> IDINAGDAG: ROUTE PARA SA 5 TRAILS NI MT. DAMAS <<<
+      if (mountainId.toLowerCase().contains('damas')) {
+        if (trailId == 'papaac') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: damasPapaacTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'damas_papaac')));
+        if (trailId == 'ubod') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: damasUbodTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'damas_ubod')));
+        if (trailId == 'dueg') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: damasDuegTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'damas_dueg')));
+        if (trailId == 'canding') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: damasCandingTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'damas_canding')));
+        if (trailId == 'siwsiw') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: damasSiwsiwTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'damas_siwsiw')));
+      }
+
+      // >>> IDINAGDAG: ROUTE PARA SA 5 TRAILS NI MT. TUGEW <<<
+      if (mountainId.toLowerCase().contains('tugew')) {
+        if (trailId == 'poblacion') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: tugewPoblacionTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'tugew_poblacion')));
+        if (trailId == 'amburayan') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: tugewAmburayanTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'tugew_amburayan')));
+        if (trailId == 'longog') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: tugewLongogTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'tugew_longog')));
+        if (trailId == 'gaddani') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: tugewGaddaniTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'tugew_gaddani')));
+        if (trailId == 'badi') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: tugewBadiTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'tugew_badi')));
+      }
+
+      // >>> IDINAGDAG: ROUTE PARA SA 5 TRAILS NI MT. MARIGLEM <<<
+      if (mountainId.toLowerCase().contains('mariglem')) {
+        if (trailId == 'classic') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: mariglemClassicTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'mariglem_classic')));
+        if (trailId == 'mapanuepe') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: mariglemMapanuepeTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'mariglem_mapanuepe')));
+        if (trailId == 'marella') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: mariglemMarellaTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'mariglem_marella')));
+        if (trailId == 'aglao') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: mariglemAglaoTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'mariglem_aglao')));
+        if (trailId == 'consuelo') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: mariglemConsueloTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'mariglem_consuelo')));
+      }
+
+      // >>> BINAGO: PURE CUTUNO 5 TRAILS PARSER (TINANGGAL ANG LUMANG CATUNO TRACKS) <<<
+      if (mountainId.toLowerCase().contains('cutuno')) {
+        if (trailId == 'summit') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: cutunoSummitTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'cutuno_summit')));
+        if (trailId == 'lubog') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: cutunoLubogTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'cutuno_lubog')));
+        if (trailId == 'explorer') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: cutunoExplorerTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'cutuno_explorer')));
+        if (trailId == 'river') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: cutunoRiverTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'cutuno_river')));
+        if (trailId == 'cave') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: cutunoCaveTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'cutuno_cave')));
       }
 
       if (mountainId == AppRoutes.mtApoMountainId &&

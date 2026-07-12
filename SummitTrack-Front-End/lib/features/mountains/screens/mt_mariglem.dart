@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../widgets/animated_mt_apo_banner.dart'; 
 import '../widgets/custom_back_button.dart';
 
-class MtCatunoScreen extends StatelessWidget {
-  const MtCatunoScreen({super.key});
+class MtMariglemScreen extends StatelessWidget {
+  const MtMariglemScreen({super.key});
 
   static const _backgroundColor = Color(0xFFE3DDCF);
   static const _cardColor = Color(0xFFF4EFE5);
@@ -21,31 +20,38 @@ class MtCatunoScreen extends StatelessWidget {
 
     final trailButtons = [
       _TrailButtonConfig(
-        title: 'Traditional Catuno Summit Loop',
+        title: 'San Marcelino Classic Route',
         subtitle: 'Open Trail Details',
         onTap: () {
-          Navigator.of(context).pushNamed('/mountain/catuno/trail/summit');
+          Navigator.of(context).pushNamed('/mountain/mariglem/trail/classic');
         },
       ),
       _TrailButtonConfig(
-        title: 'Catuno-Lubog Twin Peak Traverse',
+        title: 'Mapanuepe Lake Ridge Link',
         subtitle: 'Open Trail Details',
         onTap: () {
-          Navigator.of(context).pushNamed('/mountain/catuno/trail/lubog');
+          Navigator.of(context).pushNamed('/mountain/mariglem/trail/mapanuepe');
         },
       ),
       _TrailButtonConfig(
-        title: 'Limestone Formations Explorer',
+        title: 'Marella Riverbed Scramble',
         subtitle: 'Open Trail Details',
         onTap: () {
-          Navigator.of(context).pushNamed('/mountain/catuno/trail/explorer');
+          Navigator.of(context).pushNamed('/mountain/mariglem/trail/marella');
         },
       ),
       _TrailButtonConfig(
-        title: 'Backcountry River Back-Trail',
+        title: 'Aglao Technical Knife-Edge',
         subtitle: 'Open Trail Details',
         onTap: () {
-          Navigator.of(context).pushNamed('/mountain/catuno/trail/river');
+          Navigator.of(context).pushNamed('/mountain/mariglem/trail/aglao');
+        },
+      ),
+      _TrailButtonConfig(
+        title: 'Consuelo Eco-Canyon Loop',
+        subtitle: 'Open Trail Details',
+        onTap: () {
+          Navigator.of(context).pushNamed('/mountain/mariglem/trail/consuelo');
         },
       ),
     ];
@@ -59,7 +65,7 @@ class MtCatunoScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              AnimatedMtApoBanner(imageAsset: _headerImage, title: 'Mt. Catuno'),
+              AnimatedMtApoBanner(imageAsset: _headerImage, title: 'Mt. Mariglem'),
               const SizedBox(height: 14),
               Container(
                 decoration: BoxDecoration(
@@ -80,22 +86,22 @@ class MtCatunoScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _InfoLine(label: 'Name:', value: 'Mt. Catuno (Mt. Katingno)'),
+                    const _InfoLine(label: 'Name:', value: 'Mt. Mariglem'),
                     const _InfoLine(
                       label: 'Location:',
-                      value: 'Tanay, Rizal, Philippines.',
+                      value: 'San Marcelino, Zambales, Philippines.',
                     ),
                     const _InfoLine(
                       label: 'Elevation:',
-                      value: 'Approximately 740+ MASL. Positioned elegantly along the scenic karst boundaries of Rizal.',
+                      value: 'Around 845 MASL. A commanding volcanic-ash peak dominating the landscape of southern Zambales.',
                     ),
                     const _InfoLine(
                       label: 'Description:',
-                      value: 'Mt. Catuno stands proudly as a hidden wonderland within Rizal\'s rich eco-tourism mapping. It heavily showcases ancient limestone formations, scenic karst bridges, and forested trails that provide an exceptional technical hike. Conquering its summit rewards adventurers with beautiful panoramic viewing decks of the vast Sierra Madre, the neighboring Mt. Lubog pinnacle, and pristine mountain watershed networks.',
+                      value: 'Mt. Mariglem is an unforgiving yet breathtaking destination in the Zambales mountain range. It is highly respected for its rolling, sun-baked grassland ridges, sprawling volcanic sand riverbeds, challenging knife-edges, and stunning high-angle overviews of the famous Mapanuepe Lake.',
                     ),
                     const _InfoLine(
                       label: 'Slope:',
-                      value: 'Highly technical rolling patterns. Shifts from gradual muddy woodland paths and switchbacks into extremely sharp, exposed limestone rock scrambles. Navigating the ridge segments demands strong deliberate balance and handhold checks due to complex vertical stone pockets.',
+                      value: 'Composed of intensely loose volcanic ash plains, steep clay hill sections, sliding gravel fields, and high-exposure razor crests that test both footing precision and balance.',
                     ),
                     const SizedBox(height: 18),
                     for (
@@ -157,7 +163,7 @@ class _TrailActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    final buttonColor = context.isDarkMode ? colors.accent : MtCatunoScreen._buttonColor;
+    final buttonColor = context.isDarkMode ? colors.accent : MtMariglemScreen._buttonColor;
     final titleColor = context.isDarkMode ? colors.background : const Color(0xFF2D1E06);
 
     return SizedBox(
