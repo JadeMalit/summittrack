@@ -968,6 +968,24 @@ class _MountainCardState extends State<_MountainCard> {
         return 'assets/images/mt_daraitan_home.png';
       case 'Mt. Maculot':
         return 'assets/images/mt_maculot_home.png';
+      case 'Mt. Pico de Loro':
+        return 'assets/images/mt_pico_de_loro_home.png';
+      case 'Mt. Pinatubo':
+        return 'assets/images/mt_pinatubo_home.png';
+      case 'Mt. Guiting-Guiting':
+        return 'assets/images/mt_guiting_guiting_home.png';
+      case 'Mt. Gulugod Baboy':
+        return 'assets/images/mt_gulugod_baboy_home.png';
+      case 'Mt. Maynoba':
+        return 'assets/images/mt_manoyba_home.png';
+      case 'Mt. Arayat':
+        return 'assets/images/mt_arayat_home.png';
+      case 'Mt. Makiling':
+        return 'assets/images/mt_makiling_home.png';
+      case 'Mt. Tugew':
+        return 'assets/images/mt_tugew_home.png';
+      case 'Mt. Mariglem':
+        return 'assets/images/mt_mariglem_home.png';
       default:
         return mountain.imageAsset;
     }

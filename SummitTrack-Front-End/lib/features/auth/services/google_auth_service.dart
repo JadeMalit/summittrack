@@ -153,11 +153,14 @@ class GoogleAuthService {
         createdUserRecord: createdUserRecord,
         isNewAuthUser: credential.additionalUserInfo?.isNewUser ?? false,
       );
-    } on GoogleAuthServiceException {
+    } on GoogleAuthServiceException catch (error, stackTrace) {
+      _logGoogleAuthFailure(error.step ?? _stepFlow, error, stackTrace);
       rethrow;
-    } on FirebaseAuthException catch (error) {
+    } on FirebaseAuthException catch (error, stackTrace) {
+      _logGoogleAuthFailure(_stepFlow, error, stackTrace);
       throw _mapFirebaseAuthError(error);
-    } on FirebaseException catch (error) {
+    } on FirebaseException catch (error, stackTrace) {
+      _logGoogleAuthFailure(_stepFlow, error, stackTrace);
       if (credential?.user != null) {
         await _safeSignOut();
       }
@@ -167,9 +170,11 @@ class GoogleAuthService {
         'Google sign-in worked, but we could not save your profile. Please try again.',
         error,
       );
-    } on PlatformException catch (error) {
+    } on PlatformException catch (error, stackTrace) {
+      _logGoogleAuthFailure(_stepFlow, error, stackTrace);
       throw _mapPlatformError(error);
-    } catch (error) {
+    } catch (error, stackTrace) {
+      _logGoogleAuthFailure(_stepFlow, error, stackTrace);
       if (credential?.user != null) {
         await _safeSignOut();
       }
@@ -445,18 +450,17 @@ class GoogleAuthService {
   }
 
   bool _containsApiExceptionStatus(PlatformException error, int statusCode) {
-    final message = error.message ?? '';
     return RegExp(
       'ApiException:\\s*$statusCode\\b',
       caseSensitive: false,
-    ).hasMatch(message);
+    ).hasMatch(_platformDiagnosticText(error));
   }
 
   bool _platformMessageContains(
     PlatformException error,
     Iterable<String> markers,
   ) {
-    final message = '${error.code} ${error.message ?? ''}'.toLowerCase();
+    final message = _platformDiagnosticText(error).toLowerCase();
     return markers.any((marker) => message.contains(marker.toLowerCase()));
   }
 
@@ -494,16 +498,29 @@ class GoogleAuthService {
   void _logGoogleAuthFailure(String step, Object error, StackTrace stackTrace) {
     final code = _diagnosticCode(error);
     final message = _diagnosticMessage(error);
+    final details = _diagnosticDetails(error);
+    final googleStatusCode = _googleApiStatusCode(error);
     debugPrint('[GoogleAuthService][$step] failed');
     debugPrint('[GoogleAuthService][$step] exceptionType=${error.runtimeType}');
     if (code != null && code.isNotEmpty) {
       debugPrint('[GoogleAuthService][$step] exceptionCode=$code');
+    }
+    if (googleStatusCode != null) {
+      debugPrint(
+        '[GoogleAuthService][$step] googleApiStatusCode=$googleStatusCode',
+      );
     }
     if (message != null && message.isNotEmpty) {
       debugPrint(
         '[GoogleAuthService][$step] exceptionMessage=${_sanitizeDiagnosticMessage(message)}',
       );
     }
+    if (details != null && details.isNotEmpty) {
+      debugPrint(
+        '[GoogleAuthService][$step] exceptionDetails=${_sanitizeDiagnosticMessage(details)}',
+      );
+    }
+    _logGoogleAuthCause(step, error);
     debugPrint('[GoogleAuthService][$step] stackTrace=$stackTrace');
   }
 
@@ -516,6 +533,17 @@ class GoogleAuthService {
     }
     if (error is PlatformException) {
       return error.code;
+    }
+    return null;
+  }
+
+  String? _diagnosticDetails(Object error) {
+    final cause = error is GoogleAuthServiceException ? error.cause : error;
+    if (cause is PlatformException && cause.details != null) {
+      return cause.details.toString();
+    }
+    if (cause is FirebaseException) {
+      return 'plugin=${cause.plugin}';
     }
     return null;
   }
@@ -533,10 +561,82 @@ class GoogleAuthService {
     return error.toString();
   }
 
+  void _logGoogleAuthCause(String step, Object error) {
+    if (error is! GoogleAuthServiceException || error.cause == null) {
+      return;
+    }
+
+    final cause = error.cause!;
+    final code = _diagnosticCode(cause);
+    final message = _diagnosticMessage(cause);
+    final details = _diagnosticDetails(cause);
+    final googleStatusCode = _googleApiStatusCode(cause);
+
+    debugPrint('[GoogleAuthService][$step] causeType=${cause.runtimeType}');
+    if (code != null && code.isNotEmpty) {
+      debugPrint('[GoogleAuthService][$step] causeCode=$code');
+    }
+    if (googleStatusCode != null) {
+      debugPrint(
+        '[GoogleAuthService][$step] causeGoogleApiStatusCode=$googleStatusCode',
+      );
+    }
+    if (message != null && message.isNotEmpty) {
+      debugPrint(
+        '[GoogleAuthService][$step] causeMessage=${_sanitizeDiagnosticMessage(message)}',
+      );
+    }
+    if (details != null && details.isNotEmpty) {
+      debugPrint(
+        '[GoogleAuthService][$step] causeDetails=${_sanitizeDiagnosticMessage(details)}',
+      );
+    }
+  }
+
+  int? _googleApiStatusCode(Object error) {
+    final cause = error is GoogleAuthServiceException ? error.cause : error;
+    if (cause is! PlatformException) {
+      return null;
+    }
+
+    final match = RegExp(
+      r'(?:ApiException:\s*|statusCode[=:]\s*|status code[=:]\s*)(-?\d+)\b',
+      caseSensitive: false,
+    ).firstMatch(_platformDiagnosticText(cause));
+
+    return int.tryParse(match?.group(1) ?? '');
+  }
+
+  String _platformDiagnosticText(PlatformException error) {
+    return [
+      error.code,
+      if (error.message != null) error.message!,
+      if (error.details != null) error.details.toString(),
+    ].join(' ');
+  }
+
   String _sanitizeDiagnosticMessage(String message) {
     var sanitized = message.replaceAll(
       RegExp(r'eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+'),
       '[REDACTED_JWT]',
+    );
+
+    sanitized = sanitized.replaceAll(
+      RegExp(r'AIza[0-9A-Za-z_-]{35}'),
+      '[REDACTED_API_KEY]',
+    );
+
+    sanitized = sanitized.replaceAll(
+      RegExp(
+        r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b',
+        caseSensitive: false,
+      ),
+      '[REDACTED_EMAIL]',
+    );
+
+    sanitized = sanitized.replaceAll(
+      RegExp(r'\bBearer\s+[A-Za-z0-9._-]+', caseSensitive: false),
+      'Bearer [REDACTED]',
     );
 
     sanitized = sanitized.replaceAllMapped(

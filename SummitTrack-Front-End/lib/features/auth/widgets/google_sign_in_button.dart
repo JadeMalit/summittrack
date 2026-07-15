@@ -39,12 +39,14 @@ class _GoogleAuthButtonState extends State<GoogleAuthButton> {
 
   final GoogleAuthService _googleAuthService = GoogleAuthService();
   bool _isLoading = false;
+  bool _authRequestInFlight = false;
 
-  bool get _isButtonBusy => widget.isBusy || _isLoading;
+  bool get _isButtonBusy => widget.isBusy || _isLoading || _authRequestInFlight;
 
   Future<void> _continueWithGoogle() async {
     if (_isButtonBusy) return;
 
+    _authRequestInFlight = true;
     FocusScope.of(context).unfocus();
     ScaffoldMessenger.of(context).clearSnackBars();
     _setLoading(true);
@@ -86,8 +88,12 @@ class _GoogleAuthButtonState extends State<GoogleAuthButton> {
     } catch (error) {
       _showGoogleAuthError(error);
     } finally {
-      widget.onAuthFlowFinish?.call();
-      _setLoading(false);
+      _authRequestInFlight = false;
+      try {
+        widget.onAuthFlowFinish?.call();
+      } finally {
+        _setLoading(false);
+      }
     }
   }
 

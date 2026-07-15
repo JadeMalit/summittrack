@@ -78,6 +78,15 @@ flutter:
     - assets/images/mt_ulap.jpg
     - assets/images/mt_daraitan_home.png
     - assets/images/mt_maculot_home.png
+    - assets/images/mt_pico_de_loro_home.png
+    - assets/images/mt_pinatubo_home.png
+    - assets/images/mt_guiting_guiting_home.png
+    - assets/images/mt_gulugod_baboy_home.png
+    - assets/images/mt_manoyba_home.png
+    - assets/images/mt_arayat_home.png
+    - assets/images/mt_makiling_home.png
+    - assets/images/mt_tugew_home.png
+    - assets/images/mt_mariglem_home.png
     - assets/images/logo.jpg
     - assets/images/mt apo.jpg
     - assets/videos/
