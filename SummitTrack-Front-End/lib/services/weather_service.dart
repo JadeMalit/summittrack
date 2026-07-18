@@ -1,65 +1,82 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class WeatherService {
-  static const apiKey = "19985b4c77467b7032a49fd008575e80";
+  /// 💡 SMART IP SWITCHER (Para sa Android Emulator at Localhost)
+  /// 💡 SMART IP SWITCHER (With Project ID: summittrack-10481)
+  static String get _baseUrl {
+    if (kIsWeb) {
+      return 'http://localhost:5001/summittrack-10481/us-central1/getSummitTrackWeather';
+    } else if (Platform.isAndroid) {
+      // Android Emulator ay dapat 10.0.2.2
+      return 'http://10.0.2.2:5001/summittrack-10481/us-central1/getSummitTrackWeather';
+    } else {
+      // iOS Simulator/Desktop
+      return 'http://127.0.0.1:5001/summittrack-10481/us-central1/getSummitTrackWeather';
+    }
+  }
 
-  // Inayos ang mga lokasyon para maging mas kilala sa OpenWeatherMap API
-  static const Map<String, String> mountainLocations = {
-    "Mount Ulap": "Itogon,PH",
-    "Mount Manabu": "Lipas,PH",
-    "Mount Gulugod Baboy": "Anilao,PH",
-    "Mount Maynoba": "Antipolo,PH",
-    "Mount Cutuno": "Angeles,PH",
-    "Mount Lingguhob": "Iloilo City,PH",
-    "Mount Batulao": "Nasugbu,PH",
-    "Mount Daraitan": "Tanay,PH",
-    "Mount Arayat": "Arayat,PH",
-    "Mount Makiling": "Los Banos,PH",
-    "Mount Damas": "Tarlac City,PH",
-    "Mount Tugew": "Nueva Vizcaya,PH",
-    "Mount Mariglem": "Zambales,PH",
-    "Mount Pinatubo": "Capas,PH",
-    "Mount Pulag": "Kabayan,PH",
-    "Mount Apo": "Davao City,PH",
-    "Mount Tapulao": "Iba,PH",
-    "Mount Espadang Bato": "Rodriguez,PH",
-    "Mount Hibok-Hibok": "Mambajao,PH",
-    "Mount Kitanglad": "Malaybalay,PH",
+  // 🗺️ Dictionary ng Coordinates para sa panloob na pag-map ng mga bundok kapag String ang ipinasa
+  final Map<String, List<double>> _mountainCoordinates = {
+    "Mount Apo": [6.9872, 125.3708],
+    "Mount Pulag": [16.5983, 120.8986],
+    "Mount Ulap": [16.2917, 120.6358],
+    "Mount Manabu": [13.9782, 121.2215],
+    "Mount Gulugod Baboy": [13.7119, 120.8988],
+    "Mount Maynoba": [14.6333, 121.3167],
+    "Mount Batulao": [14.0411, 120.8014],
+    "Mount Daraitan": [14.6139, 121.4331],
+    "Mount Arayat": [15.2011, 120.7422],
+    "Mount Makiling": [14.1308, 121.1925],
+    "Mount Pinatubo": [15.1428, 120.3506],
   };
 
-  Future<Map<String, dynamic>> getWeather(String mountainName) async {
-    final String queryLocation = mountainLocations[mountainName] ?? "Manila,PH";
+  /// 🚀 PARA SA MGA BAGONG SCREENS (Gaya ng WeatherScreen)
+  /// Kukuha ng 15-day forecast gamit ang lat/lon positional parameters
+  Future<Map<String, dynamic>> fetch15DayWeather(double lat, double lon) async {
+    try {
+      final url = Uri.parse('$_baseUrl?lat=$lat&lon=$lon');
+      final response = await http.get(url);
 
-    final url =
-        "https://api.openweathermap.org/data/2.5/weather?q=$queryLocation&appid=$apiKey&units=metric";
-
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-
-      return {
-        "location": {"name": data["name"]},
-        "current": {
-          "temp_c": data["main"]["temp"],
-          "humidity": data["main"]["humidity"],
-          "wind_kph": (data["wind"]["speed"] * 3.6).toStringAsFixed(1),
-          "condition": {"text": data["weather"][0]["description"]},
-        },
-        "forecast": {
-          "forecastday": [
-            {
-              "day": {"daily_chance_of_rain": data["clouds"]["all"]},
-            },
-          ],
-        },
-      };
+      if (response.statusCode == 200) {
+        return json.decode(response.body) as Map<String, dynamic>;
+      } else {
+        throw Exception('Server returned status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch mountain weather: $e');
     }
+  }
 
-    // Binago para ibalik ang mas malinis na error message
-    throw Exception(
-      "City/Mountain info not found in API. (Code: ${response.statusCode})",
-    );
+  /// 🟢 PARA SA MGA LUMANG SCREENS (Eksakto para sa HikeNavigationConfirmation niyo)
+  /// Tinitiyak nito na tumanggap siya ng 1 Positional Argument (mountainName String)
+  /// at isasalin ang JSON response sa lumang format (temp_c, condition text) para walang mabago sa screen mo.
+  Future<Map<String, dynamic>> getWeather(dynamic mountainName) async {
+    try {
+      final nameStr = mountainName.toString();
+      final coords = _mountainCoordinates[nameStr] ?? [6.9872, 125.3708];
+
+      // Tawagin ang totoong backend gamit ang coordinates map
+      final newData = await fetch15DayWeather(coords[0], coords[1]);
+
+      final current = newData['current'] ?? {};
+      final conditionText = current['condition'] ?? 'Clear';
+      final tempValue = current['temp'] ?? 25;
+
+      // Isinalin pabalik sa lumang structure para sa hike_navigation_confirmation mo
+      return {
+        "current": {
+          "temp_c": tempValue,
+          "condition": {
+            "text": conditionText,
+          }
+        },
+        "forecast": newData['forecast'] ?? [],
+      };
+    } catch (e) {
+      throw Exception('Legacy getWeather failed: $e');
+    }
   }
 }

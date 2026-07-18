@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../services/weather_service.dart';
 import '../models/scheduled_hike.dart';
 import '../services/hike_schedule_store.dart';
 import '../utils/mountain_schedule_identity.dart';
-import '../widgets/weather/weather_forecast_card.dart';
 import '../widgets/weather/weather_header.dart';
 import '../widgets/weather/weather_safety_card.dart';
 import '../widgets/weather/weather_stat_card.dart';
@@ -52,6 +52,20 @@ class _WeatherScreenState extends State<WeatherScreen>
     "Mount Kitanglad",
   ];
 
+  final Map<String, List<double>> mountainCoordinates = {
+    "Mount Apo": [6.9872, 125.3708],
+    "Mount Pulag": [16.5983, 120.8986],
+    "Mount Ulap": [16.2917, 120.6358],
+    "Mount Manabu": [13.9782, 121.2215],
+    "Mount Gulugod Baboy": [13.7119, 120.8988],
+    "Mount Maynoba": [14.6333, 121.3167],
+    "Mount Batulao": [14.0411, 120.8014],
+    "Mount Daraitan": [14.6139, 121.4331],
+    "Mount Arayat": [15.2011, 120.7422],
+    "Mount Makiling": [14.1308, 121.1925],
+    "Mount Pinatubo": [15.1428, 120.3506],
+  };
+
   String selectedMountain = "Mount Apo";
   Map<String, dynamic>? weatherData;
   bool isError = false;
@@ -74,11 +88,11 @@ class _WeatherScreenState extends State<WeatherScreen>
     );
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _entranceController,
-            curve: Curves.easeOutCubic,
-          ),
-        );
+      CurvedAnimation(
+        parent: _entranceController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
 
     loadWeather();
     _scheduleStore.addListener(_handleScheduleChanged);
@@ -117,7 +131,8 @@ class _WeatherScreenState extends State<WeatherScreen>
         isError = false;
       });
 
-      final data = await weatherService.getWeather(selectedMountain);
+      final coords = mountainCoordinates[selectedMountain] ?? [6.9872, 125.3708];
+      final data = await weatherService.fetch15DayWeather(coords[0], coords[1]);
 
       if (mounted) {
         setState(() {
@@ -207,8 +222,7 @@ class _WeatherScreenState extends State<WeatherScreen>
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            final scheduledHikesByMountain = _scheduleStore
-                .upcomingByMountain();
+            final scheduledHikesByMountain = _scheduleStore.upcomingByMountain();
 
             return SafeArea(
               top: false,
@@ -292,8 +306,8 @@ class _WeatherScreenState extends State<WeatherScreen>
                             final mountain = mountains[index];
                             final mountainId =
                                 MountainScheduleIdentity.idForWeatherName(
-                                  mountain,
-                                );
+                              mountain,
+                            );
                             final scheduledHikes =
                                 scheduledHikesByMountain[mountainId] ??
                                 const <ScheduledHike>[];
@@ -373,18 +387,18 @@ class _WeatherScreenState extends State<WeatherScreen>
             child: isError
                 ? _buildErrorScreen(key: const ValueKey("weather-error"))
                 : weatherData == null
-                ? _buildLoadingScreen(
-                    colors,
-                    key: const ValueKey("weather-loading"),
-                  )
-                : FadeTransition(
-                    key: ValueKey("weather-body-$selectedMountain"),
-                    opacity: _fadeAnimation,
-                    child: SlideTransition(
-                      position: _slideAnimation,
-                      child: _buildWeatherBody(),
-                    ),
-                  ),
+                    ? _buildLoadingScreen(
+                        colors,
+                        key: const ValueKey("weather-loading"),
+                      )
+                    : FadeTransition(
+                        key: ValueKey("weather-body-$selectedMountain"),
+                        opacity: _fadeAnimation,
+                        child: SlideTransition(
+                          position: _slideAnimation,
+                          child: _buildWeatherBody(),
+                        ),
+                      ),
           ),
         ),
       ),
@@ -393,17 +407,17 @@ class _WeatherScreenState extends State<WeatherScreen>
 
   Widget _buildWeatherBody() {
     final current = weatherData!["current"];
-    final location = weatherData!["location"];
     final condition = _conditionText(current) ?? "Clear";
     final rainChance = _rainChanceFromForecast();
     final safety = _safetyPresentation(rainChance);
     final accentColor = _conditionAccent(condition);
-    final locationName = _locationName(location);
+    
+    final locationName = "Region: ${current["location_name"] ?? "Unknown"}";
     final nextHike = _nextScheduledHikeForSelectedMountain();
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.fromLTRB(20, 12, 20, _bottomContentPadding(context)),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -411,7 +425,7 @@ class _WeatherScreenState extends State<WeatherScreen>
             mountainName: selectedMountain,
             locationName: locationName,
             condition: _titleCase(condition),
-            temperature: _temperatureText(current["temp_c"]),
+            temperature: _temperatureText(current["temp"]),
             accentColor: accentColor,
             onSelectMountain: () => _showMountainPicker(context),
           ),
@@ -458,7 +472,7 @@ class _WeatherScreenState extends State<WeatherScreen>
                 ),
                 WeatherStatCard(
                   title: "Wind",
-                  value: "${current["wind_kph"] ?? "--"} km/h",
+                  value: "${current["wind_speed"] ?? "--"} km/h",
                   caption: "Trail exposure",
                   icon: Icons.air_rounded,
                   accentColor: const Color(0xFF6C7A89),
@@ -485,7 +499,7 @@ class _WeatherScreenState extends State<WeatherScreen>
           const SizedBox(height: 12),
           _SlideUpSection(
             delay: const Duration(milliseconds: 180),
-            child: _buildForecastSection(condition, current["temp_c"]),
+            child: _buildForecastSection(condition, current["temp"]),
           ),
         ],
       ),
@@ -514,42 +528,318 @@ class _WeatherScreenState extends State<WeatherScreen>
     }
   }
 
-  double _bottomContentPadding(BuildContext context) {
-    return MediaQuery.of(context).viewPadding.bottom +
-        _floatingNavHeight +
-        _floatingNavBottomMargin +
-        _floatingNavTopGap;
-  }
-
   Widget _buildForecastSection(String fallbackCondition, dynamic fallbackTemp) {
-    final forecastList = weatherData!["forecast"]?["forecastday"] as List?;
+    final forecastList = weatherData!["forecast"] as List?;
 
     if (forecastList == null || forecastList.isEmpty) {
       return _EmptyForecastCard(color: _sectionTitleColor(context));
     }
 
-    return SizedBox(
-      height: 146,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: forecastList.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final dayData = forecastList[index];
-          final condition = _forecastCondition(dayData, fallbackCondition);
-          return WeatherForecastCard(
-            dayLabel: _forecastDayLabel(dayData, index),
-            condition: _titleCase(condition),
-            temperature: _temperatureText(
-              _forecastTemperature(dayData, fallbackTemp),
-              includeCelsius: true,
+    int globalMin = 100;
+    int globalMax = -100;
+    for (var day in forecastList) {
+      final int minT = (day['temp_min'] as num?)?.round() ?? 20;
+      final int maxT = (day['temp_max'] as num?)?.round() ?? 35;
+      if (minT < globalMin) globalMin = minT;
+      if (maxT > globalMax) globalMax = maxT;
+    }
+    if (globalMax == globalMin) globalMax += 1;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08), 
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.calendar_month_rounded, size: 14, color: Colors.white.withValues(alpha: 0.5)),
+              const SizedBox(width: 8),
+              Text(
+                "15-DAY FORECAST",
+                style: GoogleFonts.poppins(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white.withValues(alpha: 0.5),
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: forecastList.length,
+            separatorBuilder: (context, index) => Divider(
+              color: Colors.white.withValues(alpha: 0.08),
+              height: 1,
             ),
-            accentColor: _conditionAccent(condition),
-          );
-        },
+            itemBuilder: (context, index) {
+              final dayData = forecastList[index];
+              final int wmoCode = dayData["weather_code"] ?? 0;
+              final condition = _interpretWmoCode(wmoCode);
+              
+              final int minTemp = (dayData["temp_min"] as num?)?.round() ?? 24;
+              final int maxTemp = (dayData["temp_max"] as num?)?.round() ?? 32;
+              final int rainChance = (dayData["rain_chance"] as num?)?.round() ?? 0;
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 65,
+                      child: Text(
+                        _forecastDayLabel(dayData, index),
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 55,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _iconForPreviewCondition(condition),
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                          if (rainChance >= 20) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              "$rainChance%",
+                              style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF3CD1FF),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    SizedBox(
+                      width: 32,
+                      child: Text(
+                        "$minTemp°",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withValues(alpha: 0.4),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final double totalWidth = constraints.maxWidth;
+                            final double startPct = (minTemp - globalMin) / (globalMax - globalMin);
+                            final double endPct = (maxTemp - globalMin) / (globalMax - globalMin);
+                            
+                            final double leftPadding = startPct * totalWidth;
+                            final double barWidth = (endPct - startPct) * totalWidth;
+
+                            return Stack(
+                              alignment: Alignment.centerLeft,
+                              children: [
+                                Container(
+                                  height: 4,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: leftPadding,
+                                  width: barWidth.clamp(6.0, totalWidth),
+                                  child: Container(
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(2),
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFFFF9500),
+                                          Color(0xFFFFB300),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 32,
+                      child: Text(
+                        "$maxTemp°",
+                        textAlign: TextAlign.right,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
+  }
+
+  IconData _iconForPreviewCondition(String condition) {
+    final lower = condition.toLowerCase();
+    if (lower.contains('thunderstorm')) return Icons.thunderstorm_rounded;
+    if (lower.contains('rain') || lower.contains('drizzle') || lower.contains('showers')) {
+      return Icons.umbrella_rounded;
+    }
+    if (lower.contains('clear') || lower.contains('sun')) return Icons.wb_sunny_rounded;
+    if (lower.contains('cloud') || lower.contains('overcast')) return Icons.wb_cloudy_rounded;
+    return Icons.cloud_rounded;
+  }
+
+  int _rainChanceFromForecast() {
+    final forecast = weatherData!["forecast"];
+    if (forecast is List && forecast.isNotEmpty) {
+      final firstDay = forecast.first;
+      return (firstDay["rain_chance"] as num?)?.toInt() ?? 0;
+    }
+    return 0;
+  }
+
+  _SafetyPresentation _safetyPresentation(int rainChance) {
+    final colors = context.appColors;
+
+    if (rainChance < 40) {
+      return _SafetyPresentation(
+        title: "Recommended",
+        message: "Conditions look favorable for hiking today.",
+        color: colors.accent,
+        icon: Icons.verified_rounded,
+      );
+    }
+
+    if (rainChance < 70) {
+      return _SafetyPresentation(
+        title: "Use Caution",
+        message: "Pack rain protection and monitor trail conditions.",
+        color: colors.warning,
+        icon: Icons.warning_amber_rounded,
+      );
+    }
+
+    return _SafetyPresentation(
+      title: "Not Recommended",
+      message: "Weather conditions may not be safe for hiking today.",
+      color: colors.danger,
+      icon: Icons.report_problem_rounded,
+    );
+  }
+
+  String _safetyIndexText(int rainChance) {
+    if (rainChance < 40) return "High";
+    if (rainChance < 70) return "Fair";
+    return "Low";
+  }
+
+  Color _conditionAccent(String condition) {
+    final cond = condition.toLowerCase();
+    if (_isRainy(cond)) return const Color(0xFF4F7FA2);
+    if (_isCloudy(cond)) return const Color(0xFF6E8290);
+    if (_isFoggy(cond)) return const Color(0xFF7C8C8A);
+    return const Color(0xFFFFB84D);
+  }
+
+  Color _sectionTitleColor(BuildContext context) {
+    final colors = context.appColors;
+    return context.isDarkMode ? colors.textSecondary : const Color(0xFF273B45);
+  }
+
+  String _forecastDayLabel(dynamic dayData, int index) {
+    if (index == 0) return "Today";
+    
+    final dateValue = dayData is Map ? dayData["date"] : null;
+    final parsedDate = DateTime.tryParse(dateValue?.toString() ?? "");
+    if (parsedDate == null) {
+      return "Day ${index + 1}";
+    }
+
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    return days[parsedDate.weekday - 1];
+  }
+
+  String? _conditionText(dynamic current) {
+    if (current is! Map) return null;
+    return current["condition"]?.toString();
+  }
+
+  String _temperatureText(dynamic value, {bool includeCelsius = false}) {
+    final temp = num.tryParse(value.toString());
+    if (temp == null) return includeCelsius ? "--\u00B0C" : "--\u00B0";
+
+    final suffix = includeCelsius ? "\u00B0C" : "\u00B0";
+    return "${temp.round()}$suffix";
+  }
+
+  String _interpretWmoCode(int code) {
+    if (code == 0) return "Clear";
+    if (code >= 1 && code <= 3) return "Partly Cloudy";
+    if (code == 45 || code == 48) return "Foggy";
+    if (code >= 51 && code <= 55) return "Drizzle";
+    if (code >= 61 && code <= 65) return "Rainy";
+    if (code >= 80 && code <= 82) return "Showers";
+    if (code >= 95 && code <= 99) return "Thunderstorm";
+    return "Cloudy";
+  }
+
+  String _titleCase(String value) {
+    return value
+        .split(" ")
+        .where((word) => word.isNotEmpty)
+        .map((word) {
+          final lower = word.toLowerCase();
+          return "${lower[0].toUpperCase()}${lower.substring(1)}";
+        })
+        .join(" ");
+  }
+
+  bool _isRainy(String condition) {
+    return condition.contains("rain") ||
+        condition.contains("drizzle") ||
+        condition.contains("thunder") ||
+        condition.contains("showers") ||
+        condition.contains("storm");
+  }
+
+  bool _isCloudy(String condition) {
+    return condition.contains("cloud") || condition.contains("overcast");
+  }
+
+  bool _isFoggy(String condition) {
+    return condition.contains("mist") ||
+        condition.contains("fog") ||
+        condition.contains("haze") ||
+        condition.contains("smoke");
   }
 
   Widget _buildLoadingScreen(AppColors colors, {Key? key}) {
@@ -665,153 +955,6 @@ class _WeatherScreenState extends State<WeatherScreen>
         ),
       ),
     );
-  }
-
-  int _rainChanceFromForecast() {
-    final forecastDay = weatherData!["forecast"]?["forecastday"];
-    if (forecastDay is List && forecastDay.isNotEmpty) {
-      final firstDay = forecastDay.first;
-      final day = firstDay is Map ? firstDay["day"] : null;
-      final value = day is Map ? day["daily_chance_of_rain"] : null;
-      final parsed = num.tryParse(value.toString());
-      if (parsed == null) return 0;
-      return parsed.clamp(0, 100).toInt();
-    }
-    return 0;
-  }
-
-  _SafetyPresentation _safetyPresentation(int rainChance) {
-    final colors = context.appColors;
-
-    if (rainChance < 40) {
-      return _SafetyPresentation(
-        title: "Recommended",
-        message: "Conditions look favorable for hiking today.",
-        color: colors.accent,
-        icon: Icons.verified_rounded,
-      );
-    }
-
-    if (rainChance < 70) {
-      return _SafetyPresentation(
-        title: "Use Caution",
-        message: "Pack rain protection and monitor trail conditions.",
-        color: colors.warning,
-        icon: Icons.warning_amber_rounded,
-      );
-    }
-
-    return _SafetyPresentation(
-      title: "Not Recommended",
-      message: "Weather conditions may not be safe for hiking today.",
-      color: colors.danger,
-      icon: Icons.report_problem_rounded,
-    );
-  }
-
-  String _safetyIndexText(int rainChance) {
-    if (rainChance < 40) return "High";
-    if (rainChance < 70) return "Fair";
-    return "Low";
-  }
-
-  Color _conditionAccent(String condition) {
-    final cond = condition.toLowerCase();
-    if (_isRainy(cond)) return const Color(0xFF4F7FA2);
-    if (_isCloudy(cond)) return const Color(0xFF6E8290);
-    if (_isFoggy(cond)) return const Color(0xFF7C8C8A);
-    return const Color(0xFFFFB84D);
-  }
-
-  Color _sectionTitleColor(BuildContext context) {
-    final colors = context.appColors;
-    return context.isDarkMode ? colors.textSecondary : const Color(0xFF273B45);
-  }
-
-  dynamic _forecastTemperature(dynamic dayData, dynamic fallbackTemp) {
-    final day = dayData is Map ? dayData["day"] : null;
-    if (day is Map) {
-      return day["avgtemp_c"] ??
-          day["maxtemp_c"] ??
-          day["temp_c"] ??
-          fallbackTemp;
-    }
-    return fallbackTemp;
-  }
-
-  String _forecastCondition(dynamic dayData, String fallbackCondition) {
-    final day = dayData is Map ? dayData["day"] : null;
-    final condition = day is Map ? day["condition"] : null;
-    if (condition is Map && condition["text"] != null) {
-      return condition["text"].toString();
-    }
-    return fallbackCondition;
-  }
-
-  String _forecastDayLabel(dynamic dayData, int index) {
-    final dateValue = dayData is Map ? dayData["date"] : null;
-    final parsedDate = DateTime.tryParse(dateValue?.toString() ?? "");
-    if (parsedDate == null) {
-      return index == 0 ? "Today" : "Day ${index + 1}";
-    }
-
-    if (index == 0) return "Today";
-
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    return days[parsedDate.weekday - 1];
-  }
-
-  String _locationName(dynamic location) {
-    if (location is Map && location["name"] != null) {
-      return "Region: ${location["name"]}";
-    }
-    return "Region unavailable";
-  }
-
-  String? _conditionText(dynamic current) {
-    if (current is! Map) return null;
-    final condition = current["condition"];
-    if (condition is Map && condition["text"] != null) {
-      return condition["text"].toString();
-    }
-    return null;
-  }
-
-  String _temperatureText(dynamic value, {bool includeCelsius = false}) {
-    final temp = num.tryParse(value.toString());
-    if (temp == null) return includeCelsius ? "--\u00B0C" : "--\u00B0";
-
-    final suffix = includeCelsius ? "\u00B0C" : "\u00B0";
-    return "${temp.round()}$suffix";
-  }
-
-  String _titleCase(String value) {
-    return value
-        .split(" ")
-        .where((word) => word.isNotEmpty)
-        .map((word) {
-          final lower = word.toLowerCase();
-          return "${lower[0].toUpperCase()}${lower.substring(1)}";
-        })
-        .join(" ");
-  }
-
-  bool _isRainy(String condition) {
-    return condition.contains("rain") ||
-        condition.contains("drizzle") ||
-        condition.contains("thunder") ||
-        condition.contains("storm");
-  }
-
-  bool _isCloudy(String condition) {
-    return condition.contains("cloud") || condition.contains("overcast");
-  }
-
-  bool _isFoggy(String condition) {
-    return condition.contains("mist") ||
-        condition.contains("fog") ||
-        condition.contains("haze") ||
-        condition.contains("smoke");
   }
 }
 
@@ -1235,46 +1378,22 @@ class _EmptyForecastCard extends StatelessWidget {
   }
 }
 
-bool _isSameDate(DateTime first, DateTime second) {
-  return first.year == second.year &&
-      first.month == second.month &&
-      first.day == second.day;
-}
-
-String _formatShortHikeDate(DateTime date) {
-  return "${_shortMonthNames[date.month - 1]} ${date.day}";
+bool _isSameDate(DateTime d1, DateTime d2) {
+  return d1.year == d2.year && d1.month == d2.month && d1.day == d2.day;
 }
 
 String _formatFullHikeDate(DateTime date) {
-  return "${_fullMonthNames[date.month - 1]} ${date.day}, ${date.year}";
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  return "${months[date.month - 1]} ${date.day}, ${date.year}";
 }
 
-const _shortMonthNames = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-
-const _fullMonthNames = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+String _formatShortHikeDate(DateTime date) {
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+  return "${months[date.month - 1]} ${date.day}";
+}
