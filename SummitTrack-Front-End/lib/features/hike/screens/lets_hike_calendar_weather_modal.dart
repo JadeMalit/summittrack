@@ -33,10 +33,27 @@ class _LetsHikeCalendarWeatherModalState
   static const Color _accentColor = Color(0xFF3FA65B);
   static const Color _mutedTextColor = Color(0xFFB8C7B7);
 
+  // 🗺️ Dictionary ng Coordinates para sa pag-fetch ng tamang lagay ng panahon
+  final Map<String, List<double>> _mountainCoordinates = {
+    "Mount Apo": [6.9872, 125.3708],
+    "Mount Pulag": [16.5983, 120.8986],
+    "Mount Ulap": [16.2917, 120.6358],
+    "Mount Manabu": [13.9782, 121.2215],
+    "Mount Gulugod Baboy": [13.7119, 120.8988],
+    "Mount Maynoba": [14.6333, 121.3167],
+    "Mount Batulao": [14.0411, 120.8014],
+    "Mount Daraitan": [14.6139, 121.4331],
+    "Mount Arayat": [15.2011, 120.7422],
+    "Mount Makiling": [14.1308, 121.1925],
+    "Mount Pinatubo": [15.1428, 120.3506],
+  };
+
   final WeatherService _weatherService = WeatherService();
   late DateTime _selectedDate;
   late DateTime _visibleMonth;
-  _WeatherPreviewData? _currentWeatherData;
+  
+  // Imbis na isang pirasong data lang, i-save natin ang buong response para ma-map ang 15 days!
+  Map<String, dynamic>? _fullResponseData;
   bool _isLoadingWeather = true;
 
   @override
@@ -45,30 +62,28 @@ class _LetsHikeCalendarWeatherModalState
     final today = _dateOnly(DateTime.now());
     _selectedDate = today;
     _visibleMonth = DateTime(today.year, today.month);
-    _loadCurrentWeather();
+    _loadWeatherData();
   }
 
-  Future<void> _loadCurrentWeather() async {
+  Future<void> _loadWeatherData() async {
     try {
-      final weatherData = await _weatherService.getWeather(
-        _weatherLookupName(widget.trailName),
-      );
+      final lookupName = _weatherLookupName(widget.trailName);
+      final coords = _mountainCoordinates[lookupName] ?? [6.9872, 125.3708]; // Default sa Mt. Apo kung wala sa listahan
 
-      if (!mounted) {
-        return;
-      }
+      // 🚀 Tinawag na ang tamang bagong method na may coordinates!
+      final weatherData = await _weatherService.fetch15DayWeather(coords[0], coords[1]);
+
+      if (!mounted) return;
 
       setState(() {
-        _currentWeatherData = _WeatherPreviewData.fromService(weatherData);
+        _fullResponseData = weatherData;
         _isLoadingWeather = false;
       });
     } catch (_) {
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
 
       setState(() {
-        _currentWeatherData = null;
+        _fullResponseData = null;
         _isLoadingWeather = false;
       });
     }
@@ -111,7 +126,7 @@ class _LetsHikeCalendarWeatherModalState
                   const SizedBox(height: 16),
                   _WeatherPreviewCard(
                     selectedDate: _selectedDate,
-                    isLoading: _isLoadingWeather && _isToday(_selectedDate),
+                    isLoading: _isLoadingWeather,
                     weather: _weatherForDate(_selectedDate),
                   ),
                   const SizedBox(height: 18),
@@ -304,11 +319,28 @@ class _LetsHikeCalendarWeatherModalState
     return cells;
   }
 
+  // 🧠 MAGICAL UPDATE: Itatapat natin sa totoong 15 days data kung pasok ang piniling araw!
   _WeatherPreviewData _weatherForDate(DateTime date) {
-    if (_isToday(date) && _currentWeatherData != null) {
-      return _currentWeatherData!;
+    if (_fullResponseData == null) {
+      return _WeatherPreviewData.mockFor(date);
     }
 
+    final forecastList = _fullResponseData!['forecast'] as List?;
+    if (forecastList != null) {
+      // Hanapin ang saktong petsa sa loob ng 15-day array (Format ng date sa backend: YYYY-MM-DD)
+      final String targetString = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+      
+      final matchingDay = forecastList.firstWhere(
+        (day) => day['date'] == targetString,
+        orElse: () => null,
+      );
+
+      if (matchingDay != null) {
+        return _WeatherPreviewData.fromForecastJson(matchingDay);
+      }
+    }
+
+    // Fallback sa mock kung pinili ni user ay lampas sa 15 days o nakaraang araw
     return _WeatherPreviewData.mockFor(date);
   }
 
@@ -557,32 +589,21 @@ class _WeatherPreviewData {
   final int rainChancePercent;
   final Color themeColor;
 
-  factory _WeatherPreviewData.fromService(Map<String, dynamic> data) {
-    final current = data['current'] as Map<String, dynamic>?;
-    final forecast = data['forecast'] as Map<String, dynamic>?;
-    final forecastDays = forecast?['forecastday'] as List<dynamic>?;
-    final firstDay = forecastDays?.isNotEmpty == true
-        ? forecastDays!.first as Map<String, dynamic>?
-        : null;
-    final day = firstDay?['day'] as Map<String, dynamic>?;
-    final temp = _readInt(current?['temp_c'], fallback: 24);
-    final condition = _titleCase(
-      current?['condition'] is Map<String, dynamic>
-          ? (current?['condition'] as Map<String, dynamic>)['text']?.toString()
-          : null,
-    );
-    final rainChance = _readInt(
-      day?['daily_chance_of_rain'],
-      fallback: 28,
-    ).clamp(0, 100).toInt();
+  // 🟢 INAYOS NA FACTORY: Ito ang mag-babasa ng bawat araw sa 15 days list ng bago nating server!
+  factory _WeatherPreviewData.fromForecastJson(Map<String, dynamic> json) {
+    final int wmoCode = json['weather_code'] ?? 0;
+    final conditionText = _interpretWmoCode(wmoCode);
+    final high = (json['temp_max'] as num?)?.round() ?? 25;
+    final low = (json['temp_min'] as num?)?.round() ?? 18;
+    final rain = (json['rain_chance'] as num?)?.round() ?? 0;
 
     return _WeatherPreviewData(
-      icon: _iconForCondition(condition),
-      condition: condition,
-      highTempC: temp + 3,
-      lowTempC: temp - 4,
-      rainChancePercent: rainChance,
-      themeColor: _themeForCondition(condition),
+      icon: _iconForCondition(conditionText),
+      condition: conditionText,
+      highTempC: high,
+      lowTempC: low,
+      rainChancePercent: rain,
+      themeColor: _themeForCondition(conditionText),
     );
   }
 
@@ -626,39 +647,23 @@ class _WeatherPreviewData {
     return options[seed % options.length];
   }
 
-  static int _readInt(Object? value, {required int fallback}) {
-    if (value is num) {
-      return value.round();
-    }
-
-    return num.tryParse(value?.toString() ?? '')?.round() ?? fallback;
-  }
-
-  static String _titleCase(String? value) {
-    final text = value?.trim();
-    if (text == null || text.isEmpty) {
-      return 'Partly Cloudy';
-    }
-
-    return text
-        .split(RegExp(r'\s+'))
-        .map((word) {
-          if (word.isEmpty) {
-            return word;
-          }
-
-          return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
-        })
-        .join(' ');
+  static String _interpretWmoCode(int code) {
+    if (code == 0) return "Clear";
+    if (code >= 1 && code <= 3) return "Partly Cloudy";
+    if (code == 45 || code == 48) return "Foggy";
+    if (code >= 51 && code <= 55) return "Drizzle";
+    if (code >= 61 && code <= 65) return "Rainy";
+    if (code >= 80 && code <= 82) return "Showers";
+    if (code >= 95 && code <= 99) return "Thunderstorm";
+    return "Cloudy";
   }
 
   static IconData _iconForCondition(String condition) {
     final lowerCondition = condition.toLowerCase();
-    if (lowerCondition.contains('rain') || lowerCondition.contains('drizzle')) {
+    if (lowerCondition.contains('rain') || lowerCondition.contains('drizzle') || lowerCondition.contains('showers')) {
       return Icons.water_drop_rounded;
     }
-    if (lowerCondition.contains('storm') ||
-        lowerCondition.contains('thunder')) {
+    if (lowerCondition.contains('storm') || lowerCondition.contains('thunder')) {
       return Icons.thunderstorm_rounded;
     }
     if (lowerCondition.contains('clear') || lowerCondition.contains('sun')) {
@@ -669,7 +674,7 @@ class _WeatherPreviewData {
 
   static Color _themeForCondition(String condition) {
     final lowerCondition = condition.toLowerCase();
-    if (lowerCondition.contains('rain') || lowerCondition.contains('storm')) {
+    if (lowerCondition.contains('rain') || lowerCondition.contains('storm') || lowerCondition.contains('showers')) {
       return const Color(0xFF3C83A8);
     }
     if (lowerCondition.contains('clear') || lowerCondition.contains('sun')) {
