@@ -1,22 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class WeatherService {
-  /// 💡 SMART IP SWITCHER (Para sa Android Emulator at Localhost)
-  /// 💡 SMART IP SWITCHER (With Project ID: summittrack-10481)
-  static String get _baseUrl {
-    if (kIsWeb) {
-      return 'http://localhost:5001/summittrack-10481/us-central1/getSummitTrackWeather';
-    } else if (Platform.isAndroid) {
-      // Android Emulator ay dapat 10.0.2.2
-      return 'http://10.0.2.2:5001/summittrack-10481/us-central1/getSummitTrackWeather';
-    } else {
-      // iOS Simulator/Desktop
-      return 'http://127.0.0.1:5001/summittrack-10481/us-central1/getSummitTrackWeather';
-    }
-  }
+  /// 🌐 LIVE PRODUCTION URL (Gumagana sa Web, Android, at iOS nang walang emulator)
+  static String get _baseUrl =>
+      'https://us-central1-summittrack-10481.cloudfunctions.net/getSummitTrackWeather';
 
   // 🗺️ Dictionary ng Coordinates para sa panloob na pag-map ng mga bundok kapag String ang ipinasa
   final Map<String, List<double>> _mountainCoordinates = {
