@@ -26,5 +26,5 @@ const TrailData tabacoTrail = TrailData(
     'Sun exposure is absolute on the upper half; wear sun protection sleeves and hats',
     'Strictly follow the guide\'s whistle commands in case of sudden changes in weather or visibility',
   ],
-  showTrailMap: false,
+  showTrailMap: true,
 );

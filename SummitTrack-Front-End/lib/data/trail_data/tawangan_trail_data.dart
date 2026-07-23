@@ -25,5 +25,5 @@ const TrailData tawanganTrail = TrailData(
     'Check your body periodically for limatik (leeches) attached to skin or clothing',
     'Pack all trash securely; the mossy forest is a highly sensitive habitat',
   ],
-  showTrailMap: false,
+  showTrailMap: true,
 );

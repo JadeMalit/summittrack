@@ -26,5 +26,5 @@ const TrailData buyohanTrail = TrailData(
     'Check the wind direction to avoid inhaling sudden sulfuric fumes',
     'Strictly follow the advice of local guides regarding safety lines and zones',
   ],
-  showTrailMap: false,
+  showTrailMap: true,
 );

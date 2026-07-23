@@ -25,5 +25,5 @@ const TrailData ambaguioTrail = TrailData(
     'Respect the local communities and indigenous traditions passed along the villages',
     'Keep track of day-to-day pacing to reach the target campsites before nightfall',
   ],
-  showTrailMap: false,
+  showTrailMap: true,
 );

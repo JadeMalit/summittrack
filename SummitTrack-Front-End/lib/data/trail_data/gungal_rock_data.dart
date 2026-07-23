@@ -22,5 +22,5 @@ const TrailData gungalRockTrail = TrailData(
     'Strictly follow your local guide\'s single-file system when taking photos at Gungal Rock; NO horseplay or running near the edges',
     'Be mindful of strong, sudden gusts of wind while balancing on top of the rock structure',
   ],
-  showTrailMap: false,
+  showTrailMap: true,
 );

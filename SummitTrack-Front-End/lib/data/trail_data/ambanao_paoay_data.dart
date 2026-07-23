@@ -23,5 +23,5 @@ const TrailData ambanaoPaoayTrail = TrailData(
     'Stay close to your local guide if trekking during early morning heavy fog or low visibility',
     'Avoid stepping on soft soil ledge corners along the open ridge tracks',
   ],
-  showTrailMap: false,
+  showTrailMap: true,
 );

@@ -26,5 +26,5 @@ const TrailData akikiTrail = TrailData(
     'Be highly aware of rapid temperature drops and early signs of hypothermia',
     'Strictly stay with your group and local guides; trails can get easily fogged up',
   ],
-  showTrailMap: false,
+  showTrailMap: true,
 );

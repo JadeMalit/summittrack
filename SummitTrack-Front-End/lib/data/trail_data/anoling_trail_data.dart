@@ -26,5 +26,5 @@ const TrailData anolingTrail = TrailData(
     'In case of sudden weather shifts, be prepared for slick, slippery volcanic mud on lower sections',
     'Never cross past the designated safety perimeter set by your guides',
   ],
-  showTrailMap: false,
+  showTrailMap: true,
 );

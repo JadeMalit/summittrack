@@ -32,5 +32,5 @@ const TrailData oldTrail = TrailData(
     'Do not rush or run along the knife-edge crests; wait for passing hikers in wider camp zones',
     'Listen strictly to your local guide regarding safe step placements on the rocky monolith structures',
   ],
-  showTrailMap: false,
+  showTrailMap: true,
 );

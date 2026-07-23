@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/state/app_mode_provider.dart';
 import '../../../core/routing/app_routes.dart';
+import '../../../core/state/app_mode_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/navigation/navigation_trails.dart';
 import '../../../data/trail_data/trail_data.dart';
+import '../../../data/trail_data/trail_gps_helper.dart';
+import '../../../data/trail_data/trail_waypoint_helper.dart';
 import '../../../models/hike_navigation_metadata.dart';
 import '../../../screens/navigation/hike_navigation_confirmation.dart';
 import '../../../services/tracking/hike_tracking_service.dart';
@@ -13,8 +15,10 @@ import '../../hike/models/scheduled_hike.dart';
 import '../../hike/screens/lets_hike_calendar_weather_modal.dart';
 import '../../hike/services/hike_schedule_store.dart';
 import '../../hike/utils/mountain_schedule_identity.dart';
+import '../widgets/elevation_gradient_map_3d.dart';
 import '../widgets/first_aid_emergency_tips.dart';
 import '../widgets/foldable_trail_checklist_card.dart';
+import '../widgets/trail_3d_satellite_widget.dart';
 import '../widgets/trail_photo_uploader.dart';
 
 class TrailDetailScreen extends StatelessWidget {
@@ -45,6 +49,16 @@ class TrailDetailScreen extends StatelessWidget {
     final navigationMetadata = NavigationTrails.forTrailId(
       navigationTrailId ?? trailPhotoId,
     );
+
+    // 🏔️ Kinukuha ang totoong Peak Elevation at Total Distance ng bundok mula sa waypoints
+    final waypoints = TrailWaypointHelper.getWaypointsForTrail(
+      trail,
+      trailPhotoId,
+    );
+    final maxElevation = waypoints.isNotEmpty
+        ? waypoints.map((w) => w.elevation).reduce((a, b) => a > b ? a : b)
+        : null;
+    final totalDistance = waypoints.isNotEmpty ? waypoints.last.distance : null;
 
     return Scaffold(
       backgroundColor: context.isDarkMode
@@ -111,12 +125,30 @@ class TrailDetailScreen extends StatelessWidget {
                     const _SectionHeading(title: 'First Aid / Emergency Tips'),
                     const SizedBox(height: 10),
                     const FirstAidEmergencyTips(),
-                    if (trail.showTrailMap) ...[
-                      const SizedBox(height: 18),
-                      const _SectionHeading(title: 'Trail Map / Gradient Map'),
-                      const SizedBox(height: 10),
-                      const _TrailMapCard(),
-                    ],
+
+                    // 🛰️ 1. STRAVA-STYLE HD SATELLITE TERRAIN MAP
+                    const SizedBox(height: 18),
+                    const _SectionHeading(title: 'Trail Map'),
+                    const SizedBox(height: 10),
+                    Trail3DSatelliteWidget(
+                      trailName: trail.name,
+                      routeCoordinates: TrailGpsHelper.getGpsRouteForTrail(
+                        trail,
+                        trailPhotoId,
+                      ),
+                      elevation: maxElevation,
+                      distance: totalDistance, // 👈 TOTOONG DISTANCE NG BUNDOK
+                    ),
+
+                    // ⛰️ 2. 3D ELEVATION & SLOPE PROFILE
+                    const SizedBox(height: 18),
+                    const _SectionHeading(title: 'Gradient Map'),
+                    const SizedBox(height: 10),
+                    ElevationGradientMap3D(
+                      trailTitle: trail.name,
+                      waypoints: waypoints,
+                    ),
+
                     if (isOfflineMode) ...[
                       const SizedBox(height: 18),
                       const _SectionHeading(title: 'Offline Access'),
@@ -423,143 +455,6 @@ class _SafetyReminderCard extends StatelessWidget {
   }
 }
 
-class _TrailMapCard extends StatelessWidget {
-  const _TrailMapCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.appColors;
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: context.isDarkMode
-            ? colors.surfaceHigh
-            : Colors.white.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: context.isDarkMode ? colors.border : const Color(0xFFC7C0B3),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colors.shadow,
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Sta. Cruz / Sibulan Trail to Mt. Apo Gradient Map',
-            style: GoogleFonts.fredoka(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: colors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: AspectRatio(
-              aspectRatio: 1.35,
-              child: CustomPaint(
-                painter: _TrailMapPainter(),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Elevation change from jump-off to summit',
-                        style: GoogleFonts.poppins(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                          color: context.isDarkMode
-                              ? const Color(0xFF3A473A)
-                              : const Color(0xFF625948),
-                        ),
-                      ),
-                      const Spacer(),
-                      const Wrap(
-                        alignment: WrapAlignment.spaceBetween,
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _MapLegendChip(
-                            label: 'Jump-off',
-                            color: Color(0xFF2AA64A),
-                          ),
-                          _MapLegendChip(
-                            label: 'Mid Trail',
-                            color: Color(0xFFE5B537),
-                          ),
-                          _MapLegendChip(
-                            label: 'Boulder Face',
-                            color: Color(0xFFF0702B),
-                          ),
-                          _MapLegendChip(
-                            label: 'Summit Push',
-                            color: Color(0xFFDE3F34),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MapLegendChip extends StatelessWidget {
-  const _MapLegendChip({required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.appColors;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(
-        color: context.isDarkMode
-            ? colors.surface.withValues(alpha: 0.92)
-            : Colors.white.withValues(alpha: 0.86),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withValues(alpha: 0.75)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w600,
-              color: colors.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _StartNavigationButton extends StatelessWidget {
   const _StartNavigationButton({required this.metadata});
 
@@ -784,156 +679,4 @@ class _LetsHikeButton extends StatelessWidget {
   DateTime _dateOnly(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }
-}
-
-class _TrailMapPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final background = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Color(0xFFF2F1ED), Color(0xFFE4E2DC)],
-      ).createShader(Offset.zero & size);
-    canvas.drawRect(Offset.zero & size, background);
-
-    final contourPaint = Paint()
-      ..color = const Color(0xFFCEC9BF)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-
-    for (var i = 0; i < 8; i++) {
-      final y = 18 + (i * size.height / 8.5);
-      final path = Path()
-        ..moveTo(0, y)
-        ..quadraticBezierTo(size.width * 0.2, y - 12, size.width * 0.42, y + 8)
-        ..quadraticBezierTo(size.width * 0.68, y + 18, size.width, y - 10);
-      canvas.drawPath(path, contourPaint);
-    }
-
-    final routePath = Path()
-      ..moveTo(size.width * 0.10, size.height * 0.78)
-      ..quadraticBezierTo(
-        size.width * 0.18,
-        size.height * 0.73,
-        size.width * 0.26,
-        size.height * 0.69,
-      )
-      ..quadraticBezierTo(
-        size.width * 0.35,
-        size.height * 0.67,
-        size.width * 0.42,
-        size.height * 0.61,
-      )
-      ..quadraticBezierTo(
-        size.width * 0.50,
-        size.height * 0.56,
-        size.width * 0.58,
-        size.height * 0.51,
-      )
-      ..quadraticBezierTo(
-        size.width * 0.66,
-        size.height * 0.44,
-        size.width * 0.73,
-        size.height * 0.36,
-      )
-      ..quadraticBezierTo(
-        size.width * 0.80,
-        size.height * 0.28,
-        size.width * 0.90,
-        size.height * 0.14,
-      );
-
-    final shadowPaint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.12)
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 10;
-    canvas.drawPath(routePath.shift(const Offset(0, 3)), shadowPaint);
-
-    final routePaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [
-          Color(0xFF2AA64A),
-          Color(0xFFE7C545),
-          Color(0xFFF07A2F),
-          Color(0xFFE33B33),
-        ],
-      ).createShader(Offset.zero & size)
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 8;
-    canvas.drawPath(routePath, routePaint);
-
-    final markerPaint = Paint()..color = const Color(0xFF1F3C20);
-    final summitPaint = Paint()..color = const Color(0xFFB61E1B);
-
-    canvas.drawCircle(
-      Offset(size.width * 0.10, size.height * 0.78),
-      5,
-      markerPaint,
-    );
-    canvas.drawCircle(
-      Offset(size.width * 0.90, size.height * 0.14),
-      5.5,
-      summitPaint,
-    );
-
-    _drawMapLabel(
-      canvas,
-      size,
-      text: 'Sibulan\nJump-off',
-      offset: Offset(size.width * 0.04, size.height * 0.80),
-      alignLeft: true,
-    );
-    _drawMapLabel(
-      canvas,
-      size,
-      text: 'Forest and\nfarm trail',
-      offset: Offset(size.width * 0.29, size.height * 0.64),
-      alignLeft: true,
-    );
-    _drawMapLabel(
-      canvas,
-      size,
-      text: 'Boulder Face',
-      offset: Offset(size.width * 0.58, size.height * 0.47),
-      alignLeft: true,
-    );
-    _drawMapLabel(
-      canvas,
-      size,
-      text: 'Mt. Apo\nSummit',
-      offset: Offset(size.width * 0.82, size.height * 0.13),
-      alignLeft: true,
-    );
-  }
-
-  void _drawMapLabel(
-    Canvas canvas,
-    Size size, {
-    required String text,
-    required Offset offset,
-    required bool alignLeft,
-  }) {
-    final painter = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: GoogleFonts.poppins(
-          fontSize: size.width * 0.034,
-          fontWeight: FontWeight.w600,
-          color: const Color(0xFF544A3A),
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout(maxWidth: size.width * 0.26);
-
-    painter.paint(
-      canvas,
-      alignLeft ? offset : offset - Offset(painter.width, 0),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

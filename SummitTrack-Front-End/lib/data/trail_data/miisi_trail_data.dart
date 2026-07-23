@@ -24,5 +24,5 @@ const TrailData miisiTrail = TrailData(
     'Keep a safe distance from other climbers to avoid getting hit by dislodged loose boulders',
     'Retreat immediately if guides note changing weather or volcanic behavior parameters',
   ],
-  showTrailMap: false,
+  showTrailMap: true,
 );

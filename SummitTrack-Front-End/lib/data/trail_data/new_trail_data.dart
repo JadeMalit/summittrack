@@ -31,5 +31,5 @@ const TrailData newTrail = TrailData(
     'Stay strictly on the designated and established trails to avoid destroying the surrounding grasslands',
     'Take regular short breathing pauses under available shaded tree clusters to avoid heat exhaustion',
   ],
-  showTrailMap: false,
+  showTrailMap: true,
 );

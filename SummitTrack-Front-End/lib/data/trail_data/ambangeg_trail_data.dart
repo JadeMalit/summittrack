@@ -32,5 +32,5 @@ const TrailData ambangegTrail = TrailData(
     'Follow Leave No Trace principles; bring all your trash back down',
     'Listen to your local guide at all times',
   ],
-  showTrailMap: false,
+  showTrailMap: true,
 );

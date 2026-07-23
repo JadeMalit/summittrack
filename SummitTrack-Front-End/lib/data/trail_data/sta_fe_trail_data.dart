@@ -22,5 +22,5 @@ const TrailData staFeTrail = TrailData(
     'Take extra short side-steps on dry pine leaves to prevent slipping on loose gravel slides',
     'Do not run down the mountain to prevent severe ankle sprains or knee hyperextension injuries',
   ],
-  showTrailMap: false,
+  showTrailMap: true,
 );
