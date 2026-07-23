@@ -12,6 +12,9 @@ class NavigationTrails {
       trailName: 'Sta. Cruz / Sibulan Trail',
       destinationName: 'Mt. Apo Summit',
       destination: RouteCoordinate(latitude: 6.9875, longitude: 125.271),
+      trailheadName: 'Baruring / Sibulan Trailhead',
+      trailhead: RouteCoordinate(latitude: 6.95525, longitude: 125.32062),
+      trailheadProximityRadiusMeters: 1500,
       isNavigationEnabled: true,
       validationNote:
           'Pilot navigation uses GraphHopper route data and the public Mt. Apo summit coordinate. Trailhead and checkpoint coordinates should still be validated with local guides before field use.',

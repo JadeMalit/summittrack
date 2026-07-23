@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/hike_navigation_metadata.dart';
 import '../../models/hike_navigation_start_request.dart';
 import '../../services/location/location_service.dart';
+import '../../services/routing/trailhead_proximity_guard.dart';
 import '../../services/weather_service.dart';
 
 Future<HikeNavigationStartRequest?> showHikeNavigationConfirmation({
@@ -39,8 +40,10 @@ class _HikeNavigationConfirmationDialogState
   final WeatherService _weatherService = WeatherService();
 
   LocationReadiness? _readiness;
+  TrailheadProximityResult? _trailheadProximity;
   bool _checkingGps = true;
   bool _loadingWeather = true;
+  bool _useDebugTrailheadStart = false;
   String? _weatherSummary;
 
   @override
@@ -56,12 +59,23 @@ class _HikeNavigationConfirmationDialogState
     });
 
     final readiness = await _locationService.requestNavigationReadiness();
+    final position = readiness.position;
+    final trailheadProximity = position == null
+        ? null
+        : TrailheadProximityGuard.evaluate(
+            metadata: widget.metadata,
+            currentLocation: _locationService.coordinateFromPosition(position),
+          );
     if (!mounted) {
       return;
     }
 
     setState(() {
       _readiness = readiness;
+      _trailheadProximity = trailheadProximity;
+      if (!_debugTrailheadStartAvailable) {
+        _useDebugTrailheadStart = false;
+      }
       _checkingGps = false;
     });
   }
@@ -103,7 +117,11 @@ class _HikeNavigationConfirmationDialogState
   @override
   Widget build(BuildContext context) {
     final readiness = _readiness;
-    final canStart = !_checkingGps && readiness?.isReady == true;
+    final canUseDebugStart =
+        _debugTrailheadStartAvailable && _useDebugTrailheadStart;
+    final canUseGpsStart =
+        readiness?.isReady == true && (_trailheadProximity?.canStart ?? true);
+    final canStart = !_checkingGps && (canUseGpsStart || canUseDebugStart);
     final size = MediaQuery.of(context).size;
 
     return Dialog(
@@ -145,7 +163,9 @@ class _HikeNavigationConfirmationDialogState
                     value: _checkingGps
                         ? 'Checking location signal...'
                         : readiness?.message ?? 'Unable to check GPS.',
-                    color: canStart ? _accentColor : _warningColor,
+                    color: readiness?.isReady == true
+                        ? _accentColor
+                        : _warningColor,
                     trailing: _checkingGps
                         ? const SizedBox(
                             width: 18,
@@ -160,6 +180,34 @@ class _HikeNavigationConfirmationDialogState
                           ),
                   ),
                   const SizedBox(height: 12),
+                  if (widget.metadata.trailhead != null) ...[
+                    _StatusCard(
+                      icon: Icons.place_rounded,
+                      title: 'Trailhead proximity',
+                      value: _trailheadProximityMessage,
+                      color: _trailheadProximityColor,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  if (_debugTrailheadStartAvailable) ...[
+                    _StatusCard(
+                      icon: Icons.bug_report_rounded,
+                      title: 'Debug start',
+                      value:
+                          'Simulated start at ${widget.metadata.trailheadName ?? 'selected trailhead'}.',
+                      color: _warningColor,
+                      trailing: Switch(
+                        value: _useDebugTrailheadStart,
+                        activeColor: _accentColor,
+                        onChanged: (value) {
+                          setState(() {
+                            _useDebugTrailheadStart = value;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   _StatusCard(
                     icon: Icons.cloud_queue_rounded,
                     title: 'Route and map data',
@@ -313,8 +361,36 @@ class _HikeNavigationConfirmationDialogState
   }
 
   void _startNavigation() {
+    if (_debugTrailheadStartAvailable && _useDebugTrailheadStart) {
+      final debugPosition = DebugTrailheadStartSimulator.simulatedPositionFor(
+        metadata: widget.metadata,
+      );
+      if (debugPosition == null) {
+        return;
+      }
+
+      Navigator.of(context).pop(
+        HikeNavigationStartRequest(
+          metadata: widget.metadata,
+          initialPosition: debugPosition,
+        ),
+      );
+      return;
+    }
+
     final position = _readiness?.position;
     if (position == null) {
+      return;
+    }
+
+    final proximity = TrailheadProximityGuard.evaluate(
+      metadata: widget.metadata,
+      currentLocation: _locationService.coordinateFromPosition(position),
+    );
+    if (!proximity.canStart) {
+      setState(() {
+        _trailheadProximity = proximity;
+      });
       return;
     }
 
@@ -339,6 +415,34 @@ class _HikeNavigationConfirmationDialogState
     }
 
     return trailName;
+  }
+
+  bool get _debugTrailheadStartAvailable {
+    return DebugTrailheadStartSimulator.isAvailable() &&
+        widget.metadata.trailhead != null;
+  }
+
+  String get _trailheadProximityMessage {
+    if (_debugTrailheadStartAvailable && _useDebugTrailheadStart) {
+      return 'Using simulated start at ${widget.metadata.trailheadName ?? 'selected trailhead'}.';
+    }
+
+    if (_checkingGps) {
+      return 'Checking distance to ${widget.metadata.trailheadName ?? 'the selected trailhead'}...';
+    }
+
+    return _trailheadProximity?.message ??
+        'Trailhead coordinate unavailable for this route.';
+  }
+
+  Color get _trailheadProximityColor {
+    if (_debugTrailheadStartAvailable && _useDebugTrailheadStart) {
+      return _accentColor;
+    }
+
+    return (_trailheadProximity?.canStart ?? true)
+        ? _accentColor
+        : _warningColor;
   }
 }
 

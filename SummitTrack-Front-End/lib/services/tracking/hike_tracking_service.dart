@@ -9,6 +9,7 @@ import '../../models/hiking_route.dart';
 import '../../models/route_coordinate.dart';
 import '../location/location_service.dart';
 import '../routing/graphhopper_service.dart';
+import '../routing/trailhead_proximity_guard.dart';
 
 enum HikeTrackingStatus {
   idle,
@@ -86,6 +87,8 @@ class HikeTrackingService extends ChangeNotifier {
   bool get hasActiveSession {
     return _metadata != null &&
         _status != HikeTrackingStatus.idle &&
+        _status != HikeTrackingStatus.routeUnavailable &&
+        _status != HikeTrackingStatus.error &&
         _status != HikeTrackingStatus.completed;
   }
 
@@ -105,22 +108,38 @@ class HikeTrackingService extends ChangeNotifier {
     _metadata = metadata;
     _route = null;
     _currentPosition = initialPosition;
-    _displayCoordinate = _locationService.coordinateFromPosition(
+    final startCoordinate = _locationService.coordinateFromPosition(
       initialPosition,
     );
-    _status = HikeTrackingStatus.loadingRoute;
+    _displayCoordinate = startCoordinate;
     _deviationLevel = RouteDeviationLevel.unknown;
-    _statusMessage = 'Loading route...';
     _distanceFromRouteMeters = null;
     _completionCandidate = false;
     _offRouteSampleCount = 0;
     _destinationSampleCount = 0;
     _completionPromptIssued = false;
+
+    final proximity = TrailheadProximityGuard.evaluate(
+      metadata: metadata,
+      currentLocation: startCoordinate,
+    );
+    if (!proximity.canStart) {
+      _status = HikeTrackingStatus.routeUnavailable;
+      _statusMessage = proximity.message;
+      notifyListeners();
+      return HikeTrackingStartResult(
+        started: false,
+        message: proximity.message,
+      );
+    }
+
+    _status = HikeTrackingStatus.loadingRoute;
+    _statusMessage = 'Loading route...';
     notifyListeners();
 
     try {
       final route = await _graphHopperService.fetchRoute(
-        origin: _locationService.coordinateFromPosition(initialPosition),
+        origin: startCoordinate,
         destination: metadata.destination,
       );
 

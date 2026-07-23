@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
 
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:http/http.dart' as http;
 
 import '../../core/config/app_config.dart';
@@ -32,6 +33,11 @@ class GraphHopperRouteResult {
     this.ascentMeters,
     this.descentMeters,
     this.pointCount = 0,
+    this.requestedStart,
+    this.requestedDestination,
+    this.returnedFirstRoutePoint,
+    this.returnedLastRoutePoint,
+    this.endpointToDestinationDistanceMeters,
     this.route,
   });
 
@@ -48,6 +54,11 @@ class GraphHopperRouteResult {
   final double? ascentMeters;
   final double? descentMeters;
   final int pointCount;
+  final RouteCoordinate? requestedStart;
+  final RouteCoordinate? requestedDestination;
+  final RouteCoordinate? returnedFirstRoutePoint;
+  final RouteCoordinate? returnedLastRoutePoint;
+  final double? endpointToDestinationDistanceMeters;
   final HikingRoute? route;
 
   bool get authenticationSucceeded {
@@ -66,9 +77,9 @@ class GraphHopperRouteResult {
 }
 
 class GraphHopperService {
-  const GraphHopperService({http.Client? client}) : _client = client;
+  const GraphHopperService({http.Client? client});
 
-  final http.Client? _client;
+  static const routeEndpointToleranceMeters = 300.0;
 
   Future<GraphHopperRouteResult> testRoute({
     required double startLatitude,
@@ -124,76 +135,59 @@ class GraphHopperService {
     final coordinateValidationMessage =
         _coordinateValidationMessage(origin, 'start') ??
         _coordinateValidationMessage(destination, 'destination');
+
     if (coordinateValidationMessage != null) {
       return GraphHopperRouteResult(
-        apiKeyProvided: AppConfig.hasGraphHopperApiKey,
+        apiKeyProvided: true,
         requestAttempted: false,
         profile: profile,
         safeErrorMessage: coordinateValidationMessage,
       );
     }
 
-    _debugLog('[GraphHopper] Starting route request');
+    _debugLog('[GraphHopper] Starting secure route request through Firebase');
+    _debugLog('[GraphHopper] Routing profile: $profile');
+    _debugLog('[GraphHopper] Requested start: ${_formatCoordinate(origin)}');
     _debugLog(
-      '[GraphHopper] API key present: ${AppConfig.hasGraphHopperApiKey}',
+      '[GraphHopper] Requested destination: ${_formatCoordinate(destination)}',
     );
 
-    if (!AppConfig.hasGraphHopperApiKey) {
-      return GraphHopperRouteResult(
-        apiKeyProvided: false,
-        requestAttempted: false,
-        profile: profile,
-        safeErrorMessage:
-            'GraphHopper API key is missing. Add GRAPHHOPPER_API_KEY with --dart-define.',
-      );
-    }
-
-    final client = _client ?? http.Client();
-    final shouldCloseClient = _client == null;
-
     try {
-      final uri = Uri.https(
-        'graphhopper.com',
-        '/api/1/route',
-        <String, dynamic>{
-          'point': [
-            '${origin.latitude},${origin.longitude}',
-            '${destination.latitude},${destination.longitude}',
-          ],
-          'profile': profile,
-          'points_encoded': 'false',
-          'instructions': 'true',
-          'locale': 'en',
-          'key': AppConfig.graphHopperApiKey,
-        },
-      );
+      final callable = FirebaseFunctions.instanceFor(region: 'asia-southeast1')
+          .httpsCallable(
+            'getGraphHopperRoute',
+            options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+          );
 
-      final response = await client
-          .get(uri)
-          .timeout(const Duration(seconds: 20));
+      final result = await callable.call(<String, dynamic>{
+        'startLat': origin.latitude,
+        'startLng': origin.longitude,
+        'endLat': destination.latitude,
+        'endLng': destination.longitude,
+        'profile': profile,
+      });
 
-      _debugLog('[GraphHopper] HTTP status: ${response.statusCode}');
-
-      if (response.statusCode < 200 || response.statusCode >= 300) {
+      if (result.data is! Map) {
         return GraphHopperRouteResult(
           apiKeyProvided: true,
           requestAttempted: true,
           profile: profile,
-          httpStatus: response.statusCode,
-          safeErrorMessage: _messageFromResponse(
-            statusCode: response.statusCode,
-            body: response.body,
-          ),
-          safeResponseBody: _safeResponseBody(response.body),
+          safeErrorMessage: 'The route server returned an invalid response.',
         );
       }
 
-      final parsed = _parseSuccessfulResponse(response.body);
-      final result = GraphHopperRouteResult(
+      final responseData = Map<String, dynamic>.from(result.data as Map);
+      final parsed = _parseSuccessfulResponse(jsonEncode(responseData));
+      final returnedFirstRoutePoint = parsed.route?.coordinates.first;
+      final returnedLastRoutePoint = parsed.route?.coordinates.last;
+      final endpointToDestinationDistanceMeters = returnedLastRoutePoint
+          ?.distanceTo(destination);
+
+      final routeResult = GraphHopperRouteResult(
         apiKeyProvided: true,
         requestAttempted: true,
         profile: profile,
-        httpStatus: response.statusCode,
+        httpStatus: 200,
         safeErrorMessage: parsed.errorMessage,
         pathCount: parsed.pathCount,
         hasGeometry: parsed.hasGeometry,
@@ -202,42 +196,87 @@ class GraphHopperService {
         ascentMeters: parsed.ascentMeters,
         descentMeters: parsed.descentMeters,
         pointCount: parsed.pointCount,
+        requestedStart: origin,
+        requestedDestination: destination,
+        returnedFirstRoutePoint: returnedFirstRoutePoint,
+        returnedLastRoutePoint: returnedLastRoutePoint,
+        endpointToDestinationDistanceMeters:
+            endpointToDestinationDistanceMeters,
         route: parsed.route,
       );
 
-      _debugLog('[GraphHopper] Paths returned: ${result.pathCount}');
-      _debugLog('[GraphHopper] Route points: ${result.pointCount}');
-
-      if (result.isSuccessful) {
-        _debugLog('[GraphHopper] Route request successful');
+      _debugLog('[GraphHopper] Paths returned: ${routeResult.pathCount}');
+      _debugLog('[GraphHopper] Route points: ${routeResult.pointCount}');
+      if (returnedFirstRoutePoint != null) {
+        _debugLog(
+          '[GraphHopper] Returned first route point: '
+          '${_formatCoordinate(returnedFirstRoutePoint)}',
+        );
+      }
+      if (returnedLastRoutePoint != null) {
+        _debugLog(
+          '[GraphHopper] Returned last route point: '
+          '${_formatCoordinate(returnedLastRoutePoint)}',
+        );
+      }
+      if (endpointToDestinationDistanceMeters != null) {
+        _debugLog(
+          '[GraphHopper] Endpoint-to-destination distance: '
+          '${_formatMeters(endpointToDestinationDistanceMeters)}',
+        );
       }
 
-      return result;
+      if (routeResult.isSuccessful) {
+        _debugLog('[GraphHopper] Secure route request successful');
+      }
+
+      return routeResult;
+    } on FirebaseFunctionsException catch (error) {
+      _debugLog('[GraphHopper] Firebase Functions error: ${error.code}');
+
+      return GraphHopperRouteResult(
+        apiKeyProvided: true,
+        requestAttempted: true,
+        profile: profile,
+        safeErrorMessage: _firebaseFunctionErrorMessage(error.code),
+      );
     } on TimeoutException {
       return GraphHopperRouteResult(
         apiKeyProvided: true,
         requestAttempted: true,
         profile: profile,
-        safeErrorMessage: 'GraphHopper request timed out.',
-      );
-    } on http.ClientException {
-      return GraphHopperRouteResult(
-        apiKeyProvided: true,
-        requestAttempted: true,
-        profile: profile,
-        safeErrorMessage: 'Unable to connect to GraphHopper.',
+        safeErrorMessage: 'The route request timed out.',
       );
     } catch (_) {
+      _debugLog('[GraphHopper] Unable to process Firebase route response.');
+
       return GraphHopperRouteResult(
         apiKeyProvided: true,
         requestAttempted: true,
         profile: profile,
-        safeErrorMessage: 'Unable to read a GraphHopper route response.',
+        safeErrorMessage: 'Unable to read the route server response.',
       );
-    } finally {
-      if (shouldCloseClient) {
-        client.close();
-      }
+    }
+  }
+
+  String _firebaseFunctionErrorMessage(String code) {
+    switch (code) {
+      case 'unauthenticated':
+        return 'Please sign in before starting navigation.';
+      case 'invalid-argument':
+        return 'The start or destination coordinates are invalid.';
+      case 'deadline-exceeded':
+        return 'The route request timed out. Please try again.';
+      case 'unavailable':
+        return 'The route service is temporarily unavailable.';
+      case 'permission-denied':
+        return 'You do not have permission to request this route.';
+      case 'resource-exhausted':
+        return 'The route service usage limit has been reached.';
+      case 'unknown':
+        return 'Unable to retrieve the hiking route.';
+      default:
+        return 'Unable to retrieve the hiking route.';
     }
   }
 
@@ -264,9 +303,20 @@ class GraphHopperService {
     required RouteCoordinate origin,
     required RouteCoordinate destination,
   }) {
-    final startsNearUser = route.coordinates.first.distanceTo(origin) <= 300;
+    final startDistance = route.coordinates.first.distanceTo(origin);
+    final endpointDistance = route.coordinates.last.distanceTo(destination);
+    final startsNearUser = startDistance <= routeEndpointToleranceMeters;
     final endsNearDestination =
-        route.coordinates.last.distanceTo(destination) <= 300;
+        endpointDistance <= routeEndpointToleranceMeters;
+
+    _debugLog(
+      '[GraphHopper] First-point-to-start distance: '
+      '${_formatMeters(startDistance)}',
+    );
+    _debugLog(
+      '[GraphHopper] Endpoint-to-destination validation distance: '
+      '${_formatMeters(endpointDistance)}',
+    );
 
     if (!startsNearUser || !endsNearDestination) {
       throw const GraphHopperRouteException(
@@ -416,56 +466,6 @@ class GraphHopperService {
 
     return coordinates;
   }
-
-  String _messageFromResponse({required int statusCode, required String body}) {
-    final providerMessage = _providerMessageFromResponse(body);
-    final detail = providerMessage == null ? '' : ': $providerMessage';
-
-    switch (statusCode) {
-      case 400:
-        return 'Invalid GraphHopper request$detail';
-      case 401:
-        return 'Authentication failed$detail';
-      case 403:
-        return 'Access denied by GraphHopper$detail';
-      case 429:
-        return 'GraphHopper quota or rate limit reached$detail';
-      default:
-        return 'GraphHopper request failed with HTTP $statusCode$detail';
-    }
-  }
-
-  String? _providerMessageFromResponse(String body) {
-    try {
-      final decoded = jsonDecode(body) as Map<String, dynamic>;
-      final message = decoded['message']?.toString();
-      if (message != null && message.trim().isNotEmpty) {
-        return _redactApiKey(message.trim());
-      }
-    } catch (_) {
-      // Preserve the safe response body separately when provider JSON is absent.
-    }
-
-    return null;
-  }
-
-  String _safeResponseBody(String body) {
-    final redacted = _redactApiKey(body).trim();
-    if (redacted.length <= 1200) {
-      return redacted;
-    }
-
-    return '${redacted.substring(0, 1200)}...';
-  }
-
-  String _redactApiKey(String value) {
-    final apiKey = AppConfig.graphHopperApiKey;
-    if (apiKey.trim().isEmpty) {
-      return value;
-    }
-
-    return value.replaceAll(apiKey, '[redacted]');
-  }
 }
 
 void _debugLog(String message) {
@@ -473,6 +473,15 @@ void _debugLog(String message) {
     developer.log(message, name: 'GraphHopper');
     return true;
   }());
+}
+
+String _formatCoordinate(RouteCoordinate coordinate) {
+  return '${coordinate.latitude.toStringAsFixed(6)},'
+      '${coordinate.longitude.toStringAsFixed(6)}';
+}
+
+String _formatMeters(double meters) {
+  return '${meters.toStringAsFixed(1)}m';
 }
 
 class _ParsedGraphHopperRoute {

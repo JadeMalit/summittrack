@@ -4,7 +4,9 @@ module.exports = {
     node: true,
   },
   parserOptions: {
-    "ecmaVersion": 2020, // In-update para suportahan ang optional chaining (?.) at modern JS syntax
+    // In-update para suportahan ang optional chaining (?.)
+    // at modern JS syntax.
+    "ecmaVersion": 2020,
   },
   extends: [
     "eslint:recommended",

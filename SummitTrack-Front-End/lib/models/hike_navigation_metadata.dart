@@ -11,6 +11,7 @@ class HikeNavigationMetadata {
     required this.isNavigationEnabled,
     this.trailhead,
     this.trailheadName,
+    this.trailheadProximityRadiusMeters = 1500,
     this.checkpoints = const [],
     this.validationNote,
   });
@@ -23,6 +24,7 @@ class HikeNavigationMetadata {
   final bool isNavigationEnabled;
   final RouteCoordinate? trailhead;
   final String? trailheadName;
+  final double trailheadProximityRadiusMeters;
   final List<HikingCheckpoint> checkpoints;
   final String? validationNote;
 }

@@ -12,7 +12,20 @@
           "package_name": "com.example.summittrack"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "785993329168-d49gvei3u1ruhad4s3a25rb8di7gun3o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.summittrack",
+            "certificate_hash": "b251d6853c06e611f19c5a7610ffa1919511394b"
+          }
+        },
+        {
+          "client_id": "785993329168-fo1qco92h2m364ge0qeoodaidvvqu6hv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBobG-HXLwhvyXFQaczZY1vdU-Kas7ExNo"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "785993329168-fo1qco92h2m364ge0qeoodaidvvqu6hv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "785993329168-eoavknahqfr5d56itcp24hg4jnegmdo8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.summittrack"
+              }
+            }
+          ]
         }
       }
     }
