@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../notifications/services/hike_notification_service.dart';
 import '../helpers/profile_constants.dart';
 import '../helpers/profile_models.dart';
 import '../helpers/profile_validators.dart';
@@ -310,6 +311,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
     final navigator = Navigator.of(context);
 
+    await HikeNotificationService.instance.handleLogout();
     await FirebaseAuth.instance.signOut();
 
     if (!mounted) {

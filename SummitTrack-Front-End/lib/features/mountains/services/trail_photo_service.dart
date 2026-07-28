@@ -20,7 +20,7 @@ class TrailPhotoService {
   static const staCruzSibulanTrailId = 'sta_cruz_sibulan';
   static const kapataganTrailId = 'kapatagan';
   static const _permissionMessage =
-      'You do not have permission to access these photos.';
+      'You do not have permission to access this media.';
 
   TrailPhotoService({
     FirebaseAuth? auth,
@@ -41,45 +41,75 @@ class TrailPhotoService {
     required String fileName,
     String? contentType,
     String trailId = staCruzSibulanTrailId,
+  }) {
+    return uploadMedia(
+      bytes: bytes,
+      fileName: fileName,
+      contentType: contentType,
+      trailId: trailId,
+      mediaType: TrailPhotoModel.mediaTypeImage,
+    );
+  }
+
+  Future<TrailPhotoModel> uploadMedia({
+    required Uint8List bytes,
+    required String fileName,
+    String? contentType,
+    String trailId = staCruzSibulanTrailId,
+    String mediaType = TrailPhotoModel.mediaTypeImage,
+    int? sizeBytes,
+    Duration? duration,
   }) async {
     if (bytes.isEmpty) {
-      throw const TrailPhotoException('The selected photo is empty.');
+      throw const TrailPhotoException('The selected media file is empty.');
     }
 
     final user = _requireUser();
     final normalizedTrailId = _safeTrailId(trailId);
+    final normalizedMediaType = TrailPhotoModel.normalizeMediaType(mediaType);
     final photoDocument = _photoCollection(user.uid, normalizedTrailId).doc();
-    final safeFileName = _safeFileName(fileName, photoDocument.id);
-    final fileExtension = _extensionFor(safeFileName);
+    final safeFileName = _safeFileName(
+      fileName,
+      photoDocument.id,
+      normalizedMediaType,
+    );
+    final fileExtension = _extensionFor(safeFileName, normalizedMediaType);
     final storagePath =
         'trail_photos/${user.uid}/$normalizedTrailId/${photoDocument.id}.$fileExtension';
     final storageRef = _storage.ref(storagePath);
+    final resolvedContentType = _contentTypeFor(
+      contentType,
+      safeFileName,
+      normalizedMediaType,
+    );
     _debugLog(
-      'uploadPhoto',
+      'uploadMedia',
       'uid=${user.uid}, email=${user.email}, trailId=$normalizedTrailId, '
           'firestorePath=${_photoCollectionPath(user.uid, normalizedTrailId)}/${photoDocument.id}, '
-          'storagePath=$storagePath',
+          'storagePath=$storagePath, mediaType=$normalizedMediaType',
     );
 
     try {
       await storageRef.putData(
         bytes,
         SettableMetadata(
-          contentType: _contentTypeFor(contentType, safeFileName),
+          contentType: resolvedContentType,
           customMetadata: {
             'uid': user.uid,
             if (user.email != null) 'ownerEmail': user.email!,
             'trailId': normalizedTrailId,
             'originalFileName': safeFileName,
+            'mediaType': normalizedMediaType,
+            if (duration != null) 'durationSeconds': '${duration.inSeconds}',
           },
         ),
       );
 
       final photoUrl = await storageRef.getDownloadURL();
       _debugLog(
-        'uploadPhoto',
+        'uploadMedia',
         'upload complete uid=${user.uid}, trailId=$normalizedTrailId, '
-            'storagePath=$storagePath',
+            'storagePath=$storagePath, mediaType=$normalizedMediaType',
       );
       final now = DateTime.now().toUtc();
       final photo = TrailPhotoModel(
@@ -92,6 +122,10 @@ class TrailPhotoService {
         updatedAt: now,
         fileName: safeFileName,
         ownerEmail: user.email,
+        mediaType: normalizedMediaType,
+        contentType: resolvedContentType,
+        sizeBytes: sizeBytes ?? bytes.length,
+        durationSeconds: duration?.inSeconds,
       );
 
       await savePhotoMetadata(
@@ -102,7 +136,7 @@ class TrailPhotoService {
 
       return photo;
     } catch (error) {
-      _logFirebaseError('uploadPhoto', error);
+      _logFirebaseError('uploadMedia', error);
       await _deleteStorageObjectQuietly(storagePath);
 
       if (error is TrailPhotoException) {
@@ -112,7 +146,7 @@ class TrailPhotoService {
       throw TrailPhotoException(
         _firebaseMessage(
           error,
-          fallback: 'Unable to save photos right now. Please try again.',
+          fallback: 'Unable to save media right now. Please try again.',
         ),
       );
     }
@@ -203,6 +237,7 @@ class TrailPhotoService {
                   ? normalizedTrailId
                   : photo.trailId,
               storagePath: _normalizeStoragePath(photo.storagePath),
+              mediaType: TrailPhotoModel.normalizeMediaType(photo.mediaType),
             ),
           )
           .where(
@@ -227,7 +262,7 @@ class TrailPhotoService {
       throw TrailPhotoException(
         _firebaseMessage(
           error,
-          fallback: 'Unable to load saved photos right now.',
+          fallback: 'Unable to load saved media right now.',
         ),
       );
     }
@@ -293,7 +328,7 @@ class TrailPhotoService {
       throw TrailPhotoException(
         _firebaseMessage(
           error,
-          fallback: 'Unable to delete that photo from storage.',
+          fallback: 'Unable to delete that media file from storage.',
         ),
       );
     }
@@ -319,7 +354,7 @@ class TrailPhotoService {
       throw TrailPhotoException(
         _firebaseMessage(
           error,
-          fallback: 'Unable to delete that photo from your account.',
+          fallback: 'Unable to delete that media file from your account.',
         ),
       );
     }
@@ -345,7 +380,7 @@ class TrailPhotoService {
     final user = _auth.currentUser;
     if (user == null) {
       throw const TrailPhotoException(
-        'Please sign in first before saving photos.',
+        'Please sign in first before saving media.',
       );
     }
 
@@ -374,9 +409,11 @@ class TrailPhotoService {
     }
   }
 
-  String _safeFileName(String fileName, String photoId) {
+  String _safeFileName(String fileName, String photoId, String mediaType) {
     final trimmedName = fileName.trim();
-    final fallback = 'trail-photo-$photoId.jpg';
+    final fallback = mediaType == TrailPhotoModel.mediaTypeVideo
+        ? 'trail-video-$photoId.mp4'
+        : 'trail-photo-$photoId.jpg';
     final candidate = trimmedName.isEmpty ? fallback : trimmedName;
 
     return candidate.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '-');
@@ -420,27 +457,45 @@ class TrailPhotoService {
     }
   }
 
-  String _extensionFor(String fileName) {
+  String _extensionFor(String fileName, String mediaType) {
     final lowerName = fileName.toLowerCase();
     final dotIndex = lowerName.lastIndexOf('.');
     if (dotIndex == -1 || dotIndex == lowerName.length - 1) {
-      return 'jpg';
+      return mediaType == TrailPhotoModel.mediaTypeVideo ? 'mp4' : 'jpg';
     }
 
     final extension = lowerName.substring(dotIndex + 1);
+    if (mediaType == TrailPhotoModel.mediaTypeVideo) {
+      const supportedVideoExtensions = {'mp4', 'mov', 'm4v'};
+      return supportedVideoExtensions.contains(extension) ? extension : 'mp4';
+    }
+
     const supportedExtensions = {'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'};
 
     return supportedExtensions.contains(extension) ? extension : 'jpg';
   }
 
-  String _contentTypeFor(String? contentType, String fileName) {
+  String _contentTypeFor(
+    String? contentType,
+    String fileName,
+    String mediaType,
+  ) {
     final normalizedContentType = contentType?.toLowerCase();
     if (normalizedContentType != null &&
-        normalizedContentType.startsWith('image/')) {
+        normalizedContentType.startsWith('$mediaType/')) {
       return normalizedContentType;
     }
 
-    return switch (_extensionFor(fileName)) {
+    final extension = _extensionFor(fileName, mediaType);
+    if (mediaType == TrailPhotoModel.mediaTypeVideo) {
+      return switch (extension) {
+        'mov' => 'video/quicktime',
+        'm4v' => 'video/x-m4v',
+        _ => 'video/mp4',
+      };
+    }
+
+    return switch (extension) {
       'png' => 'image/png',
       'webp' => 'image/webp',
       'heic' => 'image/heic',
@@ -457,8 +512,8 @@ class TrailPhotoService {
     if (error is FirebaseException) {
       return switch (error.code) {
         'permission-denied' =>
-          'You do not have permission to access these photos.',
-        'unauthorized' => 'You do not have permission to access these photos.',
+          'You do not have permission to access this media.',
+        'unauthorized' => 'You do not have permission to access this media.',
         'unavailable' => 'Network connection is unavailable. Please try again.',
         'network-request-failed' =>
           'Network connection is unavailable. Please try again.',

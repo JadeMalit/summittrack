@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../notifications/services/hike_notification_service.dart';
 import '../models/scheduled_hike.dart';
 
 class HikeScheduleException implements Exception {
@@ -81,7 +82,7 @@ class HikeScheduleStore extends ChangeNotifier {
     return _loadForUser(user);
   }
 
-  Future<void> saveScheduledHike(ScheduledHike hike) async {
+  Future<HikeReminderResult?> saveScheduledHike(ScheduledHike hike) async {
     _validateSchedulableDate(hike.hikeDate);
     start();
 
@@ -128,6 +129,107 @@ class HikeScheduleStore extends ChangeNotifier {
     _loadError = null;
     await _persistUserCache(user.uid);
     notifyListeners();
+    final notificationResult = await HikeNotificationService.instance
+        .handleSavedHike(ownedHike);
+    _logSchedule(
+      'Notification result: ${notificationResult.status.name} '
+      '(pendingConfirmed=${notificationResult.pendingScheduleConfirmed}, '
+      'cloudConfirmed=${notificationResult.cloudConfirmationWritten})',
+    );
+    return notificationResult;
+  }
+
+  Future<HikeReminderResult?> updateScheduledHike({
+    required ScheduledHike oldHike,
+    required ScheduledHike updatedHike,
+  }) async {
+    _validateSchedulableDate(updatedHike.hikeDate);
+    start();
+
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw const HikeScheduleException(
+        'Please sign in first before updating a scheduled hike.',
+      );
+    }
+
+    await _waitForCurrentUserLoad(user);
+
+    final ownedUpdatedHike = updatedHike.copyWith(
+      ownerUid: user.uid,
+      updatedAt: DateTime.now(),
+    );
+    final ownedOldHike = oldHike.copyWith(ownerUid: user.uid);
+
+    try {
+      await _saveToAccountStorage(user, ownedUpdatedHike);
+      if (oldHike.id != updatedHike.id) {
+        await _deleteFromAccountStorage(user, oldHike.id);
+      }
+    } catch (error) {
+      throw HikeScheduleException(
+        _firebaseMessage(
+          error,
+          fallback: 'Unable to update hike date. Please try again.',
+        ),
+      );
+    }
+
+    _activeUserId = user.uid;
+    _scheduledHikes.removeWhere((hike) => hike.id == oldHike.id);
+    _upsertSchedule(ownedUpdatedHike);
+    _isLoaded = true;
+    _isLoading = false;
+    _loadError = null;
+    await _persistUserCache(user.uid);
+    notifyListeners();
+    final notificationResult = await HikeNotificationService.instance
+        .handleUpdatedHike(
+          oldHike: ownedOldHike,
+          updatedHike: ownedUpdatedHike,
+        );
+    _logSchedule(
+      'Notification update result: ${notificationResult.status.name} '
+      '(pendingConfirmed=${notificationResult.pendingScheduleConfirmed}, '
+      'cloudConfirmed=${notificationResult.cloudConfirmationWritten})',
+    );
+    return notificationResult;
+  }
+
+  Future<void> deleteScheduledHike(String hikeId) async {
+    start();
+
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw const HikeScheduleException(
+        'Please sign in first before deleting a scheduled hike.',
+      );
+    }
+
+    await _waitForCurrentUserLoad(user);
+
+    try {
+      await _deleteFromAccountStorage(user, hikeId);
+    } catch (error) {
+      throw HikeScheduleException(
+        _firebaseMessage(
+          error,
+          fallback: 'Unable to delete that scheduled hike. Please try again.',
+        ),
+      );
+    }
+
+    _activeUserId = user.uid;
+    _scheduledHikes.removeWhere((hike) => hike.id == hikeId);
+    _isLoaded = true;
+    _isLoading = false;
+    _loadError = null;
+    await _persistUserCache(user.uid);
+    notifyListeners();
+    await HikeNotificationService.instance.handleDeletedHike(
+      uid: user.uid,
+      hikeId: hikeId,
+    );
   }
 
   List<ScheduledHike> upcomingForMountain(
@@ -462,6 +564,45 @@ class HikeScheduleStore extends ChangeNotifier {
     }, SetOptions(merge: true));
 
     _logSchedule('Save response status: user document fallback success');
+  }
+
+  Future<void> _deleteFromAccountStorage(User user, String hikeId) async {
+    var primaryDeleted = false;
+
+    try {
+      await _scheduleCollection(user.uid).doc(hikeId).delete();
+      primaryDeleted = true;
+    } on FirebaseException catch (error) {
+      if (!_isPermissionDenied(error)) {
+        rethrow;
+      }
+    }
+
+    try {
+      await _deleteFromUserDocumentFallback(user, hikeId);
+    } catch (error) {
+      if (!primaryDeleted) {
+        rethrow;
+      }
+
+      _logSchedule(
+        'Optional user document fallback delete failed: ${_errorSummary(error)}',
+      );
+    }
+  }
+
+  Future<void> _deleteFromUserDocumentFallback(User user, String hikeId) async {
+    try {
+      await _userDocument(
+        user.uid,
+      ).update({'$_userDocumentScheduleField.$hikeId': FieldValue.delete()});
+    } on FirebaseException catch (error) {
+      if (error.code == 'not-found') {
+        return;
+      }
+
+      rethrow;
+    }
   }
 
   bool _isCurrentLoad(String userId, int generation) {

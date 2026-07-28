@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:summittrack/features/notifications/services/hike_notification_service.dart';
 import 'package:summittrack/screens/mountains.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -28,10 +29,12 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
+              final navigator = Navigator.of(context);
+              await HikeNotificationService.instance.handleLogout();
               await FirebaseAuth.instance.signOut();
-              Navigator.pop(context);
+              navigator.pop();
             },
-          )
+          ),
         ],
       ),
       body: FutureBuilder<String>(
@@ -48,11 +51,7 @@ class HomeScreen extends StatelessWidget {
             children: <Widget>[
               const Padding(
                 padding: EdgeInsets.all(20.0),
-                child: Icon(
-                  Icons.terrain,
-                  size: 100,
-                  color: Colors.green,
-                ),
+                child: Icon(Icons.terrain, size: 100, color: Colors.green),
               ),
               Text(
                 'Welcome, $userName 🏔️',

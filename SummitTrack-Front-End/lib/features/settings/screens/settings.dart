@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_controller.dart';
+import '../../notifications/services/hike_notification_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -93,7 +96,7 @@ class _SettingsThemeTransition extends StatelessWidget {
   }
 }
 
-class _SettingsBody extends StatelessWidget {
+class _SettingsBody extends StatefulWidget {
   const _SettingsBody({
     required this.userName,
     required this.userEmail,
@@ -107,6 +110,14 @@ class _SettingsBody extends StatelessWidget {
   final void Function(BuildContext context, String message) onShowSnack;
 
   @override
+  State<_SettingsBody> createState() => _SettingsBodyState();
+}
+
+class _SettingsBodyState extends State<_SettingsBody> {
+  bool _isNotificationActionProcessing = false;
+  bool _isNotificationDialogOpen = false;
+
+  @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
 
@@ -117,28 +128,42 @@ class _SettingsBody extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         children: [
           _ProfileSettingsHeader(
-            userName: userName,
-            userEmail: userEmail,
-            photoUrl: photoUrl,
+            userName: widget.userName,
+            userEmail: widget.userEmail,
+            photoUrl: widget.photoUrl,
           ),
           const SizedBox(height: 20),
           _SettingsGroup(
             children: [
               const _DarkModeSettingsTile(),
-              _SettingsTile(
-                icon: Icons.notifications_rounded,
-                title: 'Notifications',
-                subtitle: 'Trail reminders and hike alerts',
-                onTap: () => onShowSnack(
-                  context,
-                  'Notification settings are ready for hookup.',
-                ),
+              AnimatedBuilder(
+                animation: HikeNotificationService.instance,
+                builder: (context, _) {
+                  final notificationsEnabled =
+                      HikeNotificationService.instance.notificationsEnabled;
+
+                  return _SettingsTile(
+                    icon: Icons.notifications_rounded,
+                    title: 'Notifications',
+                    subtitle: notificationsEnabled
+                        ? 'Hike-day reminders are enabled'
+                        : 'Hike reminders are turned off',
+                    onTap:
+                        _isNotificationActionProcessing ||
+                            _isNotificationDialogOpen
+                        ? null
+                        : () => _handleNotificationsTap(
+                            context,
+                            notificationsEnabled: notificationsEnabled,
+                          ),
+                  );
+                },
               ),
               _SettingsTile(
                 icon: Icons.security_rounded,
                 title: 'Privacy and Security',
                 subtitle: 'Manage app access and safety options',
-                onTap: () => onShowSnack(
+                onTap: () => widget.onShowSnack(
                   context,
                   'Privacy settings are ready for hookup.',
                 ),
@@ -152,8 +177,10 @@ class _SettingsBody extends StatelessWidget {
                 icon: Icons.help_outline_rounded,
                 title: 'Help',
                 subtitle: 'Get support for SummitTrack',
-                onTap: () =>
-                    onShowSnack(context, 'Help center is ready for hookup.'),
+                onTap: () => widget.onShowSnack(
+                  context,
+                  'Help center is ready for hookup.',
+                ),
               ),
               _SettingsTile(
                 icon: Icons.info_outline_rounded,
@@ -173,9 +200,286 @@ class _SettingsBody extends StatelessWidget {
               ),
             ],
           ),
+          if (notificationDiagnostics) ...[
+            const SizedBox(height: 16),
+            _SettingsGroup(
+              children: [
+                _SettingsTile(
+                  icon: Icons.bug_report_rounded,
+                  title: 'Notification diagnostics',
+                  subtitle: 'Inspect and test the production reminder path',
+                  onTap: _isNotificationActionProcessing
+                      ? null
+                      : () => _showNotificationDiagnostics(context),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  Future<void> _handleNotificationsTap(
+    BuildContext context, {
+    required bool notificationsEnabled,
+  }) async {
+    if (_isNotificationActionProcessing || _isNotificationDialogOpen) {
+      return;
+    }
+
+    if (notificationsEnabled) {
+      final shouldTurnOff = await _showTurnOffNotificationsDialog(context);
+      if (!mounted || !context.mounted || shouldTurnOff != true) {
+        return;
+      }
+
+      await _runNotificationAction(() async {
+        final result = await HikeNotificationService.instance
+            .disableFromSettings();
+        if (context.mounted) {
+          widget.onShowSnack(context, result.message);
+        }
+      });
+
+      return;
+    }
+
+    final shouldEnable = await _showEnableNotificationsDialog(context);
+    if (!mounted || !context.mounted || shouldEnable != true) {
+      return;
+    }
+
+    await _runNotificationAction(() async {
+      final result = await HikeNotificationService.instance
+          .enableFromSettings();
+      if (context.mounted) {
+        _showNotificationResult(context, result);
+      }
+    });
+  }
+
+  void _showNotificationResult(
+    BuildContext context,
+    NotificationEnableResult result,
+  ) {
+    if (!result.openSettingsSuggested) {
+      widget.onShowSnack(context, result.message);
+      return;
+    }
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(result.message),
+          action: SnackBarAction(
+            label: 'Settings',
+            onPressed: () {
+              unawaited(
+                HikeNotificationService.instance.openNotificationSettings(),
+              );
+            },
+          ),
+        ),
+      );
+  }
+
+  Future<void> _showNotificationDiagnostics(BuildContext context) async {
+    if (!notificationDiagnostics || _isNotificationActionProcessing) {
+      return;
+    }
+
+    setState(() {
+      _isNotificationActionProcessing = true;
+    });
+    final service = HikeNotificationService.instance;
+    var report = await service.collectDiagnostics();
+    if (!mounted || !context.mounted) {
+      return;
+    }
+    setState(() {
+      _isNotificationActionProcessing = false;
+    });
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
+              title: const Text('Notification diagnostics'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: SingleChildScrollView(
+                  child: SelectableText(
+                    report.summary,
+                    style: Theme.of(
+                      dialogContext,
+                    ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+                  ),
+                ),
+              ),
+              actions: [
+                if (report.openSettingsSuggested)
+                  TextButton(
+                    onPressed: () {
+                      unawaited(service.openNotificationSettings());
+                    },
+                    child: const Text('Open Settings'),
+                  ),
+                TextButton(
+                  onPressed: () async {
+                    final result = await service.runProductionDiagnosticShow();
+                    final refreshed = await service.collectDiagnostics();
+                    if (!dialogContext.mounted) {
+                      return;
+                    }
+                    setDialogState(() {
+                      report = NotificationDiagnosticsReport(
+                        summary: '${result.message}\n\n${refreshed.summary}',
+                        openSettingsSuggested: refreshed.openSettingsSuggested,
+                      );
+                    });
+                  },
+                  child: const Text('Run Show Test'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Close'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _runNotificationAction(Future<void> Function() action) async {
+    if (_isNotificationActionProcessing) {
+      return;
+    }
+
+    setState(() {
+      _isNotificationActionProcessing = true;
+    });
+
+    try {
+      await action();
+    } catch (_) {
+      if (mounted) {
+        widget.onShowSnack(
+          context,
+          'Notification setting could not be updated. Please try again.',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isNotificationActionProcessing = false;
+        });
+      }
+    }
+  }
+
+  Future<bool?> _showTurnOffNotificationsDialog(BuildContext context) async {
+    _isNotificationDialogOpen = true;
+
+    try {
+      var dialogResolved = false;
+      return await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) {
+          void closeDialog(bool value) {
+            if (dialogResolved) {
+              return;
+            }
+
+            dialogResolved = true;
+            Navigator.of(dialogContext).pop(value);
+          }
+
+          return PopScope<bool>(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, _) {
+              if (!didPop) {
+                closeDialog(false);
+              }
+            },
+            child: AlertDialog(
+              title: const Text('Turn Off Hike Notifications?'),
+              content: const Text(
+                'You will no longer receive reminders for your scheduled hikes.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => closeDialog(false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => closeDialog(true),
+                  child: const Text('Turn Off'),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } finally {
+      _isNotificationDialogOpen = false;
+    }
+  }
+
+  Future<bool?> _showEnableNotificationsDialog(BuildContext context) async {
+    _isNotificationDialogOpen = true;
+
+    try {
+      var dialogResolved = false;
+      return await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) {
+          void closeDialog(bool value) {
+            if (dialogResolved) {
+              return;
+            }
+
+            dialogResolved = true;
+            Navigator.of(dialogContext).pop(value);
+          }
+
+          return PopScope<bool>(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, _) {
+              if (!didPop) {
+                closeDialog(false);
+              }
+            },
+            child: AlertDialog(
+              title: const Text('Enable Hike Notifications?'),
+              content: const Text(
+                'SummitTrack will remind you when you have a scheduled hike today.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => closeDialog(false),
+                  child: const Text('No'),
+                ),
+                TextButton(
+                  onPressed: () => closeDialog(true),
+                  child: const Text('Yes, Enable'),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } finally {
+      _isNotificationDialogOpen = false;
+    }
   }
 }
 
@@ -423,7 +727,7 @@ class _SettingsTile extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

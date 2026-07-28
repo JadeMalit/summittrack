@@ -12,7 +12,10 @@ service firebase.storage {
 
     function isValidTrailPhotoUpload(uid, trailId) {
       return request.resource != null
-        && request.resource.contentType.matches('image/.*')
+        && (
+          request.resource.contentType.matches('image/.*')
+          || request.resource.contentType.matches('video/.*')
+        )
         && request.resource.metadata.uid == uid
         && request.resource.metadata.trailId == trailId;
     }

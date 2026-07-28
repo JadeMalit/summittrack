@@ -45,8 +45,12 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>SummitTrack lets you choose trail photos from your library and save them to your account.</string>
+	<string>SummitTrack lets you choose trail photos and videos from your library and save them to your account.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>SummitTrack uses your location while the app is open to show your hiking position and route guidance.</string>
 </dict>

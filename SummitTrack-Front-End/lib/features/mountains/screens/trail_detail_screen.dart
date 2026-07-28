@@ -162,7 +162,7 @@ class TrailDetailScreen extends StatelessWidget {
                         _StartNavigationButton(metadata: navigationMetadata!),
                       ],
                       const SizedBox(height: 18),
-                      const _SectionHeading(title: 'Add Your Photo'),
+                      const _SectionHeading(title: 'Add Photo or Video'),
                       const SizedBox(height: 10),
                       TrailPhotoUploader(trailId: trailPhotoId),
                       const SizedBox(height: 22),

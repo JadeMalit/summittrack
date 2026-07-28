@@ -5,10 +5,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../models/trail_photo_model.dart';
 import '../services/trail_photo_service.dart';
+import 'trail_video_controller_factory.dart';
 
 class TrailPhotoUploader extends StatefulWidget {
   const TrailPhotoUploader({
@@ -24,6 +26,8 @@ class TrailPhotoUploader extends StatefulWidget {
   State<TrailPhotoUploader> createState() => _TrailPhotoUploaderState();
 }
 
+enum _MediaPickerChoice { photoGallery, videoGallery }
+
 class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
   final ImagePicker _picker = ImagePicker();
   final List<TrailPhotoModel> _savedPhotos = <TrailPhotoModel>[];
@@ -33,15 +37,17 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
   StreamSubscription<User?>? _authSubscription;
 
   int _currentIndex = 0;
-  bool _isPickingPhoto = false;
-  bool _isLoadingSavedPhotos = false;
-  bool _isSavingPhotos = false;
-  bool _isDeletingPhoto = false;
+  bool _isPickingMedia = false;
+  bool _isLoadingSavedMedia = false;
+  bool _isSavingMedia = false;
+  bool _isDeletingMedia = false;
   String? _activeUserId;
   String? _activeTrailId;
   String? _lastSnackBarKey;
   static const _permissionAccessMessage =
-      'You do not have permission to access these photos.';
+      'You do not have permission to access this media.';
+  static const int _maxVideoSizeBytes = 150 * 1024 * 1024;
+  static const Duration _maxVideoDuration = Duration(minutes: 3);
 
   int get _photoCount => _savedPhotos.length + _pendingPhotos.length;
 
@@ -78,7 +84,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
       _handleAuthChanged,
     );
     _handleAuthChanged(FirebaseAuth.instance.currentUser);
-    unawaited(_recoverLostGalleryPhoto());
+    unawaited(_recoverLostGalleryMedia());
   }
 
   @override
@@ -120,7 +126,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
         _pendingPhotos.clear();
         _savedPhotos.clear();
         _currentIndex = 0;
-        _isLoadingSavedPhotos = userId != null;
+        _isLoadingSavedMedia = userId != null;
       });
     }
 
@@ -149,7 +155,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
         _savedPhotos
           ..clear()
           ..addAll(photos);
-        _isLoadingSavedPhotos = false;
+        _isLoadingSavedMedia = false;
         _normalizeCurrentIndex();
       });
       debugPrint(
@@ -167,21 +173,125 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
         'trailId=$trailId, errorType=${error.runtimeType}, error=$error',
       );
       setState(() {
-        _isLoadingSavedPhotos = false;
+        _isLoadingSavedMedia = false;
       });
       _showSnackBar(_messageForError(error), isError: true, dedupe: true);
     }
   }
 
-  Future<void> _pickPhoto() async {
-    if (_isPickingPhoto || _isSavingPhotos || _isDeletingPhoto) {
+  Future<void> _pickMedia() async {
+    if (_isPickingMedia || _isSavingMedia || _isDeletingMedia) {
       return;
     }
 
     setState(() {
-      _isPickingPhoto = true;
+      _isPickingMedia = true;
     });
 
+    try {
+      final choice = await _showMediaPickerOptions();
+      if (!mounted || choice == null) {
+        return;
+      }
+
+      switch (choice) {
+        case _MediaPickerChoice.photoGallery:
+          await _pickPhotoFromGallery();
+          break;
+        case _MediaPickerChoice.videoGallery:
+          await _pickVideoFromGallery();
+          break;
+      }
+    } catch (error) {
+      debugPrint(
+        '[TrailPhotoUploader._pickMedia] errorType=${error.runtimeType}, error=$error',
+      );
+      if (!mounted) {
+        return;
+      }
+
+      _showSnackBar('Unable to load that media right now.', isError: true);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPickingMedia = false;
+        });
+      }
+    }
+  }
+
+  Future<_MediaPickerChoice?> _showMediaPickerOptions() {
+    final colors = context.appColors;
+
+    return showModalBottomSheet<_MediaPickerChoice>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Material(
+              color: sheetContext.isDarkMode
+                  ? colors.surfaceHigh
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 10),
+                  Container(
+                    width: 42,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: colors.divider,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ListTile(
+                    leading: Icon(
+                      Icons.image_outlined,
+                      color: colors.textPrimary,
+                    ),
+                    title: Text(
+                      'Photo from gallery',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                    onTap: () => Navigator.of(
+                      sheetContext,
+                    ).pop(_MediaPickerChoice.photoGallery),
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      Icons.video_library_outlined,
+                      color: colors.textPrimary,
+                    ),
+                    title: Text(
+                      'Video from gallery',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                    onTap: () => Navigator.of(
+                      sheetContext,
+                    ).pop(_MediaPickerChoice.videoGallery),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickPhotoFromGallery() async {
     try {
       final image = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -201,16 +311,34 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
       }
 
       _showSnackBar('Unable to load that image right now.', isError: true);
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isPickingPhoto = false;
-        });
-      }
     }
   }
 
-  Future<void> _recoverLostGalleryPhoto() async {
+  Future<void> _pickVideoFromGallery() async {
+    try {
+      final video = await _picker.pickVideo(
+        source: ImageSource.gallery,
+        maxDuration: _maxVideoDuration,
+      );
+
+      if (video == null) {
+        return;
+      }
+
+      await _addPickedVideoToPreview(video);
+    } catch (error) {
+      debugPrint(
+        '[TrailPhotoUploader._pickVideoFromGallery] errorType=${error.runtimeType}, error=$error',
+      );
+      if (!mounted) {
+        return;
+      }
+
+      _showSnackBar('Unable to load that video right now.', isError: true);
+    }
+  }
+
+  Future<void> _recoverLostGalleryMedia() async {
     if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
       return;
     }
@@ -223,28 +351,45 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
 
       if (response.exception != null) {
         debugPrint(
-          '[TrailPhotoUploader._recoverLostGalleryPhoto] error=${response.exception}',
+          '[TrailPhotoUploader._recoverLostGalleryMedia] error=${response.exception}',
         );
-        _showSnackBar('Unable to load that image right now.', isError: true);
+        _showSnackBar('Unable to load that media right now.', isError: true);
         return;
       }
 
-      if (response.type != null && response.type != RetrieveType.image) {
+      if (response.type != null &&
+          response.type != RetrieveType.image &&
+          response.type != RetrieveType.video &&
+          response.type != RetrieveType.media) {
         return;
       }
 
-      final images =
+      final mediaFiles =
           response.files ?? <XFile>[if (response.file != null) response.file!];
-      for (final image in images) {
-        await _addPickedImageToPreview(image);
+      for (final media in mediaFiles) {
+        if (response.type == RetrieveType.video) {
+          await _addPickedVideoToPreview(media);
+        } else if (response.type == RetrieveType.image) {
+          await _addPickedImageToPreview(media);
+        } else {
+          await _addPickedMediaToPreview(media);
+        }
       }
     } on UnimplementedError {
       return;
     } catch (error) {
       debugPrint(
-        '[TrailPhotoUploader._recoverLostGalleryPhoto] errorType=${error.runtimeType}, error=$error',
+        '[TrailPhotoUploader._recoverLostGalleryMedia] errorType=${error.runtimeType}, error=$error',
       );
     }
+  }
+
+  Future<void> _addPickedMediaToPreview(XFile media) {
+    if (_isSupportedVideo(media)) {
+      return _addPickedVideoToPreview(media);
+    }
+
+    return _addPickedImageToPreview(media);
   }
 
   Future<void> _addPickedImageToPreview(XFile image) async {
@@ -275,23 +420,112 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
           sourcePath: sourcePath,
           id: '${DateTime.now().microsecondsSinceEpoch}-${bytes.length}-${sourcePath.hashCode}',
           fileName: _fileNameFor(image),
-          contentType: image.mimeType,
+          contentType: _contentTypeForMedia(
+            image,
+            TrailPhotoModel.mediaTypeImage,
+          ),
+          mediaType: TrailPhotoModel.mediaTypeImage,
         ),
       );
       _currentIndex = _photoCount - 1;
     });
   }
 
+  Future<void> _addPickedVideoToPreview(XFile video) async {
+    if (!_isSupportedVideo(video)) {
+      _showSnackBar('Please choose an MP4 or MOV video.', isError: true);
+      return;
+    }
+
+    final sourcePath = video.path.trim();
+    if (sourcePath.isEmpty) {
+      _showSnackBar('Unable to preview that video.', isError: true);
+      return;
+    }
+
+    final alreadyAdded = _pendingPhotos.any(
+      (photo) => photo.sourcePath == sourcePath,
+    );
+    if (alreadyAdded) {
+      _showSnackBar('That video has already been added.');
+      return;
+    }
+
+    final sizeBytes = await video.length();
+    if (sizeBytes <= 0) {
+      _showSnackBar('The selected video file is empty.', isError: true);
+      return;
+    }
+
+    if (sizeBytes > _maxVideoSizeBytes) {
+      _showSnackBar('Please choose a video under 150 MB.', isError: true);
+      return;
+    }
+
+    final duration = await _durationForPickedVideo(video);
+    if (duration == null || !mounted) {
+      return;
+    }
+
+    if (duration > _maxVideoDuration) {
+      _showSnackBar(
+        'Please choose a video shorter than 3 minutes.',
+        isError: true,
+      );
+      return;
+    }
+
+    final bytes = await video.readAsBytes();
+    if (bytes.isEmpty || !mounted) {
+      return;
+    }
+
+    setState(() {
+      _pendingPhotos.add(
+        _PendingTrailPhoto(
+          bytes: bytes,
+          sourcePath: sourcePath,
+          id: '${DateTime.now().microsecondsSinceEpoch}-${bytes.length}-${sourcePath.hashCode}',
+          fileName: _fileNameFor(video, fallbackFileName: 'trail-video.mp4'),
+          contentType: _contentTypeForMedia(
+            video,
+            TrailPhotoModel.mediaTypeVideo,
+          ),
+          mediaType: TrailPhotoModel.mediaTypeVideo,
+          duration: duration,
+        ),
+      );
+      _currentIndex = _photoCount - 1;
+    });
+  }
+
+  Future<Duration?> _durationForPickedVideo(XFile video) async {
+    VideoPlayerController? controller;
+    try {
+      controller = createTrailVideoController(
+        source: video.path.trim(),
+        isLocal: true,
+      );
+      await controller.initialize();
+      return controller.value.duration;
+    } catch (error) {
+      debugPrint(
+        '[TrailPhotoUploader._durationForPickedVideo] errorType=${error.runtimeType}, error=$error',
+      );
+      _showSnackBar('Unable to preview that video.', isError: true);
+      return null;
+    } finally {
+      await controller?.dispose();
+    }
+  }
+
   Future<void> _savePhotos() async {
-    if (_isSavingPhotos || !_hasUnsavedPhotos) {
+    if (_isSavingMedia || !_hasUnsavedPhotos) {
       return;
     }
 
     if (FirebaseAuth.instance.currentUser == null) {
-      _showSnackBar(
-        'Please sign in first before saving photos.',
-        isError: true,
-      );
+      _showSnackBar('Please sign in first before saving media.', isError: true);
       return;
     }
 
@@ -304,16 +538,19 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
     );
 
     setState(() {
-      _isSavingPhotos = true;
+      _isSavingMedia = true;
     });
 
     try {
       for (final photo in photosToSave) {
-        final savedPhoto = await _service.uploadPhoto(
+        final savedPhoto = await _service.uploadMedia(
           bytes: photo.bytes,
           fileName: photo.fileName,
           contentType: photo.contentType,
           trailId: widget.trailId,
+          mediaType: photo.mediaType,
+          sizeBytes: photo.bytes.length,
+          duration: photo.duration,
         );
         savedPairs.add(_SavedPhotoPair(pending: photo, saved: savedPhoto));
       }
@@ -324,10 +561,10 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
 
       setState(() {
         _applySavedPhotoPairs(savedPairs);
-        _isSavingPhotos = false;
+        _isSavingMedia = false;
       });
       _lastSnackBarKey = null;
-      _showSnackBar('Photos saved successfully.');
+      _showSnackBar('Media saved successfully.');
     } catch (error) {
       if (!mounted) {
         return;
@@ -335,7 +572,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
 
       setState(() {
         _applySavedPhotoPairs(savedPairs);
-        _isSavingPhotos = false;
+        _isSavingMedia = false;
       });
       debugPrint(
         '[TrailPhotoUploader._savePhotos] save error uid=${FirebaseAuth.instance.currentUser?.uid}, '
@@ -358,7 +595,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
   }
 
   void _showPreviousPhoto() {
-    if (!_hasMultiplePhotos || _isDeletingPhoto) {
+    if (!_hasMultiplePhotos || _isDeletingMedia) {
       return;
     }
 
@@ -368,7 +605,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
   }
 
   void _showNextPhoto() {
-    if (!_hasMultiplePhotos || _isDeletingPhoto) {
+    if (!_hasMultiplePhotos || _isDeletingMedia) {
       return;
     }
 
@@ -379,7 +616,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
 
   Future<void> _confirmDeletePhoto() async {
     final photo = _currentPhoto;
-    if (photo == null || _isDeletingPhoto) {
+    if (photo == null || _isDeletingMedia) {
       return;
     }
 
@@ -445,7 +682,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
     );
 
     setState(() {
-      _isDeletingPhoto = true;
+      _isDeletingMedia = true;
     });
 
     try {
@@ -460,7 +697,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
 
       setState(() {
         _removePhotoFromState(photo);
-        _isDeletingPhoto = false;
+        _isDeletingMedia = false;
       });
     } catch (error) {
       if (!mounted) {
@@ -468,7 +705,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
       }
 
       setState(() {
-        _isDeletingPhoto = false;
+        _isDeletingMedia = false;
       });
       debugPrint(
         '[TrailPhotoUploader._deletePhoto] delete error uid=$activeUserId, '
@@ -580,7 +817,66 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
     return allowedExtensions.any(fileName.endsWith);
   }
 
-  String _fileNameFor(XFile image) {
+  bool _isSupportedVideo(XFile video) {
+    final mimeType = video.mimeType?.toLowerCase();
+    if (mimeType != null &&
+        (mimeType == 'video/mp4' ||
+            mimeType == 'video/quicktime' ||
+            mimeType == 'video/x-m4v')) {
+      return true;
+    }
+
+    final fileName = _fileNameFor(
+      video,
+      fallbackFileName: 'trail-video.mp4',
+    ).toLowerCase();
+    const allowedExtensions = ['.mp4', '.mov', '.m4v'];
+
+    return allowedExtensions.any(fileName.endsWith);
+  }
+
+  String? _contentTypeForMedia(XFile media, String mediaType) {
+    final mimeType = media.mimeType?.trim().toLowerCase();
+    if (mimeType != null && mimeType.startsWith('$mediaType/')) {
+      return mimeType;
+    }
+
+    final fileName = _fileNameFor(
+      media,
+      fallbackFileName: mediaType == TrailPhotoModel.mediaTypeVideo
+          ? 'trail-video.mp4'
+          : 'trail-photo.jpg',
+    ).toLowerCase();
+    if (mediaType == TrailPhotoModel.mediaTypeVideo) {
+      if (fileName.endsWith('.mov')) {
+        return 'video/quicktime';
+      }
+      if (fileName.endsWith('.m4v')) {
+        return 'video/x-m4v';
+      }
+      return 'video/mp4';
+    }
+
+    if (fileName.endsWith('.png')) {
+      return 'image/png';
+    }
+    if (fileName.endsWith('.webp')) {
+      return 'image/webp';
+    }
+    if (fileName.endsWith('.heic')) {
+      return 'image/heic';
+    }
+    if (fileName.endsWith('.heif')) {
+      return 'image/heif';
+    }
+
+    return 'image/jpeg';
+  }
+
+  String _fileNameFor(
+    XFile image, {
+    String fallbackFileName = 'trail-photo.jpg',
+  }) {
     final imageName = image.name.trim();
     if (imageName.isNotEmpty) {
       return imageName;
@@ -589,7 +885,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
     final normalizedPath = image.path.replaceAll(r'\', '/');
     final slashIndex = normalizedPath.lastIndexOf('/');
     if (slashIndex == -1 || slashIndex == normalizedPath.length - 1) {
-      return 'trail-photo.jpg';
+      return fallbackFileName;
     }
 
     return normalizedPath.substring(slashIndex + 1);
@@ -646,7 +942,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
   Widget build(BuildContext context) {
     final colors = context.appColors;
     final canAddPhoto =
-        !_isPickingPhoto && !_isSavingPhotos && !_isDeletingPhoto;
+        !_isPickingMedia && !_isSavingMedia && !_isDeletingMedia;
 
     return PopScope<Object?>(
       canPop: !_hasUnsavedPhotos,
@@ -661,7 +957,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           OutlinedButton(
-            onPressed: canAddPhoto ? _pickPhoto : null,
+            onPressed: canAddPhoto ? _pickMedia : null,
             style: OutlinedButton.styleFrom(
               foregroundColor: colors.textPrimary,
               disabledForegroundColor: colors.textSecondary,
@@ -679,7 +975,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
             ),
             child: Row(
               children: [
-                if (_isPickingPhoto)
+                if (_isPickingMedia)
                   SizedBox(
                     width: 30,
                     height: 30,
@@ -692,7 +988,7 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
                   const Icon(Icons.add_rounded, size: 34),
                 const SizedBox(width: 10),
                 Text(
-                  'Add your photo',
+                  'Add photo or video',
                   style: GoogleFonts.fredoka(
                     fontSize: 19,
                     fontWeight: FontWeight.w600,
@@ -707,8 +1003,8 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
             currentIndex: _currentIndex,
             currentPhoto: _currentPhoto,
             photoCount: _photoCount,
-            isDeletingPhoto: _isDeletingPhoto,
-            isLoadingSavedPhotos: _isLoadingSavedPhotos,
+            isDeletingPhoto: _isDeletingMedia,
+            isLoadingSavedPhotos: _isLoadingSavedMedia,
             onDelete: _confirmDeletePhoto,
           ),
           if (_hasMultiplePhotos) ...[
@@ -733,10 +1029,9 @@ class _TrailPhotoUploaderState extends State<TrailPhotoUploader> {
           ],
           const SizedBox(height: 14),
           _SavePhotosButton(
-            isSaving: _isSavingPhotos,
+            isSaving: _isSavingMedia,
             unsavedCount: _pendingPhotos.length,
-            onPressed:
-                _hasUnsavedPhotos && !_isSavingPhotos && !_isDeletingPhoto
+            onPressed: _hasUnsavedPhotos && !_isSavingMedia && !_isDeletingMedia
                 ? _savePhotos
                 : null,
           ),
@@ -854,6 +1149,10 @@ class _TrailPhotoImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (photo.isVideo) {
+      return _TrailVideoPreview(photo: photo);
+    }
+
     final pendingPhoto = photo.pendingPhoto;
     if (pendingPhoto != null) {
       return Image.memory(
@@ -887,6 +1186,189 @@ class _TrailPhotoImage extends StatelessWidget {
       errorBuilder: (context, error, stackTrace) {
         return const _TrailPhotoErrorState();
       },
+    );
+  }
+}
+
+class _TrailVideoPreview extends StatefulWidget {
+  _TrailVideoPreview({required this.photo})
+    : super(key: ValueKey('video-${photo.id}'));
+
+  final _DisplayTrailPhoto photo;
+
+  @override
+  State<_TrailVideoPreview> createState() => _TrailVideoPreviewState();
+}
+
+class _TrailVideoPreviewState extends State<_TrailVideoPreview> {
+  VideoPlayerController? _controller;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_initializeVideo());
+  }
+
+  @override
+  void didUpdateWidget(covariant _TrailVideoPreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.photo.videoSource != widget.photo.videoSource) {
+      unawaited(_replaceVideo());
+    }
+  }
+
+  @override
+  void dispose() {
+    unawaited(_disposeController());
+    super.dispose();
+  }
+
+  Future<void> _replaceVideo() async {
+    await _disposeController();
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _hasError = false;
+    });
+    await _initializeVideo();
+  }
+
+  Future<void> _initializeVideo() async {
+    final source = widget.photo.videoSource;
+    if (source.isEmpty) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+        });
+      }
+      return;
+    }
+
+    final controller = createTrailVideoController(
+      source: source,
+      isLocal: widget.photo.isPending,
+    );
+    _controller = controller;
+    controller.addListener(_handleVideoChanged);
+
+    try {
+      await controller.initialize();
+      await controller.setLooping(false);
+      if (!mounted || _controller != controller) {
+        return;
+      }
+
+      setState(() {
+        _hasError = false;
+      });
+    } catch (error) {
+      debugPrint(
+        '[TrailPhotoUploader._TrailVideoPreview] errorType=${error.runtimeType}, error=$error',
+      );
+      if (!mounted || _controller != controller) {
+        return;
+      }
+
+      setState(() {
+        _hasError = true;
+      });
+    }
+  }
+
+  Future<void> _disposeController() async {
+    final controller = _controller;
+    _controller = null;
+    if (controller == null) {
+      return;
+    }
+
+    controller.removeListener(_handleVideoChanged);
+    await controller.dispose();
+  }
+
+  void _handleVideoChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _togglePlayback() async {
+    final controller = _controller;
+    if (controller == null ||
+        _hasError ||
+        !controller.value.isInitialized ||
+        controller.value.hasError) {
+      return;
+    }
+
+    if (controller.value.isPlaying) {
+      await controller.pause();
+    } else {
+      final duration = controller.value.duration;
+      if (duration > Duration.zero && controller.value.position >= duration) {
+        await controller.seekTo(Duration.zero);
+      }
+      await controller.play();
+    }
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = _controller;
+    if (_hasError || controller?.value.hasError == true) {
+      return const _TrailVideoErrorState();
+    }
+
+    if (controller == null || !controller.value.isInitialized) {
+      return const _TrailPhotoProgress();
+    }
+
+    final size = controller.value.size;
+    final width = size.width <= 0 ? 16.0 : size.width;
+    final height = size.height <= 0 ? 9.0 : size.height;
+    final isPlaying = controller.value.isPlaying;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _togglePlayback,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: width,
+              height: height,
+              child: VideoPlayer(controller),
+            ),
+          ),
+          if (!isPlaying)
+            Center(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.52),
+                  shape: BoxShape.circle,
+                ),
+                child: const SizedBox(
+                  width: 54,
+                  height: 54,
+                  child: Icon(
+                    Icons.play_arrow_rounded,
+                    size: 38,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -981,6 +1463,41 @@ class _TrailPhotoErrorState extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Photo unavailable',
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: colors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TrailVideoErrorState extends StatelessWidget {
+  const _TrailVideoErrorState()
+    : super(key: const ValueKey('video-error-state'));
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+
+    return ColoredBox(
+      color: context.isDarkMode ? colors.surfaceMuted : const Color(0xFFE5E2DA),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.videocam_off_outlined,
+              size: 46,
+              color: colors.textSecondary,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Video unavailable',
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -1151,10 +1668,10 @@ class _SavePhotosButton extends StatelessWidget {
             Flexible(
               child: Text(
                 isSaving
-                    ? 'Saving Photos...'
+                    ? 'Saving Media...'
                     : unsavedCount > 0
-                    ? 'Save Photos ($unsavedCount)'
-                    : 'Save Photos',
+                    ? 'Save Media ($unsavedCount)'
+                    : 'Save Media',
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.fredoka(
                   fontSize: 17,
@@ -1211,6 +1728,24 @@ class _DisplayTrailPhoto {
   final String id;
   final TrailPhotoModel? savedPhoto;
   final _PendingTrailPhoto? pendingPhoto;
+
+  bool get isPending => pendingPhoto != null;
+
+  bool get isVideo => pendingPhoto?.isVideo ?? savedPhoto?.isVideo ?? false;
+
+  String get videoSource {
+    final pending = pendingPhoto;
+    if (pending != null) {
+      return pending.sourcePath;
+    }
+
+    final saved = savedPhoto;
+    if (saved == null || !saved.isVideo) {
+      return '';
+    }
+
+    return saved.videoUrl.isNotEmpty ? saved.videoUrl : saved.downloadUrl;
+  }
 }
 
 class _PendingTrailPhoto {
@@ -1220,6 +1755,8 @@ class _PendingTrailPhoto {
     required this.sourcePath,
     required this.fileName,
     required this.contentType,
+    required this.mediaType,
+    this.duration,
   });
 
   final Uint8List bytes;
@@ -1227,6 +1764,10 @@ class _PendingTrailPhoto {
   final String sourcePath;
   final String fileName;
   final String? contentType;
+  final String mediaType;
+  final Duration? duration;
+
+  bool get isVideo => mediaType == TrailPhotoModel.mediaTypeVideo;
 }
 
 class _SavedPhotoPair {
