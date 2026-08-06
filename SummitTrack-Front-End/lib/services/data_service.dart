@@ -1,6 +1,12 @@
-import '../data/trail_data/additional_mountains_data.dart';
-import '../data/trail_data/mountain.dart';
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geolocator/geolocator.dart';
 
+import 'package:summittrack/services/location/location_service.dart';
+import 'package:summittrack/data/trail_data/additional_mountains_data.dart';
+import 'package:summittrack/data/trail_data/mountain.dart';
+
+/// Service para sa static Mountain list data ng SummitTrack
 class DataService {
   static List<Mountain> getMountains() {
     return [
@@ -104,5 +110,42 @@ class DataService {
       ),
       ...additionalMountainsData,
     ];
+  }
+}
+
+/// Service para sa Real-Time GPS Location Broadcast sa Cloud Firestore
+class LiveTrackingService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final LocationService _locationService = const LocationService();
+  StreamSubscription<Position>? _positionStreamSubscription;
+
+  /// Simulan ang live GPS broadcast papunta sa Firestore
+  void startLiveBroadcast(String hikeId) {
+    _positionStreamSubscription?.cancel();
+    _positionStreamSubscription = _locationService
+        .foregroundPositionStream(distanceFilterMeters: 10)
+        .listen((Position position) {
+      _firestore.collection('live_tracking').doc(hikeId).set({
+        'hikeId': hikeId,
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+        'altitude': position.altitude,
+        'speed': position.speed,
+        'accuracy': position.accuracy,
+        'status': 'ACTIVE',
+        'lastUpdated': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    });
+  }
+
+  /// Itigil ang live GPS broadcast
+  Future<void> stopLiveBroadcast(String hikeId) async {
+    await _positionStreamSubscription?.cancel();
+    _positionStreamSubscription = null;
+
+    await _firestore.collection('live_tracking').doc(hikeId).set({
+      'status': 'ENDED',
+      'lastUpdated': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 }

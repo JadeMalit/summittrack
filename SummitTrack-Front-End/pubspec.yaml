@@ -54,6 +54,7 @@ dependencies:
   flutter_timezone: ^4.1.1
   crypto: ^3.0.3
   
+  share_plus: ^10.0.0
   # 🗺️ 2D Interactive Map Packages
   flutter_map: ^6.1.0
   latlong2: ^0.9.1

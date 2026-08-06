@@ -62,6 +62,21 @@ class HikeScheduleStore extends ChangeNotifier {
     return List<ScheduledHike>.unmodifiable(_sorted(_scheduledHikes));
   }
 
+  /// Getter para makuha ang lahat ng nakaplanong hike para sa araw na ito.
+  List<ScheduledHike> get todayHikes {
+    return _scheduledHikes.where((hike) => hike.isHikeToday).toList();
+  }
+
+  /// Kukunin ang scheduled hike sa specific na bundok kung ARAW NG HIKE ngayon.
+  ScheduledHike? activeHikeForMountainToday(String mountainId) {
+    final normalizedMountainId = _normalizeId(mountainId);
+    final matches = _scheduledHikes.where((hike) {
+      return _normalizeId(hike.mountainId) == normalizedMountainId &&
+          hike.isHikeToday;
+    });
+    return matches.isEmpty ? null : matches.first;
+  }
+
   void start() {
     if (_isStarted) {
       return;

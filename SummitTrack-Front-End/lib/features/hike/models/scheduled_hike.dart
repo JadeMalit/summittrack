@@ -110,6 +110,22 @@ class ScheduledHike {
   final String? ownerUid;
   final DateTime? updatedAt;
 
+  /// Helper Getter: Nagre-return ng `true` kapag ang araw ngayon ay tumutugma sa nakaplanong `hikeDate`.
+  bool get isHikeToday {
+    final today = dateOnly(DateTime.now());
+    final target = dateOnly(hikeDate);
+    return today.year == target.year &&
+        today.month == target.month &&
+        today.day == target.day;
+  }
+
+  /// Helper Getter: Nagre-return ng `true` kapag ngayon o nakalipas na ang petsa ng hike.
+  bool get isHikeDayOrPast {
+    final today = dateOnly(DateTime.now());
+    final target = dateOnly(hikeDate);
+    return !target.isAfter(today);
+  }
+
   ScheduledHike copyWith({String? ownerUid, DateTime? updatedAt}) {
     return ScheduledHike(
       id: id,

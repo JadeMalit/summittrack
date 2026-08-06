@@ -12,6 +12,7 @@ import '../../../models/hike_navigation_metadata.dart';
 import '../../../screens/navigation/hike_navigation_confirmation.dart';
 import '../../../services/tracking/hike_tracking_service.dart';
 import '../../hike/models/scheduled_hike.dart';
+import '../../hike/screens/hike.dart'; // 🟢 ADDED: Import para sa HikeScreen
 import '../../hike/screens/lets_hike_calendar_weather_modal.dart';
 import '../../hike/services/hike_schedule_store.dart';
 import '../../hike/utils/mountain_schedule_identity.dart';
@@ -190,6 +191,8 @@ class TrailDetailScreen extends StatelessWidget {
                         const _SectionHeading(title: 'Navigation'),
                         const SizedBox(height: 10),
                         _StartNavigationButton(metadata: navigationMetadata!),
+                        const SizedBox(height: 10),
+                        const _ViewLiveHikeDashboardButton(), // 🟢 ADDED: Live Hike Dashboard Button
                       ],
                       const SizedBox(height: 18),
                       const _SectionHeading(title: 'Add Photo or Video'),
@@ -235,6 +238,43 @@ Future<void> _handleStartNavigation(
   Navigator.of(
     context,
   ).pushNamed(AppRoutes.hikeNavigation, arguments: startRequest);
+}
+
+/// 🟢 BAGONG WIDGET: Button para pumunta sa Live Hike Dashboard
+class _ViewLiveHikeDashboardButton extends StatelessWidget {
+  const _ViewLiveHikeDashboardButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          side: const BorderSide(color: Color(0xFF3FA65B), width: 2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        icon: const Icon(Icons.hiking_rounded, color: Color(0xFF3FA65B)),
+        label: Text(
+          'View Live Hike Dashboard',
+          style: GoogleFonts.fredoka(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: context.isDarkMode ? Colors.white : const Color(0xFF1E261A),
+          ),
+        ),
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const HikeScreen(),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
 class _OfflineTrailAccessCard extends StatelessWidget {

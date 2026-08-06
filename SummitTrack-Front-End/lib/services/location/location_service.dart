@@ -114,4 +114,12 @@ class LocationService {
       longitude: position.longitude,
     );
   }
+
+  /// Helper method para sa mabilisang Permission Check ng Live Tracking
+  Future<bool> requestPermission() async {
+    final readiness = await requestNavigationReadiness();
+    // Papayagan mag-track basta may permission (kahit poor accuracy muna habang nasa loob ng bahay)
+    return readiness.isReady ||
+        readiness.status == LocationReadinessStatus.poorAccuracy;
+  }
 }
