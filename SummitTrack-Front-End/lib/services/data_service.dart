@@ -117,11 +117,16 @@ class DataService {
 class LiveTrackingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final LocationService _locationService = const LocationService();
-  StreamSubscription<Position>? _positionStreamSubscription;
+
+  // ⚠️ CRITICAL FIX: Ginawang STATIC para iisang active GPS stream subscription
+  // lang ang iiral sa buong app at siguradong makakansela ito pagpindot ng Stop.
+  static StreamSubscription<Position>? _positionStreamSubscription;
 
   /// Simulan ang live GPS broadcast papunta sa Firestore
   void startLiveBroadcast(String hikeId) {
+    // Patayin muna ang lumang stream kung mayroon man
     _positionStreamSubscription?.cancel();
+
     _positionStreamSubscription = _locationService
         .foregroundPositionStream(distanceFilterMeters: 10)
         .listen((Position position) {
@@ -133,18 +138,22 @@ class LiveTrackingService {
         'speed': position.speed,
         'accuracy': position.accuracy,
         'status': 'ACTIVE',
+        'isLive': true,
         'lastUpdated': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     });
   }
 
-  /// Itigil ang live GPS broadcast
+  /// Itigil ang live GPS broadcast nang tuluyan
   Future<void> stopLiveBroadcast(String hikeId) async {
+    // 1. 🛑 HARD STOP: Kanselahin ang GPS stream
     await _positionStreamSubscription?.cancel();
     _positionStreamSubscription = null;
 
+    // 2. 🔴 Set status to ENDED at isLive = false para sa Web Map
     await _firestore.collection('live_tracking').doc(hikeId).set({
       'status': 'ENDED',
+      'isLive': false,
       'lastUpdated': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
