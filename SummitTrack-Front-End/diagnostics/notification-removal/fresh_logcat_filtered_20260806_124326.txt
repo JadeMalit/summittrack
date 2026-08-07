@@ -1,0 +1,2082 @@
+﻿
+08-06 12:49:14.533  1705  1751 W NotificationHistory: Attempted to remove conversation for locked/gone/disabled user 0
+08-06 12:49:17.383  1705  2014 I SmartPower: com.openai.chatgpt/10317(11104): background->idle(3795ms) R(service end 
+com.openai.chatgpt/com.openai.feature.notification.impl.NotificationService) adj=905.
+08-06 12:50:30.685 11483 11485 W BpBinder: PerfMonitor binderTransact: time=214ms 
+interface=android.app.INotificationManager code=1598311760
+08-06 12:51:57.744  2113  2113 D ShortcutMenuLayerElement: onAnimationEnd animation = 
+com.miui.home.recents.anim.HyperSpringAnimation@867a497 canceled = false
+08-06 12:51:57.801 11883 11885 W BpBinder: PerfMonitor binderTransact: time=299ms 
+interface=android.app.INotificationManager code=1598311760
+08-06 12:51:57.845  2113  2499 D NavStubView: ACTION_UP: mIsGestureStarted: true, currTime - mDownTime < 
+MSG_CHECK_GESTURE_STUB_TOUCHABLE_TIMEOUT, updateViewLayout UnTouchable, diffX: 113.4209 diffY: -457.4121
+08-06 12:51:57.877  2113  2113 D ShortcutMenuLayerElement: onAnimationEnd animation = 
+com.miui.home.recents.anim.HyperSpringAnimation@867a497 canceled = false
+08-06 12:51:58.366  1219  1259 W MiuiBooster: "doCpuFreqTimeout, perf_handle 14138"
+08-06 12:51:58.366  1219  1259 W MiuiBooster: "doFreqTimeout, erase perf_handle 14138 index 0"
+08-06 12:51:58.371   997  1085 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:14138
+08-06 12:51:58.376 28937 29785 I BtGatt.ScanManager: msg.what = MSG_BALANCED_TIMEOUT_RECENTLY, msg.arg1 = 
+BALANCED_TIMEOUT_RECENTLY
+08-06 12:51:58.376 28937 29785 D BtGatt.ScanManager: handleBalancedTimeoutRecently() called with: client = [ 
+[ScanClient scanModeApp 1 scanModeUsed 1 [appScanStats com.google.uid.shared:10147]]], infoId = [22]
+08-06 12:51:58.377 28937 29785 D BtGatt.ScanManager: handleBalancedTimeoutRecently() -- com.google.android.gms is 
+foreground
+08-06 12:51:58.471  1705  2019 D PerfShielderService: Add animation response: RECENT_SWIPE_REMOVE_APP_RESPONSE  
+package:Default_Value duration:0 startTime: 61876439 endTime:61876439
+08-06 12:51:58.481  1022  1022 I Vibrator: Vibrator on for timeoutMs: 66
+08-06 12:51:58.550   997  1085 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:14141
+08-06 12:51:58.977  2113  2113 D TaskStackViewTouchHandler: onChildDismissedEnd, taskView = 
+com.miui.home.recents.views.TaskView{80e4a7a VFE...CL. ........ 246,559-833,1999} task information: [TaskKey{id=9264, 
+stackId=0, baseIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x30000000 
+cmp=com.example.summittrack/.MainActivity }, userId=0, lastActiveTime=60706508, windowingMode=1, 
+isThumbnailBlur=false, isAccessLocked=false, isScreening=false, 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, mHashCode=276907376}, 
+title=SummitTrack, titleDescription=summittrack, bounds=null, isLaunchTarget=false, isStackTask=true, 
+isSystemApp=false, isDockable=true, 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, isLocked=false, 
+mNeedHide=false, hasMultipleTasks=false, cti1Key=, cti2Key=, cti1Task=, cti2Task=] 
+08-06 12:51:58.981  2113  2113 D RecentsContainer: removeTask: [TaskKey{id=9264, stackId=0, baseIntent=Intent { 
+act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x30000000 
+cmp=com.example.summittrack/.MainActivity }, userId=0, lastActiveTime=60706508, windowingMode=1, 
+isThumbnailBlur=false, isAccessLocked=false, isScreening=false, 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, mHashCode=276907376}, 
+title=SummitTrack, titleDescription=summittrack, bounds=null, isLaunchTarget=false, isStackTask=true, 
+isSystemApp=false, isDockable=true, 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, isLocked=false, 
+mNeedHide=false, hasMultipleTasks=false, cti1Key=, cti2Key=, cti1Task=, cti2Task=] 
+08-06 12:51:58.989  1705  2025 I CameraActivitySceneMode: decideSceneMode: ActivityStateChange isn't resumend 
+activityName = com.example.summittrack.MainActivity, displayId = 0, state = 7, mIsVideocallResumed = false
+08-06 12:51:58.990  2113  2113 D RecentsContainer: doSwapUPClean : [TaskKey{id=9264, stackId=0, baseIntent=Intent { 
+act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x30000000 
+cmp=com.example.summittrack/.MainActivity }, userId=0, lastActiveTime=60706508, windowingMode=1, 
+isThumbnailBlur=false, isAccessLocked=false, isScreening=false, 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, mHashCode=276907376}, 
+title=SummitTrack, titleDescription=summittrack, bounds=null, isLaunchTarget=false, isStackTask=true, 
+isSystemApp=false, isDockable=true, 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, isLocked=false, 
+mNeedHide=false, hasMultipleTasks=false, cti1Key=, cti2Key=, cti1Task=, cti2Task=] 
+08-06 12:51:58.990  1705  1777 I PowerHalWrapper: amsBoostNotify 
+pid:1559,activity:com.example.summittrack.MainActivity, package:com.example.summittrack, 
+mProcessCreatePackcom.example.summittrack 
+08-06 12:51:58.992  1705  1777 I ScnModule: [GameDetection] requestedPermissions1/1:: com.example.summittrack:: 
+[android.permission.INTERNET, android.permission.ACCESS_NETWORK_STATE, android.permission.POST_NOTIFICATIONS, 
+android.permission.RECEIVE_BOOT_COMPLETED, android.permission.ACCESS_COARSE_LOCATION, 
+android.permission.ACCESS_FINE_LOCATION, android.permission.READ_MEDIA_IMAGES, android.permission.READ_MEDIA_VIDEO, 
+android.permission.READ_MEDIA_VISUAL_USER_SELECTED, android.permission.WAKE_LOCK, android.permission.VIBRATE, 
+android.permission.ACCESS_WIFI_STATE, com.google.android.c2dm.permission.RECEIVE, 
+com.google.android.providers.gsf.permission.READ_GSERVICES, 
+com.example.summittrack.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] 
+08-06 12:51:58.993  1705  1777 I ScnModule: [GameDetection] numOfPermissiom:: com.example.summittrack:: 15 
+08-06 12:51:58.998  1705  1777 I ScnModule: [GameDetection] nativeLibs1/1:: com.example.summittrack:: 
+[libdatastore_shared_counter.so, libflutter.so, libmaplibre.so, libVkLayer_khronos_validation.so] 
+08-06 12:51:58.999  1705  1777 I ScnModule: [GameDetection] inputPermissions:: com.example.summittrack:: [0.0, 0.0, 
+0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] 
+08-06 12:51:58.999  1705  1777 I ScnModule: [GameDetection] inputGameFeature:: com.example.summittrack:: [-1.1751872, 
+0.0, 0.0, 0.0] 
+08-06 12:51:59.000  1705  1777 I ScnModule: [GameDetection] GamePredictor:: com.example.summittrack:: 
+nonGame:9.4997,isGame:-10.3426 
+08-06 12:51:59.000  1705  1777 I mtkpower_client: [PowerHal_Wrap_notifyAppState] 
+com.example.summittrack/com.example.summittrack.MainActivity pid=1559 activityId:617386 state:0
+08-06 12:51:59.001   992   992 I vendor.mediatek.hardware.mtkpower_applist-service.mediatek: packName: 
+com.example.summittrack actName: com.example.summittrack.MainActivity pid: 1559 activityId: 617386 uid: 10384 state: 0
+08-06 12:51:59.001   992   992 I MTK_APPList: [notifyAPPstate] 
+com.example.summittrack/com.example.summittrack.MainActivity, pid=1559, activityId=617386, uid=10384, state:PAUSED, 
+fps:-1, win:0
+08-06 12:51:59.007  1705  1777 I ActivityTaskManager: removetask notifyTaskRemoved Task{6b5894b #9264 type=standard 
+I=com.example.summittrack/.MainActivity}, call from com.android.server.wm.ActivityTaskSupervisor.removeTask:1984 
+com.android.server.wm.ActivityTaskSupervisor.removeTask:1929 
+com.android.server.wm.WindowProcessUtils.removeTaskLocked:392 com.android.server.wm.WindowProcessUtils.removeTask:379 
+com.android.server.am.ProcessCleanerBase.removeTaskIfNeeded:198 
+com.android.server.am.ProcessSceneCleaner.handleSwipeKill:203 
+com.android.server.am.ProcessSceneCleaner.-$$Nest$mhandleSwipeKill:0 
+com.android.server.am.ProcessSceneCleaner$H.handleMessage:120 
+08-06 12:51:59.007  1705  2025 I CameraActivitySceneMode: decideSceneMode: ActivityStateChange isn't resumend 
+activityName = com.example.summittrack.MainActivity, displayId = 0, state = 8, mIsVideocallResumed = false
+08-06 12:51:59.011  1705  1777 I ProcessSceneCleaner: SwipeUpClean: kill procName=com.example.summittrack info=AS:90018
+08-06 12:51:59.011  1705  1777 I ActivityManager: Killing 1559:com.example.summittrack/u0a384 (adj 900): SwipeUpClean
+08-06 12:51:59.164  2113  2113 D ShortcutMenuLayerElement: onAnimationEnd animation = 
+com.miui.home.recents.anim.HyperSpringAnimation@867a497 canceled = false
+08-06 12:51:59.332  1705  4774 I WindowManager: WIN DEATH: Window{afebc59 u0 
+com.example.summittrack/com.example.summittrack.MainActivity}, mAddedWindows = [Window{afebc59 u0 
+com.example.summittrack/com.example.summittrack.MainActivity}]
+08-06 12:51:59.332  1050  1556 D SurfaceFlinger: [SF client] REMOVE (0xb400007cb14445e0) for 
+(1559:com.example.summittrack)
+08-06 12:51:59.334  1705  1947 D ConnectivityService: releasing NetworkRequest [ REQUEST id=5298, [ Capabilities: 
+INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 RequestorPkg: 
+com.example.summittrack UnderlyingNetworks: Null] ] (release request)
+08-06 12:51:59.335  1705  1947 D ConnectivityService: releasing NetworkRequest [ REQUEST id=5296, [ Capabilities: 
+INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 RequestorPkg: 
+com.example.summittrack UnderlyingNetworks: Null] ] (release request)
+08-06 12:51:59.335  1705  1947 D ConnectivityService: releasing NetworkRequest [ REQUEST id=5300, [ Capabilities: 
+INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 RequestorPkg: 
+com.example.summittrack UnderlyingNetworks: Null] ] (release request)
+08-06 12:51:59.346  1705  2570 I ScnModule: [GameDetection] requestedPermissions1/1:: com.example.summittrack:: 
+[android.permission.INTERNET, android.permission.ACCESS_NETWORK_STATE, android.permission.POST_NOTIFICATIONS, 
+android.permission.RECEIVE_BOOT_COMPLETED, android.permission.ACCESS_COARSE_LOCATION, 
+android.permission.ACCESS_FINE_LOCATION, android.permission.READ_MEDIA_IMAGES, android.permission.READ_MEDIA_VIDEO, 
+android.permission.READ_MEDIA_VISUAL_USER_SELECTED, android.permission.WAKE_LOCK, android.permission.VIBRATE, 
+android.permission.ACCESS_WIFI_STATE, com.google.android.c2dm.permission.RECEIVE, 
+com.google.android.providers.gsf.permission.READ_GSERVICES, 
+com.example.summittrack.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] 
+08-06 12:51:59.346  1705  2570 I ScnModule: [GameDetection] numOfPermissiom:: com.example.summittrack:: 15 
+08-06 12:51:59.346  1705  1762 I libprocessgroup: Removed cgroup /sys/fs/cgroup/apps/uid_10384/pid_1559
+08-06 12:51:59.346  1705  2570 I ScnModule: [GameDetection] nativeLibs1/1:: com.example.summittrack:: 
+[libdatastore_shared_counter.so, libflutter.so, libmaplibre.so, libVkLayer_khronos_validation.so] 
+08-06 12:51:59.346  1705  1931 I MiuiNetworkPolicy: removeUidState uid = 10384
+08-06 12:51:59.346  1705  2570 I ScnModule: [GameDetection] inputPermissions:: com.example.summittrack:: [0.0, 0.0, 
+0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] 
+08-06 12:51:59.347  1705  2570 I ScnModule: [GameDetection] inputGameFeature:: com.example.summittrack:: [-1.1751872, 
+0.0, 0.0, 0.0] 
+08-06 12:51:59.347  1705  2570 I ScnModule: [GameDetection] GamePredictor:: com.example.summittrack:: 
+nonGame:9.4997,isGame:-10.3426 
+08-06 12:51:59.347  1705  2570 I mtkpower_client: [PowerHal_Wrap_notifyAppState] 
+com.example.summittrack/com.example.summittrack pid=1559 activityId:1559 state:3
+08-06 12:51:59.347   992   992 I vendor.mediatek.hardware.mtkpower_applist-service.mediatek: packName: 
+com.example.summittrack actName: com.example.summittrack pid: 1559 activityId: 1559 uid: 10384 state: 3
+08-06 12:51:59.347   992   992 I MTK_APPList: [notifyAPPstate] com.example.summittrack/com.example.summittrack, 
+pid=1559, activityId=1559, uid=10384, state:DEAD, fps:-1, win:0
+08-06 12:51:59.347   992   992 I MTK_APPList: [notifyAPPstate] pack:com.example.summittrack, pid:1559, STATE_DEAD
+08-06 12:51:59.349  1705  2025 I CameraActivitySceneMode: decideSceneMode: ActivityStateChange isn't resumend 
+activityName = com.example.summittrack.MainActivity, displayId = 0, state = 9, mIsVideocallResumed = false
+08-06 12:51:59.350  1705  2570 D BarFollowAnimation: onTaskInfoChanedForCaptionBar Task{6b5894b #9264 type=standard 
+I=com.example.summittrack/.MainActivity} shouldbeVisible:false isVisible:false isOnTop:false windowMode:1 
+preDisplayId:-1 displayId:0 mCaptionAssociatedTask:null mIsTouchedInCaption:false
+08-06 12:51:59.351  1050  1050 I SurfaceFlinger: onHandleDestroyed: layerId=4168, name=afebc59 
+com.example.summittrack/com.example.summittrack.MainActivity#4168
+08-06 12:51:59.354  1705  2570 D BarFollowAnimation: onTaskValishedForCaptionBar Task{6b5894b #9264 type=standard 
+I=com.example.summittrack/.MainActivity}
+08-06 12:51:59.358  1705  1842 W UsageStatsService: Unexpected activity event reported! 
+(com.example.summittrack/com.example.summittrack.MainActivity event : 23 instanceId : 106296297)
+08-06 12:51:59.359  2433  2633 D MultiTaskingTaskRepository: removeMultiTaskingTaskInfo::taskInfo.taskId = 9264 
+current mMultiTaskingTaskInfoList: { ,9264 ,5 ,4 }
+08-06 12:51:59.359  2433  2633 D MultiTaskingTaskRepository: removeFullscreenTask::taskId = 9264
+08-06 12:51:59.363  1050  1050 I SurfaceFlinger: onHandleDestroyed: layerId=4155, name=ActivityRecord{617386 u0 
+com.example.summittrack/.MainActivity t9264}#4155
+08-06 12:51:59.717   997  1085 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:14142
+08-06 12:51:59.869   997  1085 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:14143
+08-06 12:52:00.326 29655 29655 W adbd    : timeout expired while reading data after flushing socket, closing
+08-06 12:52:01.486   997  1085 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:14145
+08-06 12:52:02.978  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 12:52:02.982  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 12:52:09.899  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 12:52:09.902  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 12:52:12.098  9032  9260 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[lightspeed] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 12:52:12.104  9032  9280 E msys    : E[S 
+MSync]modular_sync_service_ffi::service_ffi::handle_network_response(1013)=>DB[231] - Encountered a network error 
+(2002: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP 
+code: 1 detail: SecureTCP connection establish timeout))
+08-06 12:52:14.843 31505 10288 W System.err: 	at com.vega.launcher.network.interceptors.TimeOutSettingInterceptor.inter
+cept(dex-id-1015cc7939f53a0eb9f13e76b6da2fecb9729e79:17302005)
+08-06 12:52:15.685 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:am force-stop com.example.summittrack'
+08-06 12:52:15.768  1705  2557 I ActivityManager: Force stopping com.example.summittrack appid=10384 user=0: from 
+process:11949
+08-06 12:52:15.776  1705  2557 I AppsFilter: interaction: PackageSetting{cbb8fae 
+com.android.microdroid.empty_payload/10250} -> PackageSetting{e440e17 com.example.summittrack/10384} BLOCKED
+08-06 12:52:15.786  2411  2411 D CarrierSvcBindHelper: onHandleForceStop: [com.example.summittrack]
+08-06 12:52:17.320  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 12:52:17.326  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 12:52:20.413 29740 29740 I Finsky  : [2] VerifyApps: Install-time verification requested for package 
+com.example.summittrack, PackageManager id = 14, Verifier id = 7e3fbde1-1832-4fd4-ae30-52e8a42ad738
+08-06 12:52:20.717 29740 11975 I Finsky  : [8242] VerifyApps: Anti-malware verification task started for 
+package=com.example.summittrack
+08-06 12:52:21.115 29740 11975 I Finsky  : [8242] VerifyApps: chooseScanResult for package=com.example.summittrack 
+with timeout=15000ms
+08-06 12:52:21.116 29740  7367 I Finsky  : [8158] VerifyApps: Starting APK Analysis scan for com.example.summittrack.
+08-06 12:52:21.116 29740  7367 I Finsky  : [8158] Scanning package com.example.summittrack contents with client side 
+protections. File: [Ked0j6vGQeGHk1bPN7A3TsfPnqGO3zlB5sK7rq77OkI]
+08-06 12:52:21.117 29740  7367 I Finsky  : [8158] VerifyApps: APK Analysis scan finished for com.example.summittrack. 
+Verdict: 0
+08-06 12:52:21.119 29740 11975 I Finsky  : [8242] VerifyApps: firstScanResult for package=com.example.summittrack: 0
+08-06 12:52:21.119 29740 11975 I Finsky  : [8242] VerifyApps: firstScanResult verdict is 0. Checking for extended 
+timeout.
+08-06 12:52:21.120 29740 11975 I Finsky  : [8242] VerifyApps: Timeout for second result: 14995ms
+08-06 12:52:21.454 29740 11987 I Finsky  : [8245] VerifyApps: Verification package=com.example.summittrack, id=14, 
+response=0, upload_requested=false, enable_ecm=false
+08-06 12:52:21.466 29740 11987 I Finsky  : [8245] VerifyApps: PAM result saving to datastore delayed for package: 
+com.example.summittrack
+08-06 12:52:21.467 29740 11975 I Finsky  : [8242] VerifyApps: overallScanResult for package=com.example.summittrack: 0
+08-06 12:52:21.467 29740 11975 I Finsky  : [8242] VerifyApps: chooseScanResult returning verdict 0 for 
+package=com.example.summittrack
+08-06 12:52:21.476  1705  1823 D InstallDependencyHelper: No missing dependency for com.example.summittrack
+08-06 12:52:21.477 29740 29740 I Finsky  : [2] VerifyApps: Install-time verification complete: id=14, 
+package_name=com.example.summittrack
+08-06 12:52:21.566  1705  1823 D BLASTSyncEngine: [DH_DEBUG]scheduleTimeout #190 success=true timeoutMs=5000 
+callback=com.android.server.wm.BLASTSyncEngine$SyncGroup$$ExternalSyntheticLambda2@7220e59
+08-06 12:52:21.588  1705  1823 I PowerHalWrapper: amsBoostNotify pid:2113,activity:com.miui.home.launcher.Launcher, 
+package:com.miui.home, mProcessCreatePackcom.example.summittrack 
+08-06 12:52:21.596  1455  1455 I VoLTE IMCB-0: {{{{uatimer expiry acct_id: 0, uatimer_id: 1, uatimeout: 600, 
+user_data: 0x1000AC09, timer_id: 186 imcb_uatimer_tmo_hdlr()@0#231
+08-06 12:52:21.597  1453  1482 I VoLTE REG: SA lifetime timeout (module/volte//volte_stack/src/reg/reg.c:14524)
+08-06 12:52:21.599  1455  1455 I VoLTE IMCB: ENTER ua_imcb_ind_timer_cancel_handler()@0#4321
+08-06 12:52:21.599  1455  1455 I VoLTE IMCB: uatimer fail cancel acct_id: 0, uatimer_id: 1, uatimeout: 0, user_data: 
+0x1000AC09 imcb_uatimer_cancel()@0#310
+08-06 12:52:21.627  1705  4747 I PowerHalWrapper: amsBoostNotify 
+pid:5480,activity:com.miui.permcenter.install.AdbInstallActivity, package:com.miui.securitycenter, 
+mProcessCreatePackcom.example.summittrack 
+08-06 12:52:21.660  2433  2433 D DynamicIslandSafeguardsController: cancelDelayEnterApp com.miui.securitycenter 
+com.miui.player
+08-06 12:52:21.660  2433  2433 D DynamicIslandSafeguardsController: cancelDelayEnterMiniWindow com.miui.securitycenter 
+com.miui.securitycenter null
+08-06 12:52:21.660  2433  2433 D DynamicIslandSafeguardsController: cancelDelayExitApp com.miui.securitycenter 
+com.miui.home
+08-06 12:52:21.660  2433  2433 D DynamicIslandSafeguardsController: cancelDelayExitMiniWindow com.miui.securitycenter 
+null
+08-06 12:52:21.660  2433  2433 D DynamicIslandSafeguardsController: cancelDelayExitApp com.miui.securitycenter 
+com.miui.securitycenter
+08-06 12:52:21.664  1705  1719 I PowerHalWrapper: amsBoostNotify 
+pid:5480,activity:com.miui.permcenter.install.AdbInstallActivity, package:com.miui.securitycenter, 
+mProcessCreatePackcom.example.summittrack 
+08-06 12:52:21.713  1705  4747 I PowerHalWrapper: amsBoostNotify pid:2113,activity:com.miui.home.launcher.Launcher, 
+package:com.miui.home, mProcessCreatePackcom.example.summittrack 
+08-06 12:52:21.716  1705  4747 I PowerHalWrapper: amsBoostNotify pid:2113,activity:com.miui.home.launcher.Launcher, 
+package:com.miui.home, mProcessCreatePackcom.example.summittrack 
+08-06 12:52:21.726  2433  2433 D DynamicIslandSafeguardsController: cancelDelayEnterApp com.miui.home com.miui.player
+08-06 12:52:21.726  2433  2433 D DynamicIslandSafeguardsController: cancelDelayEnterMiniWindow com.miui.home 
+com.miui.home null
+08-06 12:52:21.726  2433  2433 D DynamicIslandSafeguardsController: cancelDelayExitApp com.miui.home 
+com.miui.securitycenter
+08-06 12:52:21.726  2433  2433 D DynamicIslandSafeguardsController: cancelDelayExitMiniWindow com.miui.home null
+08-06 12:52:21.726  2433  2433 D DynamicIslandSafeguardsController: cancelDelayExitApp com.miui.home com.miui.home
+08-06 12:52:21.732  1705  4747 D BLASTSyncEngine: [DH_DEBUG]remove timeout #190 
+callback=com.android.server.wm.BLASTSyncEngine$SyncGroup$$ExternalSyntheticLambda2@7220e59
+08-06 12:52:21.742  2113  2600 D MiBridge: requestCpuHighFreq---- uid: 10165 level: 1 timeoutms:500
+08-06 12:52:21.743  1219  1257 W MiuiBooster: "requestCpuHighFreq, final level:1, final timeoutms:500"
+08-06 12:52:21.746  2433  2633 I RemoteTransitionHandlerStubImpl: invokeAndRemoveWctCB transition is null, curWctCB: 
+null
+08-06 12:52:21.750  1705  1737 I PowerHalWrapper: amsBoostNotify 
+pid:5480,activity:com.miui.permcenter.install.AdbInstallActivity, package:com.miui.securitycenter, 
+mProcessCreatePackcom.example.summittrack 
+08-06 12:52:21.795  2113  2113 I ImeTracker: com.miui.home:eda4ad1: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+08-06 12:52:21.805  1705  1719 I ActivityTaskManager: trimed notifyTaskRemoved Task{59e96ce #9265 type=standard 
+A=1000:com.miui.securitycenter nonResizable}, call from 
+com.android.server.wm.ActivityTaskSupervisor.activityIdleInternal:1654 
+com.android.server.wm.ActivityClientController.activityIdle:205 
+android.app.IActivityClientController$Stub.onTransact:675 
+com.android.server.wm.ActivityClientController.onTransact:184 android.os.Binder.execTransactInternal:1433 
+android.os.Binder.execTransact:1372 <bottom of call stack> <bottom of call stack> 
+08-06 12:52:21.830  5480  5480 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false 
+callback=android.view.ViewRootImpl$$ExternalSyntheticLambda16@1487b5b
+08-06 12:52:21.842  1705  3863 W WindowManager: Failed looking up window session=Session{7f0c302 5480:1000} 
+callers=com.android.server.wm.WindowManagerService.removeClientToken:2710 com.android.server.wm.Session.remove:344 
+android.view.IWindowSession$Stub.onTransact:781 
+08-06 12:52:21.843  2433  2633 D MultiTaskingTaskRepository: removeMultiTaskingTaskInfo::taskInfo.taskId = 9265 
+current mMultiTaskingTaskInfoList: { ,5 ,4 }
+08-06 12:52:21.887  1705  1795 I PackageManager: Update package com.example.summittrack code path from 
+/data/app/~~gPpIPf15sNX8wzMT50PAPw==/com.example.summittrack-wH2V7buaRnunOl2S2zKO_w== to /data/app/vmdl333702499.tmp; 
+Retain data and using new
+08-06 12:52:21.976  1705  1795 I AppsFilter: interaction: PackageSetting{8d0bf8 
+com.android.microdroid.empty_payload/10250} -> PackageSetting{7345684 com.example.summittrack/10384} BLOCKED
+08-06 12:52:21.977  1705  1795 I AppsFilter: interaction: PackageSetting{8d0bf8 
+com.android.microdroid.empty_payload/10250} -> PackageSetting{9d16210 com.example.summittrack/10384} BLOCKED
+08-06 12:52:22.046  1705 28190 I BaselineProfile: com.example.summittrack dexmetadataFile does not exist.
+08-06 12:52:22.048  1705  1760 I ActivityManager: Force stopping com.example.summittrack appid=10384 user=-1: 
+installPackageLI
+08-06 12:52:22.048  1705  1795 W PackageFreezer: Freeze package com.example.summittrack about 0.073 seconds for 
+reason: installPackageLI
+08-06 12:52:22.050  1705 28190 D ProfileTranscode: com.example.summittrack read profile exception: 
+java.io.FileNotFoundException: dexopt/baseline.prof
+08-06 12:52:22.050  1705  1795 I InstallationTiming: com.example.summittrack|null|6232|3428|191|954|0|1071|14
+08-06 12:52:22.050  1705  1795 I PackageManager: installation completed for package:com.example.summittrack. Final 
+code path: /data/app/~~-66lECIXNN9nFFzTAEr8Hg==/com.example.summittrack-F1jlqe7fMma2qjhoAFpfpA==
+08-06 12:52:22.051  1705  1795 I AppsFilter: interaction: PackageSetting{cbb8fae 
+com.android.microdroid.empty_payload/10250} -> PackageSetting{947ac4e com.example.summittrack/10384} BLOCKED
+08-06 12:52:22.095  1705  1795 I ActivityManager: Force stopping com.example.summittrack appid=10384 user=0: pkg 
+removed
+08-06 12:52:22.125  1705  2046 D ShortcutService: received package broadcast intent: Intent { 
+act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }
+08-06 12:52:22.134  2433  2966 I CurrentTilesInteractor: onReceive: com.example.summittrack is not in currentTiles
+08-06 12:52:22.135  2433  2433 D LockScreenMagazineController: received broadcast android.intent.action.PACKAGE_REMOVED
+08-06 12:52:22.137  2433  2433 D VolumePanelViewController_true: onReceive: android.intent.action.PACKAGE_REMOVED, 
+time= 0
+08-06 12:52:22.140  2433  2433 E DynamicIslandEventCoordinator: updatePkgSupportFreeform : com.example.summittrack, 
+true
+08-06 12:52:22.140  2433  2433 D MiuiClockController: receive package changed com.example.summittrack
+08-06 12:52:22.141  2433  2433 D MiuiClockController: receive package changed com.example.summittrack
+08-06 12:52:22.142  1705  1931 I MiuiNetworkPolicy: ACTION_PACKAGE_REMOVED uid = 10384
+08-06 12:52:22.142  1705  1931 D MiuiNetworkPolicyAppBuckets: updateAppPN 
+packageName=com.example.summittrack,uid=10384,installed=false
+08-06 12:52:22.144  2113  2506 E InstallApkReceiver: uninstall:package:com.example.summittrack
+08-06 12:52:22.148  1219  1257 W MiuiBooster: "MiuiBoosterService removeAuthorizedUid: 10384"
+08-06 12:52:22.148  4505  4505 D MiSpeedUtils: Calling service to removeAuthorizedUid: 10384 and result: 0
+08-06 12:52:22.168 28208 29475 I GrayResultDBManager: deleteInfoByPackageName from db pkgName com.example.summittrack 
+dbr 0
+08-06 12:52:22.170  2113  2113 D Launcher.Model: LauncherAppsCallback 
+onPackageChanged|com.example.summittrack|UserHandle{0}|false
+08-06 12:52:22.172  2113  2113 D Launcher.Model: onPackageChanged: packageName = com.example.summittrack
+08-06 12:52:22.173  1705  1906 W PackageConfigPersister: App-specific configuration not found for packageName: 
+com.example.summittrack and userId: 0
+08-06 12:52:22.175  2113  2113 D PackageModifiedListener: checkWidgetBlurState: post WidgetBlurStateMessage 
+com.example.summittrack
+08-06 12:52:22.175  2113  2113 D Launcher.Widget: onMessageEvent: message = 
+WidgetBlurStateMessage{packageName='com.example.summittrack'}
+08-06 12:52:22.176  2113  2113 D Launcher.Widget: onMessageEvent: message = 
+WidgetBlurStateMessage{packageName='com.example.summittrack'}
+08-06 12:52:22.177  2113  2113 D Launcher.Widget: onMessageEvent: message = 
+WidgetBlurStateMessage{packageName='com.example.summittrack'}
+08-06 12:52:22.182  1705  1705 I Telecom : CarModeTracker: Package com.example.summittrack is not tracked.: SSH.oR@F4Y
+08-06 12:52:22.183  1705  1941 I AmlNetworkDetectInjector: ACTION_PACKAGE_REMOVED uid = 10384
+08-06 12:52:22.189  1705  1983 D GreezeManager: uid: 10384  pkg:com.example.summittrack package added.
+08-06 12:52:22.191  1705  1757 I MiuiCompatModePackages: package com.example.summittrack updated, removing config
+08-06 12:52:22.193  1705  2053 I SdkSandboxManager: No SDKs used. Skipping SDK data reconcilation for 
+CallingInfo{mUid=10384, mPackageName='com.example.summittrack, mAppProcessToken='null'}
+08-06 12:52:22.200  1705  1931 D MiuiNetworkPolicyAppBuckets: updateAppPN 
+packageName=com.example.summittrack,uid=10384,installed=true
+08-06 12:52:22.200  2411  2411 D CarrierSvcBindHelper: onPackageUpdateFinished: com.example.summittrack
+08-06 12:52:22.203  2411  2880 I SatelliteAppTracker: onPackageUpdateFinished : com.example.summittrack
+08-06 12:52:22.203  2411  2880 I SatelliteAppTracker: onPackageModified : com.example.summittrack
+08-06 12:52:22.206  1705  2046 D ShortcutService: replacing package: com.example.summittrack userId=0
+08-06 12:52:22.207  1705  1705 W AlarmManager: Package com.example.summittrack, uid 10384 lost permission to set exact 
+alarms!
+08-06 12:52:22.207  2411  2880 E SatelliteAppTracker: packageName: com.example.summittrack, value: null
+08-06 12:52:22.208  2411  2411 D CarrierSvcBindHelper: onPackageModified: com.example.summittrack
+08-06 12:52:22.209  2113  2506 E InstallApkReceiver: install:package:com.example.summittrack
+08-06 12:52:22.210  1705  1941 E AppScanObserverService: Try to add a invalid package: com.example.summittrack | 10384 
+| 0
+08-06 12:52:22.214  2433  2433 E DynamicIslandEventCoordinator: updatePkgSupportFreeform : com.example.summittrack, 
+true
+08-06 12:52:22.214  2433  2433 D MiuiClockController: receive package changed com.example.summittrack
+08-06 12:52:22.214  2433  2433 D MiuiClockController: receive package changed com.example.summittrack
+08-06 12:52:22.215  2411  2880 E SatelliteAppTracker: packageName: com.example.summittrack, value: null
+08-06 12:52:22.223  2411  2874 D ImsResolver: maybeAddedImsService, packageName: com.example.summittrack
+08-06 12:52:22.223  2411  2874 V ImsResolver: searchForImsServices: package=com.example.summittrack, 
+users=[UserHandle{0}]
+08-06 12:52:22.224  2411  2874 V ImsResolver: searchForImsServices: package=com.example.summittrack, 
+users=[UserHandle{0}]
+08-06 12:52:22.227  2411  2411 W VvmPkgInstalledRcvr: carrierVvmPkgAdded: carrier vvm packages doesn't contain 
+com.example.summittrack
+08-06 12:52:22.231  2113  2501 I IconCustomizer: find better bitmap : 144px, for com.example.summittrackat density 
+:480dpi, the device is : 440dpi
+08-06 12:52:22.233  2113  2501 D IconCustomizer: Generate customized icon for com.example.summittrack.png, true
+08-06 12:52:22.233  2113  2501 I IconCustomizer: composeIconWithTrans FullMask: for com.example.summittrack.png
+08-06 12:52:22.235  2113  2113 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.235  4909  4909 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.236  4873  4873 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.236  4263  4263 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.236 14137 14137 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.238 25813 25813 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.239  2150  2150 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.240  3471  3471 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.241  6269  6269 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.241 25791 25791 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.242  3121  3121 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.242 29740 29740 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.242  3501  3501 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.242  9320  9320 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.243 17303 17303 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.244  7448  7448 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.245 31505 31505 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.245  4391  4391 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.246  1219  1259 W MiuiBooster: "doCpuFreqTimeout, perf_handle 14152"
+08-06 12:52:22.246  1219  1259 W MiuiBooster: "doFreqTimeout, erase perf_handle 14152 index 0"
+08-06 12:52:22.247  5480  5480 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.247 28208 28208 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.246  7257  7257 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.247   997  1085 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:14152
+08-06 12:52:22.247 10199 10199 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.248  4892  4892 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.248  5777  5777 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.249 15344 15344 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.250  3626  3626 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.251 11641 11641 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.252  6374  6374 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.252 11104 11104 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.252 10119 10119 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.253  9032  9032 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.253  9038  9038 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.254 11533 11533 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.254 25797 25797 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.255  1710  1710 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.255  4337  4337 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.255 10445 10445 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.256  4399  4399 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.256 28119 28119 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.256  8502  8502 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.258  9854  9854 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.259 10364 10364 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.259 10316 10316 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.259 32462 32462 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.259  4436  4436 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.259  2781  2781 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.260 14316 14316 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.261 27977 27977 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.261  6675  6675 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.262 28937 28937 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.263  6185  6185 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.264  4516  4516 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.264  2433  2433 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.265  8005  8005 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.265  4505  4505 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.263  6412  6412 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.266  2113  2501 D Launcher.AllAppsList: updatePackage, packageName=com.example.summittrack, 
+loadMissing=false, user=UserHandle{0}, matchedSize=1
+08-06 12:52:22.264  4789  4789 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.266  2113  2501 D Launcher.AllAppsList: updatePackage, find appInfo=AppInfo, id=-1, itemType=0, 
+user=UserHandle{0}, mIconType=0, pkgName=com.example.summittrack, className=com.example.summittrack.MainActivity, 
+screenId=-1, container=-1, cellX=-1, cellY=-1, spanX=1, spanY=1 from 
+ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}
+08-06 12:52:22.266 12184 12184 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.266 30855 30855 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.266  4816  4816 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.266  4475  4475 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.267 16893 16893 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.267  4658  4658 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.268  5587  5587 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.268  2354  2354 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.268  2411  2411 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.268  2399  2399 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.269 24315 24315 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.269  4594  4594 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.270  4551  4551 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.270 26659 26659 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.271  4567  4567 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.271  4690  4690 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.272  2377  2377 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.282  1705  1705 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.282  1705  2053 I SdkSandboxManager: No SDKs used. Skipping SDK data reconcilation for 
+CallingInfo{mUid=10384, mPackageName='com.example.summittrack, mAppProcessToken='null'}
+08-06 12:52:22.286  2113  2501 D Launcher.Model: onReceiveBackground, mAllAppsList=add=[], remove=[], modified=[(0, 
+AppInfo, id=-1, itemType=0, user=UserHandle{0}, mIconType=0, pkgName=com.example.summittrack, 
+className=com.example.summittrack.MainActivity, screenId=-1, container=-1, cellX=-1, cellY=-1, spanX=1, spanY=1)]
+08-06 12:52:22.286  2433  3273 D MiuiShortcut-PackageChangedManager: update success : com.example.summittrack
+08-06 12:52:22.293 29740 29740 I Finsky  : [2] akpo - Received: android.intent.action.PACKAGE_REMOVED, 
+[eay4jUYJcAM0Ydv-8tN6ToKXX3OBFXwbYgkQB7_ZW8E]
+08-06 12:52:22.295  2433  2433 E DynamicIslandEventCoordinator: updatePkgSupportFreeform : com.example.summittrack, 
+true
+08-06 12:52:22.295  1705  1760 I SmartPower: com.android.vending:background/10157(5587): idle->background(1178632ms) 
+R(broadcast start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) 
+adj=945.
+08-06 12:52:22.298 28994 28994 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.299  5587  5587 I Finsky:background: [2] akpe - Received: android.intent.action.PACKAGE_REMOVED, 
+[eay4jUYJcAM0Ydv-8tN6ToKXX3OBFXwbYgkQB7_ZW8E]
+08-06 12:52:22.301  2113  2500 W PreviewDisappear: getIcon info target: 
+ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}
+08-06 12:52:22.301  2113  2500 W PreviewDisappear: getIcon info intent: Intent { act=android.intent.action.MAIN 
+cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=com.example.summittrack/.MainActivity (has extras) }
+08-06 12:52:22.307   997  1085 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:14153
+08-06 12:52:22.313  5777  6170 D AppInstalledReceiver: packageName: com.example.summittrack
+08-06 12:52:22.320 28994 28994 I SafetyLabelChangedBroadcastReceiver: received broadcast packageName: 
+com.example.summittrack, current user: UserHandle{0}, packageChangeEvent: UPDATE, intent user: UserHandle{0}
+08-06 12:52:22.324  2150  2150 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.326  4909  4909 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.326 14137 14137 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.327 28208 29497 I GrayResultDBManager: deleteInfoByPackageName from db pkgName com.example.summittrack 
+dbr 0
+08-06 12:52:22.328  4873  4873 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.329  4263  4263 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.331 25813 25813 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.332 17303 17303 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.333  2113  2113 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.337  3471  3471 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.337  3121  3121 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.337  4391  4391 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.338  7448  7448 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.338 28208 28208 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.338  6269  6269 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.339  9320  9320 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.339 11641 11641 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.339  5777  5777 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.340  4892  4892 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.340 29740 29740 I Finsky  : [2] AIM: AppInfoCacheUpdater -> invalidating apps: [com.example.summittrack]
+08-06 12:52:22.340  7257  7257 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.341  3626  3626 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.341  3501  3501 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.341 25791 25791 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.342 31505 31505 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.342 15344 15344 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.342 10119 10119 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.343 11104 11104 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.343  2411  2411 D SatelliteController: packageStateChanged: package:com.example.summittrack 
+DefaultSmsPackageName:com.google.android.apps.messaging
+08-06 12:52:22.343 10199 10199 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.344  6374  6374 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.344  9032  9032 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.344  9038  9038 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.344 25797 25797 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.344  5480  5480 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.345 28119 28119 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.345  1710  1710 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.347  4337  4337 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.348 11533 11533 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.352  4436  4436 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.352  6185  6185 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.353  4399  4399 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.353  9854  9854 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.353  8502  8502 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.353  2781  2781 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.354 10364 10364 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.354 10316 10316 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.355 26659 26659 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.356 10445 10445 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.356  4789  4789 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.357 32462 32462 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.357  4551  4551 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.357  6675  6675 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.358 14316 14316 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.358  4816  4816 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.359 27977 27977 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.359  4594  4594 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.359  6412  6412 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.359 16893 16893 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.359 30855 30855 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.361 29740  7369 I Finsky  : [8160] AIM: AppInfoManager-Perf > OnDeviceAppInfo > cacheHitCount=0, 
+cacheMissCount=1. Missed  in cache (limit 10) : [com.example.summittrack]
+08-06 12:52:22.361 12184 12184 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.363  4690  4690 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.363  4567  4567 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.364  4658  4658 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.365  8005  8005 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.366 28937 28937 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.368  2433  2433 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.368 24315 24315 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.368  4505  4505 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.369  4516  4516 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.369  5587  5638 I Finsky:background: [8263] IQ:PSL: skipping onPackageRemoved(replacing=true) for 
+untracked package=com.example.summittrack
+08-06 12:52:22.370  4475  4475 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.372  2377  2377 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.373  2399  2399 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.374  2354  2354 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.377  2411  2411 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.377  1705  1705 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.380 28994 28994 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.426 29740 29740 I Finsky  : [2] AIM: AppInfoCacheUpdater -> invalidating apps: [com.example.summittrack]
+08-06 12:52:22.431 29740  7370 I Finsky  : [8161] AIM: AppInfoManager-Perf > OnDeviceAppInfo > cacheHitCount=0, 
+cacheMissCount=1. Missed  in cache (limit 10) : [com.example.summittrack]
+08-06 12:52:22.450  5587  5587 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.490 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:echo -n 
+7244a085ce2d1ceb764b7dd61682897eba457889 > /data/local/tmp/sky.com.example.summittrack.sha1'
+08-06 12:52:22.540  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 12:52:22.549 29740 29740 D ActivityThread: Package [com.example.summittrack] reported as REPLACED, but missing 
+application info. Assuming REMOVED.
+08-06 12:52:22.551  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 12:52:22.617  2150  2150 I MiuiWallpaper-MiuiWallpaperManagerService: receive broadcast action = 
+android.intent.action.PACKAGE_REMOVED
+08-06 12:52:22.628  1705  1760 I SmartPower: com.miui.analytics/10168(4391): idle->background(149866ms) R(broadcast 
+start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) adj=100.
+08-06 12:52:22.645  1705  1760 I SmartPower: com.mi.globalminusscreen/10162(4909): idle->background(1261599ms) 
+R(broadcast start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) adj=0.
+08-06 12:52:22.649  4909  4909 D AppFinder:AppFinderLoadModel: package removed received com.example.summittrack
+08-06 12:52:22.649  4909  5356 D AppFinder:PackageUpdatedTask: Removing app iconcom.example.summittrack
+08-06 12:52:22.650  4909  4909 I PackageInstallReceiver: action = android.intent.action.PACKAGE_REMOVED packageName = 
+com.example.summittrack
+08-06 12:52:22.650  4909  4909 I PackageInstallReceiver: action = android.intent.action.PACKAGE_ADDED packageName = 
+com.example.summittrack
+08-06 12:52:22.651  4909  4909 I PackageInstallReceiver: action = android.intent.action.PACKAGE_REPLACED packageName = 
+com.example.summittrack
+08-06 12:52:22.671  1705  1760 I SmartPower: com.mi.appfinder/10124(14137): idle->background(1261614ms) R(broadcast 
+start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) adj=0.
+08-06 12:52:22.673 14137 14137 D AppFinder:AppFinderLoadModel: package removed received com.example.summittrack
+08-06 12:52:22.673 14137 14266 D AppFinder:PackageUpdatedTask: Removing app iconcom.example.summittrack
+08-06 12:52:22.676  1705  1760 I SmartPower: com.milink.service:audio/10190(15344): idle->background(3394ms) 
+R(broadcast start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) 
+adj=100.
+08-06 12:52:22.680  1705  1760 I SmartPower: com.google.android.as/10154(2781): idle->background(1261609ms) 
+R(broadcast start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) 
+adj=100.
+08-06 12:52:22.682  1705  1760 I SmartPower: com.facebook.orca/10303(28119): idle->background(162884ms) R(broadcast 
+start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) adj=925.
+08-06 12:52:22.684  1705  1760 I SmartPower: com.google.android.apps.messaging/10167(32462): 
+idle->background(725090ms) R(broadcast start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: 
+flg=0x4000010 (has extras) }) adj=800.
+08-06 12:52:22.685 28119 28119 W msgr.AppInfoCore: Install status cache EVICT for com.example.summittrack (package 
+changed)
+08-06 12:52:22.685 28119 28119 W msgr.AppInfoCore: Install status cache EVICT for com.example.summittrack (package 
+changed)
+08-06 12:52:22.694  1705  1760 I SmartPower: com.lazada.android:channel/10256(10119): idle->background(88458ms) 
+R(broadcast start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) 
+adj=915.
+08-06 12:52:22.695  1705  1760 I SmartPower: android.process.acore/10086(11641): idle->background(86212ms) R(broadcast 
+start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) adj=800.
+08-06 12:52:22.696  1705  1760 I SmartPower: com.whatsapp/10341(11533): idle->background(60506ms) R(broadcast start 
+Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) adj=500.
+08-06 12:52:22.714 11641 12086 D ContactDirectoryManager: onPackageChanged,updateDirectoriesForPackage, 
+packageName:com.example.summittrack
+08-06 12:52:22.721 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:am start -a android.intent.action.MAIN 
+-c android.intent.category.LAUNCHER -f 0x20000000 --ez enable-dart-profiling true --ez enable-checked-mode true --ez 
+verify-entry-points true com.example.summittrack/com.example.summittrack.MainActivity'
+08-06 12:52:22.726  6675  6813 D PermissionManagerProvider: installPackage: packageName=com.example.summittrack 
+update=true grantRuntimePermissions=false apply=true
+08-06 12:52:22.744 11641 12086 D ContactDirectoryManager: onPackageChanged,updateDirectoriesForPackage, 
+packageName:com.example.summittrack
+08-06 12:52:22.745 11641 12086 D ContactDirectoryManager: onPackageChanged,updateDirectoriesForPackage, 
+packageName:com.example.summittrack
+08-06 12:52:22.763  6675  6813 D AppOpsAdapter: applyAppPermissionOpConfig1 packageNamecom.example.summittrack , 
+userId 0
+08-06 12:52:22.775  6675  6825 I AppOpsAdapter: info == null: com.example.summittrack
+08-06 12:52:22.788  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack perm: 52 
+permissionAction: 2 userChangedPermission: false forceChange: false update: true cloudControl:  false
+08-06 12:52:22.788  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack , perm52 , op 
+10017 permissionAction 2permissionItem.changeByUser false
+08-06 12:52:22.788  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack perm: 55 
+permissionAction: 3 userChangedPermission: false forceChange: false update: true cloudControl:  false
+08-06 12:52:22.788  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack , perm55 , op 
+10020 permissionAction 3permissionItem.changeByUser false
+08-06 12:52:22.798  6675  6825 D PermissionUtil: userChangedPermission packageNamecom.example.summittrack 
+permId56permissionFlags: 0
+08-06 12:52:22.798  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack perm: 56 
+permissionAction: 3 userChangedPermission: false forceChange: false update: true cloudControl:  false
+08-06 12:52:22.798  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack , perm56 , op 
+10021 permissionAction 3permissionItem.changeByUser false
+08-06 12:52:22.798  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack , perm56 , op 133 
+permissionAction 3permissionItem.changeByUser false
+08-06 12:52:22.798  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack perm: 14 
+permissionAction: 1 userChangedPermission: false forceChange: false update: true cloudControl:  false
+08-06 12:52:22.798  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack , perm14 , op 
+10008 permissionAction 1permissionItem.changeByUser false
+08-06 12:52:22.798  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack , perm14 , op 
+10053 permissionAction 1permissionItem.changeByUser false
+08-06 12:52:22.798  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack perm: 58 
+permissionAction: 3 userChangedPermission: false forceChange: false update: true cloudControl:  false
+08-06 12:52:22.799  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack , perm58 , op 
+10023 permissionAction 3permissionItem.changeByUser false
+08-06 12:52:22.799  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack perm: 62 
+permissionAction: 6 userChangedPermission: false forceChange: false update: true cloudControl:  false
+08-06 12:52:22.799  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack , perm62 , op 29 
+permissionAction 6permissionItem.changeByUser false
+08-06 12:52:22.799  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack , perm62 , op 30 
+permissionAction 6permissionItem.changeByUser false
+08-06 12:52:22.799  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack perm: 27 
+permissionAction: 3 userChangedPermission: false forceChange: false update: true cloudControl:  false
+08-06 12:52:22.799  6675  6825 I AppOpsAdapter: doApplyAppPermissionConfig: com.example.summittrack , perm27 , op 
+10007 permissionAction 3permissionItem.changeByUser false
+08-06 12:52:22.907  3121 12099 I ProximityAuth: [RecentAppsMediator] Package added: (user=UserHandle{0}) 
+com.example.summittrack
+08-06 12:52:22.966  1705  1825 D BLASTSyncEngine: [DH_DEBUG]scheduleTimeout #191 success=true timeoutMs=5000 
+callback=com.android.server.wm.BLASTSyncEngine$SyncGroup$$ExternalSyntheticLambda2@c5b77f3
+08-06 12:52:22.967  1705  1825 D WindowManager: Collecting in transition 191: ActivityRecord{156137257 u0 
+com.example.summittrack/.MainActivity t-1} init visibleRequested:false dc:null
+08-06 12:52:22.969  1705  1825 I ActivityStarterImpl: boost cold start activity for com.example.summittrack
+08-06 12:52:22.995  1705  1825 D WindowManager: Collecting in transition 191: Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} init visibleRequested:false dc:Display{#0 state=ON size=1080x2460 ROTATION_0}
+08-06 12:52:23.001  1705  2072 D BarFollowAnimation:  CreateBarRunnable  mTask = Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} mSurfaceControl = Surface(name=Task=9266#4216)/@0x65c2186 currentPid = 1705 
+currentThread name = BarFollowAnimation Thread currentThread id = 278
+08-06 12:52:23.001  1705  1825 D BarFollowAnimation: onTaskInfoChanedForCaptionBar Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} shouldbeVisible:true isVisible:false isOnTop:true windowMode:1 
+preDisplayId:-1 displayId:0 mCaptionAssociatedTask:null mIsTouchedInCaption:false
+08-06 12:52:23.001  1705  1825 D BarFollowAnimation: onTaskInfoChanedForCaptionBar Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} shouldbeVisible:true isVisible:false isOnTop:true windowMode:1 
+preDisplayId:-1 displayId:0 mCaptionAssociatedTask:null mIsTouchedInCaption:false
+08-06 12:52:23.013  1705  1825 D BarFollowAnimation: onTaskInfoChanedForCaptionBar Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} shouldbeVisible:true isVisible:false isOnTop:true windowMode:1 
+preDisplayId:-1 displayId:0 mCaptionAssociatedTask:null mIsTouchedInCaption:false
+08-06 12:52:23.014  1705  1825 D MiuiFreeFormManagerService: onStartActivityInner as = Task{b154a47 #9266 
+type=standard I=com.example.summittrack/.MainActivity} op = null
+08-06 12:52:23.014  1705  1825 I ActivityTaskManager: moveTaskToFront: Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} caller trace:com.android.server.wm.TaskDisplayArea.onTaskMoved:461 
+com.android.server.wm.Task.updateTaskMovement:1758 com.android.server.wm.TaskDisplayArea.positionChildTaskAt:425 
+com.android.server.wm.TaskDisplayArea.positionChildAt:386 com.android.server.wm.Task.moveToFront:6245 
+com.android.server.wm.Task.moveToFront:6215 com.android.server.wm.ActivityStarter.startActivityInner:2487 
+com.android.server.wm.ActivityStarter.startActivityUnchecked:1989 
+com.android.server.wm.ActivityStarter.executeRequest:1801 com.android.server.wm.ActivityStarter.execute:1005 
+08-06 12:52:23.017  1705  1825 I WindowManager: Try to add startingWindow type = STARTING_WINDOW_TYPE_SPLASH_SCREEN 
+this = ActivityRecord{156137257 u0 com.example.summittrack/.MainActivity t9266} mOccludesParent = true 
+preAllowTaskSnapshot = true afterAllowTaskSnapshot = true newTask = true taskSwitch = false processRunning = false 
+activityCreated = false activityAllDrawn = false isSnapshotCompatible = false snapshotRotation = NaN resolvedTheme = 
+2131689671 theme = 2131689671
+08-06 12:52:23.022  1705  1825 I PowerHalWrapper: amsBoostNotify pid:2113,activity:com.miui.home.launcher.Launcher, 
+package:com.miui.home, mProcessCreatePackcom.example.summittrack 
+08-06 12:52:23.032  1705  1825 D WindowManager: Collecting in transition 191: ActivityRecord{156137257 u0 
+com.example.summittrack/.MainActivity t9266} init visibleRequested:false dc:Display{#0 state=ON size=1080x2460 
+ROTATION_0}
+08-06 12:52:23.035  1705  1825 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN 
+cat=[android.intent.category.LAUNCHER] flg=0x30000000 xflg=0x4 cmp=com.example.summittrack/.MainActivity (has extras)} 
+with LAUNCH_SINGLE_TOP from uid 2000 from pid 12108 callingPackage com.android.shell (BAL_ALLOW_PERMISSION) result 
+code=0
+08-06 12:52:23.035  1705  1825 I AppStartScenario: notifyScenarioChanged: active=true param=Bundle[{uid=10384, 
+name=com.example.summittrack.MainActivity, type=2, preStartProc=false, state=1, processName=com.example.summittrack, 
+packageName=com.example.summittrack, appSwitch=true}]
+08-06 12:52:23.044  2433  2633 I SoScStageCoordinator: Transition requested:TransitionRequestInfo { type = OPEN, 
+triggerTask = TaskInfo{userId=0 taskId=9266 effectiveUid=10384 displayId=0 isRunning=true baseIntent=Intent { 
+act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x30000000 
+cmp=com.example.summittrack/.MainActivity } 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} origActivity=null 
+realActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} numActivities=1 
+lastActiveTime=61901000 supportsSplitScreenMultiWindow=true mSoScDisplayMode=-1 supportsMultiWindow=true resizeMode=1 
+isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=200 
+token=WCT{android.window.IWindowContainerToken$Stub$Proxy@e494d21} topActivityType=1 pictureInPictureParams=null 
+shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 
+121 - 0, 0) topActivityInfo=ActivityInfo{33c1546 com.example.summittrack.MainActivity} launchCookies=[] 
+positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false 
+isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false 
+isActivityStackTransparent=false lastNonFullscreenBounds=Rect(286, 728 - 794, 1808) capturedLink=null 
+capturedLinkTimestamp=0 requestedVisibleTypes=-9 topActivityRequestOpenInBrowserEducationTimestamp=0 
+appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false 
+topActivityInMiuiSizeCompat=false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false 
+eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false 
+topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 
+topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2460) isUserFullscreenOverrideEnabled=false 
+isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null 
+cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}} isImmersive=false 
+mTopActivityRequestOrientation=-2 mStatusBarParent=null mNavBarParent=null mBehindAppLockPkg=null mOriginatingUid=0 
+isEmbedded=false shouldBeVisible=true isCreatedByOrganizer=false mIsCastMode=false mTopActivityMediaSize=null 
+mTopActivityRecordName=ActivityRecord{156137257 u0 com.example.summittrack/.MainActivity t9266} 
+mTopActivityOrientation=-2 topActivityMainWindowFrame=null}, pipChange = null, remoteTransition = null, displayChange 
+= null, flags = 0, debugId = 191 } isSoScActive:false triggerTask:TaskInfo{userId=0 taskId=9266 effectiveUid=10384 
+displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] 
+flg=0x30000000 cmp=com.example.summittrack/.MainActivity } 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} origActivity=null 
+realActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} numActivities=1 
+lastActiveTime=61901000 supportsSplitScreenMultiWindow=true mSoScDisplayMode=-1 supportsMultiWindow=true resizeMode=1 
+isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=200 
+token=WCT{android.window.IWindowContainerToken$Stub$Proxy@e494d21} topActivityType=1 pictureInPictureParams=null 
+shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 
+121 - 0, 0) topActivityInfo=ActivityInfo{33c1546 com.example.summittrack.MainActivity} launchCookies=[] 
+positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false 
+isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false 
+isActivitySta
+08-06 12:52:23.045  1705  4747 D WindowManager:    ChangeInfo{9757827 container=ActivityRecord{156137257 u0 
+com.example.summittrack/.MainActivity t9266} flags=0x0}
+08-06 12:52:23.045  1705  4747 D WindowManager:    ChangeInfo{5ffd47d container=Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} flags=0x0}
+08-06 12:52:23.062  1705  4747 D CoreBackPreview: Window{4c8203c u0 Splash Screen com.example.summittrack}: Setting 
+back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@b72106c, 
+mPriority=0, mIsAnimationCallback=false, mOverrideBehavior=0}
+08-06 12:52:23.062  2433  2734 D BLASTBufferQueue: [VRI[summittrack]#185](f:0,a:0) constructor()
+08-06 12:52:23.062  2433  2734 D BLASTBufferQueue: [VRI[summittrack]#185](f:0,a:0) update width=1080 height=2460 
+format=-3 mTransformHint=0
+08-06 12:52:23.064  2433  2734 D VRI[summittrack]: vri.Setup new sync=wmsSync-VRI[summittrack]#83
+08-06 12:52:23.067  2433  2433 D KeyguardEditorHelper: onTopActivityMayChanged, 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}; mState=IDEL
+08-06 12:52:23.078  2433  2804 D BLASTBufferQueue: [VRI[summittrack]#185](f:0,a:1) acquireNextBufferLocked 
+size=1080x2460 mFrameNumber=1 applyTransaction=true mTimestamp=43719123738913(auto) mPendingTransactions.size=0 
+graphicBufferId=10449655435726 transform=0
+08-06 12:52:23.078  2433  2734 D VRI[summittrack]: vri.reportDrawFinished 0 0 Rect(0, 0 - 1080, 2460)
+08-06 12:52:23.086  1705  1737 I PowerHalWrapper: amsBoostProcessCreate package:com.example.summittrack 
+08-06 12:52:23.087  1705  1718 D WindowManager: Finishing drawing starting window: Window{4c8203c u0 Splash Screen 
+com.example.summittrack} mDrawState: DRAW_PENDING
+08-06 12:52:23.099  1705  1737 I AppStartScenario: notifyScenarioChanged: active=true 
+param=Bundle[{hostingRecordName={com.example.summittrack/com.example.summittrack.MainActivity}, 
+hostingRecordType=next-top-activity, uid=10384, type=1, state=2, processName=com.example.summittrack, 
+packageName=com.example.summittrack}]
+08-06 12:52:23.114  1705  2114 I AppsFilter: interaction: PackageSetting{cbb8fae 
+com.android.microdroid.empty_payload/10250} -> PackageSetting{9c21607 com.example.summittrack/10384} BLOCKED
+08-06 12:52:23.116  1705  2114 D WindowManager: Collecting in transition 191: ActivityRecord{156137257 u0 
+com.example.summittrack/.MainActivity t9266} init visibleRequested:false dc:Display{#0 state=ON size=1080x2460 
+ROTATION_0}
+08-06 12:52:23.124  1705  1761 I AppStartScenario: notifyScenarioChanged: active=true 
+param=Bundle[{hostingRecordName={com.example.summittrack/com.example.summittrack.MainActivity}, 
+hostingRecordType=next-top-activity, pid=5818, uid=10384, type=1, state=3, processName=com.example.summittrack, 
+packageName=com.example.summittrack}]
+08-06 12:52:23.127  5818  5818 E Zygote  : process_name_ptr:5818 com.example.summittrack
+08-06 12:52:23.127  5818  5818 E Zygote  : SetMemoryProtected process_name_ptr:5818 com.example.summittrack
+08-06 12:52:23.138  2113  3185 W RecentsModel: getRunningTask   taskInfo=TaskInfo{userId=0 taskId=9266 
+effectiveUid=10384 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.MAIN 
+cat=[android.intent.category.LAUNCHER] flg=0x30000000 cmp=com.example.summittrack/.MainActivity } 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} origActivity=null 
+realActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} numActivities=1 
+lastActiveTime=61901107 supportsSplitScreenMultiWindow=true mSoScDisplayMode=-1 supportsMultiWindow=true resizeMode=1 
+isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=200 
+token=WCT{android.window.IWindowContainerToken$Stub$Proxy@40aaf1c} topActivityType=1 pictureInPictureParams=null 
+shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 
+- 0, 0) topActivityInfo=ActivityInfo{58f4725 com.example.summittrack.MainActivity} launchCookies=[] 
+positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=true 
+isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false 
+isActivityStackTransparent=false lastNonFullscreenBounds=Rect(286, 728 - 794, 1808) capturedLink=null 
+capturedLinkTimestamp=0 requestedVisibleTypes=-9 topActivityRequestOpenInBrowserEducationTimestamp=0 
+appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false 
+topActivityInMiuiSizeCompat=false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false 
+eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false 
+topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 
+topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2460) isUserFullscreenOverrideEnabled=false 
+isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null 
+cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}} isImmersive=false 
+mTopActivityRequestOrientation=-1 mStatusBarParent=null mNavBarParent=null mBehindAppLockPkg=null mOriginatingUid=0 
+isEmbedded=false shouldBeVisible=true isCreatedByOrganizer=false mIsCastMode=false mTopActivityMediaSize=null 
+mTopActivityRecordName=ActivityRecord{156137257 u0 com.example.summittrack/.MainActivity t9266} 
+mTopActivityOrientation=-1 topActivityMainWindowFrame=null}
+08-06 12:52:23.152  2113  3185 E ActivityManagerWrapper:  mainTaskId=9266   userId=0   windowMode=1   
+isExcludedFromRecents=false   baseIntent=Intent { act=android.intent.action.MAIN flag=805306368 
+cmp=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} }
+08-06 12:52:23.153  5818  5818 I ple.summittrack: Late-enabling -Xcheck:jni
+08-06 12:52:23.156  2113  3185 D RecentsTaskLoader: reloadTasksData [TaskKey{id=9266, stackId=0, baseIntent=Intent { 
+act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x30000000 
+cmp=com.example.summittrack/.MainActivity }, userId=0, lastActiveTime=61901000, windowingMode=1, 
+isThumbnailBlur=false, isAccessLocked=false, isScreening=false, 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, mHashCode=276966958}, 
+title=summittrack, titleDescription=summittrack, bounds=null, isLaunchTarget=true, isStackTask=true, 
+isSystemApp=false, isDockable=true, 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, isLocked=false, 
+mNeedHide=false, hasMultipleTasks=false, cti1Key=, cti2Key=, cti1Task=, cti2Task=] 
+08-06 12:52:23.209  1705  1761 I ActivityManager: Start proc 5818:com.example.summittrack/u0a384 for next-top-activity 
+{com.example.summittrack/com.example.summittrack.MainActivity} caller=com.android.shell
+08-06 12:52:23.215  2433  2433 D DynamicIslandTopActivityController: fullscreen: com.example.summittrack
+08-06 12:52:23.216  2433  2433 D DynamicIslandController: onTopActivityChanged: 
+ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}
+08-06 12:52:23.216  2433  2433 D DynamicIslandWindowViewController: onTopActivityChange: topActivity 
+ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, inSmallWindow false, isSupportPip false, 
+isFocus false fullScreenPkg com.example.summittrack
+08-06 12:52:23.216  2433  2433 D DynamicIslandSafeguardsController: cancelDelayEnterApp com.example.summittrack 
+com.miui.player
+08-06 12:52:23.216  2433  2433 D DynamicIslandSafeguardsController: cancelDelayEnterMiniWindow com.example.summittrack 
+com.example.summittrack null
+08-06 12:52:23.216  2433  2433 D DynamicIslandSafeguardsController: cancelDelayExitApp com.example.summittrack 
+com.miui.home
+08-06 12:52:23.216  2433  2433 D DynamicIslandSafeguardsController: cancelDelayExitMiniWindow com.example.summittrack 
+null
+08-06 12:52:23.216  2433  2433 D DynamicIslandSafeguardsController: delayExitApp com.example.summittrack
+08-06 12:52:23.216  2433  2433 D DynamicIslandSafeguardsController: cancelDelayExitApp com.example.summittrack 
+com.example.summittrack
+08-06 12:52:23.223  5818  5818 I ple.summittrack: Using generational CollectorTypeCMC GC.
+08-06 12:52:23.234  2113  3185 W RecentsModel: getRunningTask   taskInfo=TaskInfo{userId=0 taskId=9266 
+effectiveUid=10384 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.MAIN 
+cat=[android.intent.category.LAUNCHER] flg=0x30000000 cmp=com.example.summittrack/.MainActivity } 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} origActivity=null 
+realActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} numActivities=1 
+lastActiveTime=61901204 supportsSplitScreenMultiWindow=true mSoScDisplayMode=-1 supportsMultiWindow=true resizeMode=1 
+isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=200 
+token=WCT{android.window.IWindowContainerToken$Stub$Proxy@3218920} topActivityType=1 pictureInPictureParams=null 
+shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 
+- 0, 0) topActivityInfo=ActivityInfo{bcf52d9 com.example.summittrack.MainActivity} launchCookies=[] 
+positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=true 
+isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false 
+isActivityStackTransparent=false lastNonFullscreenBounds=Rect(286, 728 - 794, 1808) capturedLink=null 
+capturedLinkTimestamp=0 requestedVisibleTypes=-9 topActivityRequestOpenInBrowserEducationTimestamp=0 
+appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false 
+topActivityInMiuiSizeCompat=false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false 
+eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false 
+topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 
+topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2460) isUserFullscreenOverrideEnabled=false 
+isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null 
+cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}} isImmersive=false 
+mTopActivityRequestOrientation=-1 mStatusBarParent=null mNavBarParent=null mBehindAppLockPkg=null mOriginatingUid=0 
+isEmbedded=false shouldBeVisible=true isCreatedByOrganizer=false mIsCastMode=false mTopActivityMediaSize=null 
+mTopActivityRecordName=ActivityRecord{156137257 u0 com.example.summittrack/.MainActivity t9266} 
+mTopActivityOrientation=-1 topActivityMainWindowFrame=null}
+08-06 12:52:23.239  2113  3185 E ActivityManagerWrapper:  mainTaskId=9266   userId=0   windowMode=1   
+isExcludedFromRecents=false   baseIntent=Intent { act=android.intent.action.MAIN flag=805306368 
+cmp=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} }
+08-06 12:52:23.242  2113  3185 D RecentsTaskLoader: reloadTasksData [TaskKey{id=9266, stackId=0, baseIntent=Intent { 
+act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x30000000 
+cmp=com.example.summittrack/.MainActivity }, userId=0, lastActiveTime=61901000, windowingMode=1, 
+isThumbnailBlur=false, isAccessLocked=false, isScreening=false, 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, mHashCode=276966958}, 
+title=summittrack, titleDescription=summittrack, bounds=null, isLaunchTarget=true, isStackTask=true, 
+isSystemApp=false, isDockable=true, 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, isLocked=false, 
+mNeedHide=false, hasMultipleTasks=false, cti1Key=, cti2Key=, cti1Task=, cti2Task=] 
+08-06 12:52:23.286  3501 12125 W SQLiteLog: (28) double-quoted string literal: "com.example.summittrack"
+08-06 12:52:23.292  1705  2557 D MiuiForceVkService: shouldUseVk, pkg=com.example.summittrack useVk 0
+08-06 12:52:23.320 12032 12039 W BpBinder: PerfMonitor binderTransact: time=887ms 
+interface=android.app.INotificationManager code=1598311760
+08-06 12:52:23.339  1705  2114 I AppStartScenario: notifyScenarioChanged: active=true 
+param=Bundle[{applicationThread=android.os.BinderProxy@13360f6, 
+hostingRecordName={com.example.summittrack/com.example.summittrack.MainActivity}, hostingRecordType=next-top-activity, 
+pid=5818, uid=10384, type=1, state=4, processName=com.example.summittrack, packageName=com.example.summittrack, 
+applicationThreadExt=android.os.BinderProxy@eaf6cf7}]
+08-06 12:52:23.340  1705  2114 I SmartPower: com.example.summittrack/10384(5818): died->background(24322ms) R(process 
+start ) adj=-10000.
+08-06 12:52:23.355  1705  2114 D SchedBoost: com.example.summittrack already boosted, skip boost priority
+08-06 12:52:23.365 12040 12040 I PI-ScanDispatch: service bind, pkgName = com.example.summittrack, installer = 
+unknown, isReplace = true, firstGoogleTime = 1731599477934
+08-06 12:52:23.366  2433  2433 D DynamicIslandSafeguardsController: delayExitApp: com.example.summittrack 
+com.example.summittrack count = 0
+08-06 12:52:23.390  5818  5818 I RENDER_TURBO: onActivityThreadCreate not in white list, pkg=com.example.summittrack, 
+type=tides
+08-06 12:52:23.391  1705  1721 D GnssSsruImpl: onLocationPermissionsChanged provider:network 
+packageName:com.example.summittrack
+08-06 12:52:23.391  1705  1721 D GnssSsruImpl: onLocationPermissionsChanged provider:passive 
+packageName:com.example.summittrack
+08-06 12:52:23.416  5818  5818 D ActivityThread: setEmbeddedParam packageName=com.example.summittrack 
+processName=com.example.summittrack isEmbedded=false isIsolated=false
+08-06 12:52:23.720  5777  5777 I NewGlobalInstallCheckTask: finish: the queue first task operate over.remove first 
+task.
+08-06 12:52:23.993  5818  5818 D nativeloader: Configuring clns-10 for other apk 
+/data/app/~~-66lECIXNN9nFFzTAEr8Hg==/com.example.summittrack-F1jlqe7fMma2qjhoAFpfpA==/base.apk. target_sdk_version=35, 
+uses_libraries=, library_path=/data/app/~~-66lECIXNN9nFFzTAEr8Hg==/com.example.summittrack-F1jlqe7fMma2qjhoAFpfpA==/lib
+/arm64:/data/app/~~-66lECIXNN9nFFzTAEr8Hg==/com.example.summittrack-F1jlqe7fMma2qjhoAFpfpA==/base.apk!/lib/arm64-v8a, 
+permitted_path=/data:/mnt/expand:/data/user/0/com.example.summittrack
+08-06 12:52:24.003  5818  5818 I ple.summittrack: AssetManager2(0xb4000071a9bb6538) locale list changing from [] to 
+[en-US]
+08-06 12:52:24.017  5818  5818 V GraphicsEnvironment: com.example.summittrack is not listed in per-application setting
+08-06 12:52:24.017  5818  5818 V GraphicsEnvironment: com.example.summittrack is not listed in ANGLE allowlist or 
+settings, returning default
+08-06 12:52:24.022  5818  5818 I ForceDarkHelperStubImpl: initialize for com.example.summittrack , ForceDarkOrigin
+08-06 12:52:24.056  5818  5818 D ResMonitorStub: The current process type is: third_party_app, process name is: 
+com.example.summittrack
+08-06 12:52:24.071  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 0, permissionAction: 
+-1, controlLevel: 1
+08-06 12:52:24.071  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 1, permissionAction: 
+-1, controlLevel: 1
+08-06 12:52:24.071  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 2, permissionAction: 
+-1, controlLevel: 1
+08-06 12:52:24.071  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 3, permissionAction: 
+-1, controlLevel: 1
+08-06 12:52:24.071  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 4, permissionAction: 
+-1, controlLevel: 1
+08-06 12:52:24.071  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 5, permissionAction: 
+-1, controlLevel: 1
+08-06 12:52:24.071  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 6, permissionAction: 
+-1, controlLevel: 1
+08-06 12:52:24.071  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 7, permissionAction: 
+-1, controlLevel: 1
+08-06 12:52:24.071  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 8, permissionAction: 
+-1, controlLevel: 1
+08-06 12:52:24.071  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 9, permissionAction: 
+-1, controlLevel: 1
+08-06 12:52:24.071  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 10, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.071  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 11, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.071  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 12, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.071  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 13, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 14, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 15, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 16, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 17, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 18, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 19, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 20, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 21, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 22, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 23, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 24, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 25, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 26, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 27, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 28, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 29, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 30, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 31, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 32, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 33, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 34, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 35, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 36, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.072  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 37, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 38, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 39, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 40, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 41, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 42, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 43, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 44, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 45, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 46, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 47, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 48, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 49, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 50, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 51, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 52, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 53, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 54, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 55, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 56, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 57, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 58, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 59, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 60, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 61, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 62, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 63, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 64, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 65, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 66, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 67, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 68, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 69, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 70, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 71, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.073  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 72, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.074  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 73, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.074  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 74, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.074  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 75, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.074  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 76, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.074  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 77, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.074  6675 18368 D CloudUpdater: packageName: com.example.summittrack permissionId: 78, 
+permissionAction: -1, controlLevel: 1
+08-06 12:52:24.077  6675 18368 D AppOpsAdapter: applyAppPermissionOpConfig1 packageNamecom.example.summittrack , 
+userId 0
+08-06 12:52:24.078  6675  6825 I AppOpsAdapter: info == null: com.example.summittrack
+08-06 12:52:24.080  6675 18368 E PackageUtil: getPackageInfoAsUser failed com.example.summittrack , 999
+08-06 12:52:24.205  1705  2114 D BarFollowAnimation: onTaskInfoChanedForCaptionBar Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} shouldbeVisible:true isVisible:false isOnTop:true windowMode:1 
+preDisplayId:-1 displayId:0 mCaptionAssociatedTask:null mIsTouchedInCaption:false
+08-06 12:52:24.206  1705  2114 D WindowManager: Collecting in transition 191: ActivityRecord{156137257 u0 
+com.example.summittrack/.MainActivity t9266} init visibleRequested:true dc:Display{#0 state=ON size=1080x2460 
+ROTATION_0}
+08-06 12:52:24.207  1705  2114 I SmartPower: com.example.summittrack/10384(5818): background->invisible(867ms) 
+R(become foreground) adj=0.
+08-06 12:52:24.207  1705  2114 D ATMSImpl: Notify ticket snatching mode scenario package is com.example.summittrack
+08-06 12:52:24.209  1705  2114 D BarFollowAnimation: onTaskInfoChanedForCaptionBar Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} shouldbeVisible:true isVisible:false isOnTop:true windowMode:1 
+preDisplayId:-1 displayId:0 mCaptionAssociatedTask:null mIsTouchedInCaption:false
+08-06 12:52:24.212  1705  2114 I PowerHalWrapper: amsBoostNotify 
+pid:5818,activity:com.example.summittrack.MainActivity, package:com.example.summittrack, 
+mProcessCreatePackcom.example.summittrack 
+08-06 12:52:24.213  1705  2114 I ScnModule: [GameDetection] requestedPermissions1/1:: com.example.summittrack:: 
+[android.permission.INTERNET, android.permission.ACCESS_NETWORK_STATE, android.permission.POST_NOTIFICATIONS, 
+android.permission.RECEIVE_BOOT_COMPLETED, android.permission.ACCESS_COARSE_LOCATION, 
+android.permission.ACCESS_FINE_LOCATION, android.permission.READ_MEDIA_IMAGES, android.permission.READ_MEDIA_VIDEO, 
+android.permission.READ_MEDIA_VISUAL_USER_SELECTED, android.permission.WAKE_LOCK, android.permission.VIBRATE, 
+android.permission.ACCESS_WIFI_STATE, com.google.android.c2dm.permission.RECEIVE, 
+com.google.android.providers.gsf.permission.READ_GSERVICES, 
+com.example.summittrack.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] 
+08-06 12:52:24.213  1705  2114 I ScnModule: [GameDetection] numOfPermissiom:: com.example.summittrack:: 15 
+08-06 12:52:24.213  1705  2114 I ScnModule: [GameDetection] nativeLibs1/1:: com.example.summittrack:: 
+[libdatastore_shared_counter.so, libflutter.so, libmaplibre.so, libVkLayer_khronos_validation.so] 
+08-06 12:52:24.213  1705  2114 I ScnModule: [GameDetection] inputPermissions:: com.example.summittrack:: [0.0, 0.0, 
+0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] 
+08-06 12:52:24.214  1705  2114 I ScnModule: [GameDetection] inputGameFeature:: com.example.summittrack:: [-1.1751872, 
+0.0, 0.0, 0.0] 
+08-06 12:52:24.214  1705  2114 I ScnModule: [GameDetection] GamePredictor:: com.example.summittrack:: 
+nonGame:9.4997,isGame:-10.3426 
+08-06 12:52:24.214  1705  2114 I mtkpower_client: [PowerHal_Wrap_notifyAppState] 
+com.example.summittrack/com.example.summittrack.MainActivity pid=5818 activityId:156137257 state:1
+08-06 12:52:24.214   992   992 I vendor.mediatek.hardware.mtkpower_applist-service.mediatek: packName: 
+com.example.summittrack actName: com.example.summittrack.MainActivity pid: 5818 activityId: 156137257 uid: 10384 
+state: 1
+08-06 12:52:24.214   992   992 I MTK_APPList: [notifyAPPstate] 
+com.example.summittrack/com.example.summittrack.MainActivity, pid=5818, activityId=156137257, uid=10384, 
+state:RESUMED, fps:-1, win:0
+08-06 12:52:24.214   992   992 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] 
+com.example.summittrack/com.example.summittrack.MainActivity, pid:5818, activityId:156137257, fps:-1, isMultiWindow:0
+08-06 12:52:24.214   992   992 I MTK_APPList: [notifyAPPstate] foreground:com.example.summittrack, pid:5818, 
+activityId:156137257, uid:10384
+08-06 12:52:24.217   992   992 I MTK_APPList: [notifyAPPstate] pc:0, com.miui.home => com.example.summittrack
+08-06 12:52:24.221  1705  2114 D WindowManager:    ChangeInfo{9757827 container=ActivityRecord{156137257 u0 
+com.example.summittrack/.MainActivity t9266} flags=0x0}
+08-06 12:52:24.221  1705  2114 D WindowManager:    ChangeInfo{5ffd47d container=Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} flags=0x0}
+08-06 12:52:24.233  1705  1738 I SmartPower: com.example.summittrack/10384(5818): invisible->visible(26ms) R(become 
+visible) adj=0.
+08-06 12:52:24.233  1705  1738 D BarFollowAnimation: onTaskInfoChanedForCaptionBar Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} shouldbeVisible:true isVisible:true isOnTop:true windowMode:1 preDisplayId:-1 
+displayId:0 mCaptionAssociatedTask:null mIsTouchedInCaption:false
+08-06 12:52:24.234  1705  1738 I WindowManager: wms.showSurfaceRobustly mWin:Window{4c8203c u0 Splash Screen 
+com.example.summittrack} in Surface(name=Splash Screen com.example.summittrack#4221)/@0x5fa3040
+08-06 12:52:24.234  1705  1738 D BarFollowAnimation: onTaskAppearedForCaptionBar Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity}
+08-06 12:52:24.236  1705  1738 D WindowManager: Final targets: [ChangeInfo{5ffd47d container=Task{b154a47 #9266 
+type=standard I=com.example.summittrack/.MainActivity} flags=0x10}, ChangeInfo{9d4129 container=Task{acea9b8 #1 
+type=home} flags=0x10}, ChangeInfo{9f3feb0 container=WallpaperWindowToken{452ca30 showWhenLocked=false} flags=0x0}]
+08-06 12:52:24.241  1705  1738 I DynamicIslandService: elementSurfaceTransition is null for:com.example.summittrack
+08-06 12:52:24.241  1705  2025 I CameraActivitySceneMode: decideSceneMode: ActivityStateChange activityName = 
+com.example.summittrack.MainActivity, displayId = 0, state = 2
+08-06 12:52:24.245  1705  1738 D WindowManager: Calling onTransitionReady info={id=191 t=OPEN f=0x0 trk=0 
+r=[0@Point(0, 0)] c=[{WCT{RemoteToken{7326386 Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity}}} m=OPEN f=NONE leash=Surface(name=Task=9266#4216)/@0x65c2186 sb=Rect(0, 0 - 
+1080, 2460) eb=Rect(0, 0 - 1080, 2460) epz=Point(1080, 2460) d=0 taskParent=-1 v=trueMiuiChangeImpl 
+{miuiEmbedding:false, scale:1.0}},{WCT{RemoteToken{3d77a68 Task{acea9b8 #1 type=home}}} m=TO_BACK f=SHOW_WALLPAPER 
+leash=Surface(name=Task=1#51)/@0x60d4b15 sb=Rect(0, 0 - 1080, 2460) eb=Rect(0, 0 - 1080, 2460) epz=Point(1080, 2460) 
+d=0 taskParent=-1 v=falseMiuiChangeImpl {miuiEmbedding:false, scale:1.0}},{m=TO_BACK f=IS_WALLPAPER 
+leash=Surface(name=WallpaperWindowToken{452ca30 showWhenLocked=false}#61)/@0x1fae6a9 sb=Rect(0, 0 - 1080, 2460) 
+eb=Rect(0, 0 - 1080, 2460) epz=Point(1080, 2460) d=0 v=falseMiuiChangeImpl {miuiEmbedding:false, scale:1.0}}] 
+mk=[true] noAni=[false] df=[false] rsa=[false] oa=[false] nc=[0] ho=[false] hla=[false] iSync=[-1]}, 
+mToken=Token{a6b6447 TransitionRecord{a704cb0 id=191 type=OPEN flags=0x0 c=[
+08-06 12:52:24.245  1705  1738 D WindowManager:    ChangeInfo{9757827 container=ActivityRecord{156137257 u0 
+com.example.summittrack/.MainActivity t9266} flags=0x0}
+08-06 12:52:24.245  1705  1738 D WindowManager:    ChangeInfo{5ffd47d container=Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} flags=0x10}
+08-06 12:52:24.246  2113  2475 D RecentsImpl: onForegroundChanged, foregroundPackageName=com.example.summittrack
+08-06 12:52:24.247  1705  1738 D BLASTSyncEngine: [DH_DEBUG]remove timeout #191 
+callback=com.android.server.wm.BLASTSyncEngine$SyncGroup$$ExternalSyntheticLambda2@c5b77f3
+08-06 12:52:24.248  6269  6307 D PerfEngineController: 
+ForegroundInfo{mForegroundPackageName='com.example.summittrack', mForegroundUid=10384, mForegroundPid=5818, 
+mForegroundDisplayId=0, mLastForegroundPackageName='com.miui.home', mLastForegroundUid=10165, mLastForegroundPid=2113, 
+mLastForegroundDisplayId=0, mMultiWindowForegroundPackageName='com.example.summittrack', 
+mMultiWindowForegroundUid=10384, mFlags=1}
+08-06 12:52:24.248  1705  1988 D EventReceiver: foregroundChange uid  uid=10384 pkg=com.example.summittrack
+08-06 12:52:24.250  5777  9698 I ProcessMonitor: onForegroundInfoChanged: 
+ForegroundInfo{mForegroundPackageName='com.example.summittrack', mForegroundUid=10384, mForegroundPid=5818, 
+mForegroundDisplayId=0, mLastForegroundPackageName='com.miui.home', mLastForegroundUid=10165, mLastForegroundPid=2113, 
+mLastForegroundDisplayId=0, mMultiWindowForegroundPackageName='com.example.summittrack', 
+mMultiWindowForegroundUid=10384, mFlags=1}
+08-06 12:52:24.252  5777  9698 I GameBoosterService: onForegroundInfoChanged: Cur=com.example.summittrack	 
+last=com.miui.home
+08-06 12:52:24.254  2433  2633 D MiuiDecorationController: relayout::taskId=9266, visible=true, bounds=Rect(0, 0 - 
+1080, 2460), focused=true, oldImmersive=false, newImmersive=false, windowMode=1, activityType=1, displayId=0, 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, callers=com.android.wm.shell.m
+ultitasking.miuimultiwinswitch.miuiwindowdecor.MulWinSwitchDecorViewModel.createWindowDecoration:317 
+com.android.wm.shell.multitasking.miuimultiwinswitch.miuiwindowdecor.MulWinSwitchDecorViewModel.onTaskOpening:10 
+com.android.wm.shell.freeform.FreeformTaskTransitionObserver.onTransitionReady:334 
+com.android.wm.shell.transition.Transitions.dispatchReady:241 
+com.android.wm.shell.transition.Transitions.onTransitionReady:280 
+08-06 12:52:24.267  2113  2601 D WindowTransitionCompat:  printLeash::taskInfo = TaskInfo{userId=0 taskId=9266 
+effectiveUid=10384 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.MAIN 
+cat=[android.intent.category.LAUNCHER] flg=0x30000000 cmp=com.example.summittrack/.MainActivity } 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} origActivity=null 
+realActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} numActivities=1 
+lastActiveTime=61902178 supportsSplitScreenMultiWindow=true mSoScDisplayMode=-1 supportsMultiWindow=true resizeMode=1 
+isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=200 
+token=WCT{android.window.IWindowContainerToken$Stub$Proxy@423614e} topActivityType=1 pictureInPictureParams=null 
+shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 
+- 0, 0) topActivityInfo=ActivityInfo{b0a626f com.example.summittrack.MainActivity} launchCookies=[] 
+positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true 
+isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false 
+isActivityStackTransparent=false lastNonFullscreenBounds=Rect(286, 728 - 794, 1808) capturedLink=null 
+capturedLinkTimestamp=0 requestedVisibleTypes=-9 topActivityRequestOpenInBrowserEducationTimestamp=0 
+appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false 
+topActivityInMiuiSizeCompat=false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false 
+eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false 
+topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 
+topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2460) isUserFullscreenOverrideEnabled=false 
+isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null 
+cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}} isImmersive=false 
+mTopActivityRequestOrientation=-1 mStatusBarParent=null mNavBarParent=null mBehindAppLockPkg=null mOriginatingUid=0 
+isEmbedded=false shouldBeVisible=true isCreatedByOrganizer=false mIsCastMode=false mTopActivityMediaSize=null 
+mTopActivityRecordName=ActivityRecord{156137257 u0 com.example.summittrack/.MainActivity t9266} 
+mTopActivityOrientation=-1 topActivityMainWindowFrame=null}
+08-06 12:52:24.271  2113  2601 D TransitionUtil: get key 
+:ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}#9266
+08-06 12:52:24.272  5777  9698 D GameBoosterService: onGameStatusChange 
+foreground:ForegroundInfo{mForegroundPackageName='com.example.summittrack', mForegroundUid=10384, mForegroundPid=5818, 
+mForegroundDisplayId=0, mLastForegroundPackageName='com.miui.home', mLastForegroundUid=10165, mLastForegroundPid=2113, 
+mLastForegroundDisplayId=0, mMultiWindowForegroundPackageName='com.example.summittrack', 
+mMultiWindowForegroundUid=10384, mFlags=1}
+08-06 12:52:24.293  2113  2113 I WindowTransitionCompatListener51f504d: hasCancel mCancel=false
+08-06 12:52:24.295  2113  2499 D LocalWindowAnimImplementor: animTo, 
+params=RectFParams(targetApps=com.miui.home.recents.util.RemoteAnimationTargetSet@c0c2e14, 
+windowAnimParams=WindowAnimParams(startRect=RectF(43.19998, 98.400024, 1036.8, 2361.6), targetRect=RectF(0.0, 0.0, 
+1080.0, 2460.0), startRadii=[110.0,110.0,110.0,110.0], endRadii=[110.0,110.0,110.0,110.0], startAlpha=0.0, 
+endAlpha=1.0, velocityParams=VelocityParams(leftVelocity=0.0, topVelocity=0.0, widthVelocity=0.0, heightVelocity=0.0, 
+ratioVelocity=0.0, radiusRatioVelocity=0.0, alphaVelocity=0.0), extraSpringsBundles=null), animType=OPEN_FROM_HOME, 
+ignoreIcon=false, showTask=false, isQuickSwitchMode=false, targetView=null, 
+animListener=com.miui.home.recents.anim.WindowAnimParamsProvider$getOpeningWindowsAnimParams$animListener$1@eb1e6bd, 
+clipAnimationHelper=com.miui.home.recents.util.ClipAnimationHelper@93b04b2, clearLastListener=false, 
+currentDisplayRotation=0, homeRotation=0, gestureHomeCalculator=null, needFinishOnAnimEnd=true, currentTaskIndex=0, 
+isSplitModeBack=false, isUseTranslucentAnim=false, runningTaskId=0, touchRange=2, hasAnimTarget=true, 
+isCloseAppToDefaultCenter=false, isHoldSmallWindowCropForCloseToDrag=false), isRunningAndNotRequestEndOrCancel()=false
+08-06 12:52:24.298  1705  2348 D ActivityTaskManager:  setSkipCaptureLayers tr: Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity}
+08-06 12:52:24.298  2113  3185 W RecentsModel: getRunningTask   taskInfo=TaskInfo{userId=0 taskId=9266 
+effectiveUid=10384 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.MAIN 
+cat=[android.intent.category.LAUNCHER] flg=0x30000000 cmp=com.example.summittrack/.MainActivity } 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} origActivity=null 
+realActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} numActivities=1 
+lastActiveTime=61902260 supportsSplitScreenMultiWindow=true mSoScDisplayMode=-1 supportsMultiWindow=true resizeMode=1 
+isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=200 
+token=WCT{android.window.IWindowContainerToken$Stub$Proxy@1b31b9} topActivityType=1 pictureInPictureParams=null 
+shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 
+- 0, 0) topActivityInfo=ActivityInfo{2d0b9fe com.example.summittrack.MainActivity} launchCookies=[] 
+positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true 
+isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false 
+isActivityStackTransparent=false lastNonFullscreenBounds=Rect(286, 728 - 794, 1808) capturedLink=null 
+capturedLinkTimestamp=0 requestedVisibleTypes=-9 topActivityRequestOpenInBrowserEducationTimestamp=0 
+appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false 
+topActivityInMiuiSizeCompat=false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false 
+eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false 
+topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 
+topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2460) isUserFullscreenOverrideEnabled=false 
+isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null 
+cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}} isImmersive=false 
+mTopActivityRequestOrientation=-1 mStatusBarParent=null mNavBarParent=null mBehindAppLockPkg=null mOriginatingUid=0 
+isEmbedded=false shouldBeVisible=true isCreatedByOrganizer=false mIsCastMode=false mTopActivityMediaSize=null 
+mTopActivityRecordName=ActivityRecord{156137257 u0 com.example.summittrack/.MainActivity t9266} 
+mTopActivityOrientation=-1 topActivityMainWindowFrame=null}
+08-06 12:52:24.309  2113  3185 E ActivityManagerWrapper:  mainTaskId=9266   userId=0   windowMode=1   
+isExcludedFromRecents=false   baseIntent=Intent { act=android.intent.action.MAIN flag=805306368 
+cmp=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} }
+08-06 12:52:24.310  2113  3185 D RecentsTaskLoader: reloadTasksData [TaskKey{id=9266, stackId=0, baseIntent=Intent { 
+act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x30000000 
+cmp=com.example.summittrack/.MainActivity }, userId=0, lastActiveTime=61902178, windowingMode=1, 
+isThumbnailBlur=false, isAccessLocked=false, isScreening=false, 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, mHashCode=276966958}, 
+title=summittrack, titleDescription=summittrack, bounds=null, isLaunchTarget=true, isStackTask=true, 
+isSystemApp=false, isDockable=true, 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, isLocked=false, 
+mNeedHide=false, hasMultipleTasks=false, cti1Key=, cti2Key=, cti1Task=, cti2Task=] 
+08-06 12:52:24.338  5818  5818 D ple.summittrack: blurUtils, initBackgroundBlurMinInterval 
+processName(com.example.summittrack), inWhiteLists(0)
+08-06 12:52:24.357  5818  5818 I ple.summittrack: AssetManager2(0xb4000071a9ba6e58) locale list changing from [] to 
+[en-US]
+08-06 12:52:24.405  5818 12302 D vulkan  : searching for layers in 
+'/data/app/~~-66lECIXNN9nFFzTAEr8Hg==/com.example.summittrack-F1jlqe7fMma2qjhoAFpfpA==/lib/arm64'
+08-06 12:52:24.412  1705  2114 D BarFollowAnimation: onTaskInfoChanedForCaptionBar Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} shouldbeVisible:true isVisible:true isOnTop:true windowMode:1 preDisplayId:-1 
+displayId:0 mCaptionAssociatedTask:null mIsTouchedInCaption:false
+08-06 12:52:24.427  5818 12302 D vulkan  : added global layer 'VK_LAYER_KHRONOS_validation' from library '/data/app/~~-
+66lECIXNN9nFFzTAEr8Hg==/com.example.summittrack-F1jlqe7fMma2qjhoAFpfpA==/lib/arm64/libVkLayer_khronos_validation.so'
+08-06 12:52:24.441  5818 12302 D vulkan  : searching for layers in 
+'/data/app/~~-66lECIXNN9nFFzTAEr8Hg==/com.example.summittrack-F1jlqe7fMma2qjhoAFpfpA==/base.apk!/lib/arm64-v8a'
+08-06 12:52:24.457  5818 12302 D MMUD    : mtk_memory_debug_init com.example.summittrack 0xb4000073b712f5d0
+08-06 12:52:24.503  2113  2499 I MultiSpringDynamicAnimation2e56aa2: TransitionTest cancel
+08-06 12:52:24.509  5818 12319 D nativeloader: Load 
+/data/app/~~-66lECIXNN9nFFzTAEr8Hg==/com.example.summittrack-F1jlqe7fMma2qjhoAFpfpA==/lib/arm64/libflutter.so using 
+class loader ns clns-10 
+(caller=/data/app/~~-66lECIXNN9nFFzTAEr8Hg==/com.example.summittrack-F1jlqe7fMma2qjhoAFpfpA==/base.apk!classes7.dex): 
+ok
+08-06 12:52:24.517  1705  4736 I TransitionImpl: finishTransition: updateLastSurfacePosition tf=Task{b154a47 #9266 
+type=standard I=com.example.summittrack/.MainActivity}
+08-06 12:52:24.520  2433  2633 I RemoteTransitionHandlerStubImpl: invokeAndRemoveWctCB transition is null, curWctCB: 
+null
+08-06 12:52:24.529  1705  1738 D BarFollowAnimation: pairAppearanceRegionAndWin win=Window{4c8203c u0 Splash Screen 
+com.example.summittrack} 8
+08-06 12:52:24.531  1705  1738 D BarFollowAnimation: current status bar control target is : Window{4c8203c u0 Splash 
+Screen com.example.summittrack}
+08-06 12:52:24.534  1705  1738 D WindowManager: updateSystemBarAttributes displayId: 0 Window{4c8203c u0 Splash Screen 
+com.example.summittrack} winAppearance=LIGHT_STATUS_BARS LIGHT_NAVIGATION_BARS
+08-06 12:52:24.534  1705  1735 D WmSystemUiDebug: on system bar attributes changed displayId=0 
+appearance=LIGHT_STATUS_BARS LIGHT_NAVIGATION_BARS appearanceRegions=[AppearanceRegion{LIGHT_STATUS_BARS 
+bounds=[0,0][1080,2460]}] navbarColorManagedByIme=false behavior=1 requestedVisibleTypes=[statusBars navigationBars 
+captionBar systemGestures mandatorySystemGestures tappableElement displayCutout windowDecor systemOverlays] 
+packageName=com.example.summittrack letterboxDetails=[]
+08-06 12:52:24.539  1705  2560 D BarFollowAnimation: pairAppearanceRegionAndWin win=Window{4c8203c u0 Splash Screen 
+com.example.summittrack} 8
+08-06 12:52:24.541  1705  2560 I WindowManager: Allow fixed rotation for not collecting:ActivityRecord{156137257 u0 
+com.example.summittrack/.MainActivity t9266}
+08-06 12:52:24.542  2433  2633 D MiuiDecorationController: relayout::taskId=9266, visible=true, bounds=Rect(0, 0 - 
+1080, 2460), focused=true, oldImmersive=false, newImmersive=false, windowMode=1, activityType=1, displayId=0, 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, callers=com.android.wm.shell.m
+ultitasking.miuimultiwinswitch.miuiwindowdecor.decoration.MiuiDecorationController.relayout:4 
+com.android.wm.shell.multitasking.miuimultiwinswitch.miuiwindowdecor.MulWinSwitchDecorViewModel.onTaskInfoChanged:18 
+com.android.wm.shell.multitasking.common.taskmanager.MultiTaskingTaskListener.onTaskInfoChanged:47 
+com.android.wm.shell.ShellTaskOrganizer.onTaskInfoChanged:136 
+android.window.TaskOrganizer$1.lambda$onTaskInfoChanged$6:300 
+08-06 12:52:24.544  1705  4740 D ActivityTaskManager:  setSkipCaptureLayers tr: Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity}
+08-06 12:52:24.545  1705  1738 D BarFollowAnimation: pairAppearanceRegionAndWin win=Window{4c8203c u0 Splash Screen 
+com.example.summittrack} 8
+08-06 12:52:24.547  2433  2633 D MiuiFreeformModeController: onFocusTaskChanged taskInfo: TaskInfo{userId=0 
+taskId=9266 effectiveUid=10384 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.MAIN 
+cat=[android.intent.category.LAUNCHER] flg=0x30000000 cmp=com.example.summittrack/.MainActivity } 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} origActivity=null 
+realActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} numActivities=1 
+lastActiveTime=61902178 supportsSplitScreenMultiWindow=true mSoScDisplayMode=-1 supportsMultiWindow=true resizeMode=1 
+isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=200 
+token=WCT{android.window.IWindowContainerToken$Stub$Proxy@d026600} topActivityType=1 pictureInPictureParams=null 
+shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 
+- 0, 0) topActivityInfo=ActivityInfo{9199e39 com.example.summittrack.MainActivity} launchCookies=[] 
+positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true 
+isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false 
+isActivityStackTransparent=false lastNonFullscreenBounds=Rect(286, 728 - 794, 1808) capturedLink=null 
+capturedLinkTimestamp=0 requestedVisibleTypes=-9 topActivityRequestOpenInBrowserEducationTimestamp=0 
+appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false eligibleForLetterboxEducation= false 
+topActivityInMiuiSizeCompat=false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false 
+eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false 
+topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 
+topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2460) isUserFullscreenOverrideEnabled=false 
+isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null 
+cameraCompatTaskInfo=CameraCompatTaskInfo { freeformCameraCompatMode=inactive}} isImmersive=false 
+mTopActivityRequestOrientation=-1 mStatusBarParent=Surface(name=StatusBar Container of Task = 9266#4218)/@0xf069494 
+mNavBarParent=Surface(name=NavigationBar Container of Task = 9266#4217)/@0x58a8b3d mBehindAppLockPkg=null 
+mOriginatingUid=0 isEmbedded=false shouldBeVisible=true isCreatedByOrganizer=false mIsCastMode=false 
+mTopActivityMediaSize=null mTopActivityRecordName=ActivityRecord{156137257 u0 com.example.summittrack/.MainActivity 
+t9266} mTopActivityOrientation=-1 topActivityMainWindowFrame=null}
+08-06 12:52:24.553  1705  2338 D BarFollowAnimation: pairAppearanceRegionAndWin win=Window{4c8203c u0 Splash Screen 
+com.example.summittrack} 8
+08-06 12:52:24.555  1705  2338 I WindowManager: Allow fixed rotation for not collecting:ActivityRecord{156137257 u0 
+com.example.summittrack/.MainActivity t9266}
+08-06 12:52:25.297  1705  2014 I SmartPower: com.android.vending/10157(29740): background->idle(4887ms) R(broadcast 
+start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) adj=915.
+08-06 12:52:25.297  1705  2014 I SmartPower: com.android.vending:background/10157(5587): background->idle(3003ms) 
+R(broadcast start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) 
+adj=915.
+08-06 12:52:25.300  2113  2113 I TransitionCallback: clear leash = 
+Surface(name=TL_Surface(name=Task=9266#4216)/@0xf5a949e_transition-leash#4227)/@0x984b68b, key = 
+ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}#9266
+08-06 12:52:25.553  5818  5818 D MMUD    : mtk_memory_debug_init com.example.summittrack 0xb4000073ac5435d0
+08-06 12:52:25.590  5818  5818 I ple.summittrack: AssetManager2(0xb4000071a9bb4f58) locale list changing from [] to 
+[en-US]
+08-06 12:52:25.601  5818  5818 W ple.summittrack: type=1400 audit(0.0:1158664): avc:  denied  { read } for  
+name="max_map_count" dev="proc" ino=3492147 scontext=u:r:untrusted_app:s0:c128,c257,c512,c768 
+tcontext=u:object_r:proc_max_map_count:s0 tclass=file permissive=0 app=com.example.summittrack
+08-06 12:52:25.627  5818  5818 D MMUD    : mtk_memory_debug_init com.example.summittrack 0xb4000073ac5435d0
+08-06 12:52:25.629  1705  2014 I SmartPower: com.miui.analytics/10168(4391): background->idle(3001ms) R(broadcast 
+start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) adj=100.
+08-06 12:52:25.654  1705  2014 I SmartPower: com.mi.globalminusscreen/10162(4909): background->idle(3008ms) 
+R(broadcast start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) adj=0.
+08-06 12:52:25.654 12387 12389 W BpBinder: PerfMonitor binderTransact: time=230ms 
+interface=android.app.INotificationManager code=1598311760
+08-06 12:52:25.671  1705  2014 I SmartPower: com.mi.appfinder/10124(14137): background->idle(3001ms) R(broadcast start 
+Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) adj=0.
+08-06 12:52:25.680  1705  2014 I SmartPower: com.milink.service:audio/10190(15344): background->idle(3004ms) 
+R(broadcast start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) 
+adj=100.
+08-06 12:52:25.681  1705  2014 I SmartPower: com.google.android.as/10154(2781): background->idle(3001ms) R(broadcast 
+start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) adj=100.
+08-06 12:52:25.685  1705  2014 I SmartPower: com.facebook.orca/10303(28119): background->idle(3003ms) R(broadcast 
+start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) adj=905.
+08-06 12:52:25.685  1705  2014 I SmartPower: com.google.android.apps.messaging/10167(32462): background->idle(3001ms) 
+R(broadcast start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) 
+adj=800.
+08-06 12:52:25.696  1705  2014 I SmartPower: com.lazada.android:channel/10256(10119): background->idle(3002ms) 
+R(broadcast start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) 
+adj=905.
+08-06 12:52:25.697  1705  2014 I SmartPower: android.process.acore/10086(11641): background->idle(3002ms) R(broadcast 
+start Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) adj=800.
+08-06 12:52:25.713  1705  2014 I SmartPower: com.whatsapp/10341(11533): background->idle(3017ms) R(broadcast start 
+Intent { act=android.intent.action.PACKAGE_REMOVED dat=package: flg=0x4000010 (has extras) }) adj=500.
+08-06 12:52:26.186  1705  2007 E HyperSentinel: ->pid:5818,processName:"com.example.summittrack",Rss Memory Size 
+Change 309124kb -> 386640kb
+08-06 12:52:26.430  5818  5818 I ple.summittrack: hiddenapi: Accessing hidden method 
+Landroid/view/accessibility/AccessibilityNodeInfo;->getSourceNodeId()J (runtime_flags=0, domain=platform, 
+api=unsupported,test-api) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, 
+TargetSdkVersion=35) using reflection: allowed
+08-06 12:52:26.430  5818  5818 I ple.summittrack: hiddenapi: Accessing hidden method 
+Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J (runtime_flags=0, domain=platform, 
+api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, 
+TargetSdkVersion=35) using reflection: allowed
+08-06 12:52:26.430  5818  5818 I ple.summittrack: hiddenapi: Accessing hidden field 
+Landroid/view/accessibility/AccessibilityNodeInfo;->mChildNodeIds:Landroid/util/LongArray; (runtime_flags=0, 
+domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, 
+TargetSdkVersion=35) using reflection: allowed
+08-06 12:52:26.430  5818  5818 I ple.summittrack: hiddenapi: Accessing hidden method Landroid/util/LongArray;->get(I)J 
+(runtime_flags=0, domain=platform, api=unsupported) from 
+Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=35) using reflection: 
+allowed
+08-06 12:52:26.468  5818  5818 W MessageMonitor: PerfMonitor: Slow Operation: Activity 
+com.example.summittrack/.MainActivity onCreate took 2044ms
+08-06 12:52:26.472  5818  5818 D Activity: Activity = ActivityInfo{543370 com.example.summittrack.MainActivity}, 
+Resume onConfigurationChanged = {1.0 515mcc3mnc [en_US] ldltr sw393dp w393dp h895dp 440dpi nrml long widecg port 
+finger -keyb/v/h -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2460) mAppBounds=Rect(0, 0 - 1080, 2460) 
+mMaxBounds=Rect(0, 0 - 1080, 2460) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=standard 
+mAlwaysOnTop=undefined mRotation=ROTATION_0 mInSplitScreen=false letterBoxed=false foScaled=false 
+isSpecificEmbedded=false embeddingScale=1.0} s.2 fontWeightAdjustment=0/d/0 themeChanged=0 themeChangedFlags=0 
+display=0 extraData = Bundle[{}] screenType=0/0}
+08-06 12:52:26.500  5818  5818 D ple.summittrack: MiuiProcessManagerServiceStub setSchedFifo
+08-06 12:52:26.522  2113  2113 D RecentsImpl: mActivityStateObserver com.example.summittrack.MainActivity
+08-06 12:52:26.522  2113  2113 W RecentsImpl: updateGestureWindowVisibleImpl, 
+className=com.example.summittrack.MainActivity
+08-06 12:52:26.966  5818  5818 I flutter : [SummitTrackStartup] Flutter binding initialized
+08-06 12:52:27.044  5818  5818 D DecorViewImmersiveImpl: onAttachedToWindow. pkg: com.example.summittrack
+08-06 12:52:27.095  1705  4740 D CoreBackPreview: Window{311347 u0 
+com.example.summittrack/com.example.summittrack.MainActivity}: Setting back callback 
+OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@56bfd99, mPriority=0, 
+mIsAnimationCallback=false, mOverrideBehavior=0}
+08-06 12:52:27.100  1705  4740 D BarFollowAnimation: pairAppearanceRegionAndWin win=Window{4c8203c u0 Splash Screen 
+com.example.summittrack} 8
+08-06 12:52:27.106  1705  4740 D BarFollowAnimation: current status bar control target is : Window{311347 u0 
+com.example.summittrack/com.example.summittrack.MainActivity}
+08-06 12:52:27.109  1705  4740 D WindowManager: updateSystemBarAttributes displayId: 0 Window{311347 u0 
+com.example.summittrack/com.example.summittrack.MainActivity} winAppearance=
+08-06 12:52:27.109  1705  4740 D WindowManager: wms.Input focus has changed to Window{311347 u0 
+com.example.summittrack/com.example.summittrack.MainActivity} display=0 updateInputWindows = true
+08-06 12:52:27.110  1705  1735 D WmSystemUiDebug: on system bar attributes changed displayId=0 
+appearance=LIGHT_NAVIGATION_BARS appearanceRegions=[AppearanceRegion{LIGHT_STATUS_BARS bounds=[0,0][1080,2460]}] 
+navbarColorManagedByIme=false behavior=1 requestedVisibleTypes=[statusBars navigationBars captionBar systemGestures 
+mandatorySystemGestures tappableElement displayCutout windowDecor systemOverlays] packageName=com.example.summittrack 
+letterboxDetails=[]
+08-06 12:52:27.111  1705  2024 I MultiSenceManagerInternalStubImpl: packageName = com.example.summittrack
+08-06 12:52:27.111  1705  4740 I WindowManager: Allow fixed rotation for not collecting:ActivityRecord{156137257 u0 
+com.example.summittrack/.MainActivity t9266}
+08-06 12:52:27.118  5818  5818 E ple.summittrack: [perfctl] 5818 5818 FPSGO ver:7
+08-06 12:52:27.118  5818  5818 E ple.summittrack: [perfctl] 1 1 1 0
+08-06 12:52:27.122  1705  1738 D SurfaceComposerClient: Transaction::apply InputWindowCommands.focusRequests 
+timestamp=43723159910990, windowName=311347 com.example.summittrack/com.example.summittrack.MainActivity
+08-06 12:52:27.139  1050  3148 D SurfaceFlinger: [SF client] NEW(0xb400007cb1435010) for (5818:com.example.summittrack)
+08-06 12:52:27.141  5818  5818 D ViewRootImplStubImpl: , vri:android.view.ViewRootImpl@8d7a700, 
+com.example.summittrack/com.example.summittrack.MainActivity
+08-06 12:52:27.141  5818  5818 D ViewRootImplStubImpl: , 
+surfaceView:io.flutter.embedding.android.FlutterSurfaceView{3312832 V.E...... ......ID 0,0-1080,2460}, 
+SurfaceView[com.example.summittrack/com.example.summittrack.MainActivity]
+08-06 12:52:27.141  5818  5818 D ViewRootImplStubImpl: , surfaceControl:Surface(name=3312832 
+SurfaceView[com.example.summittrack/com.example.summittrack.MainActivity](BLAST)#4238)/@0x2b44b39
+08-06 12:52:27.142  5818  5818 D BLASTBufferQueue: [3312832 
+SurfaceView[com.example.summittrack/com.example.summittrack.MainActivity]#1](f:0,a:0) constructor()
+08-06 12:52:27.143  5818  5818 D BLASTBufferQueue: [3312832 
+SurfaceView[com.example.summittrack/com.example.summittrack.MainActivity]#1](f:0,a:0) update width=1080 height=2460 
+format=4 mTransformHint=0
+08-06 12:52:27.152  1050  1551 D SurfaceFlinger: updateWinowInfo=1, setFocusedWindow timestamp=43723159910990, 
+windowName=311347 com.example.summittrack/com.example.summittrack.MainActivity
+08-06 12:52:27.219  5818  5818 D SurfaceView: UPDATE Surface(name=3312832 
+SurfaceView[com.example.summittrack/com.example.summittrack.MainActivity]#4237)/@0x2a2d030, mIsProjectionMode = false
+08-06 12:52:27.220 29655 29655 W adbd    : timeout expired while reading data after flushing socket, closing
+08-06 12:52:27.225  5818  5818 D WindowLayoutComponentImpl: Register WindowLayoutInfoListener on 
+Context=com.example.summittrack.MainActivity@5c0347a, of which baseContext=android.app.ContextImpl@733b265
+08-06 12:52:27.246  5818 12156 I ple.summittrack: Compiler allocated 6807KB to compile void 
+android.view.ViewRootImpl.performTraversals()
+08-06 12:52:27.676  5818  5818 I flutter : [SummitTrackStartup] Firebase initialized
+08-06 12:52:27.699  5818  5818 I flutter : [SummitTrackStartup] Firebase Messaging background handler registered
+08-06 12:52:27.732  5818  5818 I flutter : [SummitTrackStartup] Theme preference loaded
+08-06 12:52:27.732  5818  5818 I flutter : [SummitTrackStartup] runApp called
+08-06 12:52:27.842  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 12:52:27.843  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 12:52:27.948 28937 29785 I BtGatt.ScanManager: msg.what = MSG_BALANCED_TIMEOUT, msg.arg1 = BALANCED_TIMEOUT
+08-06 12:52:27.949 28937 29785 D BtGatt.ScanManager: handleBalancedTimeout() called with: client = [ [ScanClient 
+scanModeApp 1 scanModeUsed 1 [appScanStats com.google.uid.shared:10147]]]
+08-06 12:52:27.951 28937 29785 D BtGatt.ScanManager: handleBalancedTimeout() -- com.google.android.gms is foreground
+08-06 12:52:28.024 12471 12474 W BpBinder: PerfMonitor binderTransact: time=269ms 
+interface=android.app.INotificationManager code=1598311760
+08-06 12:52:28.333  5818  5818 I flutter : [SummitTrackStartup] Initial route selected route=/
+08-06 12:52:28.377 28937 29785 I BtGatt.ScanManager: msg.what = MSG_BALANCED_TIMEOUT_RECENTLY, msg.arg1 = 
+BALANCED_TIMEOUT_RECENTLY
+08-06 12:52:28.378 28937 29785 D BtGatt.ScanManager: handleBalancedTimeoutRecently() called with: client = [ 
+[ScanClient scanModeApp 1 scanModeUsed 1 [appScanStats com.google.uid.shared:10147]]], infoId = [22]
+08-06 12:52:28.378 28937 29785 D BtGatt.ScanManager: handleBalancedTimeoutRecently() -- com.google.android.gms is 
+foreground
+08-06 12:52:29.845  1705  2007 E HyperSentinel: ->pid:5818,processName:"com.example.summittrack",Rss Memory Size 
+Change 386640kb -> 485020kb
+08-06 12:52:30.560  1705  2014 I SmartPower: 
+com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedPrbackground->idle(6006ms) R(remove 
+from whitelist) adj=800.
+08-06 12:52:30.561  1705  2014 I SmartPower: 
+com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedPrbackground->idle(6006ms) R(remove 
+from whitelist) adj=800.
+08-06 12:52:30.580  5818 12408 D BLASTBufferQueue: [3312832 
+SurfaceView[com.example.summittrack/com.example.summittrack.MainActivity]#1](f:0,a:1) acquireNextBufferLocked 
+size=1080x2460 mFrameNumber=1 applyTransaction=true mTimestamp=43726626428529(auto) mPendingTransactions.size=0 
+graphicBufferId=24988119728138 transform=0
+08-06 12:52:30.603  5818  5818 I flutter : [SummitTrackStartup] First frame rendered route=/
+08-06 12:52:30.607  5818  5818 I flutter : [SummitTrackStartup] Notification service initialization started
+08-06 12:52:30.628  5818  5818 I flutter : [HikeNotifications] diagnostic_build_marker 
+timestamp=2026-08-06T04:52:30.620127Z marker=notification_toggle_fix_v3 location=notification_service_initialization
+08-06 12:52:30.630  5818  5818 I flutter : [HikeNotifications] service_initialization_started 
+timestamp=2026-08-06T04:52:30.628413Z
+08-06 12:52:30.740  5818  5818 I flutter : [HikeNotifications] notification_preference_loaded 
+timestamp=2026-08-06T04:52:30.740074Z enabled=true present=true
+08-06 12:52:30.744  5818  5818 I flutter : [HikeNotifications] local_plugin_initialization_started 
+timestamp=2026-08-06T04:52:30.744169Z
+08-06 12:52:30.825  1705  2338 D WindowManager: wms.finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING Window{311347 
+u0 com.example.summittrack/com.example.summittrack.MainActivity} in 
+Surface(name=com.example.summittrack/com.example.summittrack.MainActivity#4233)/@0x87243f
+08-06 12:52:30.827  1705  1738 D BarFollowAnimation: pairAppearanceRegionAndWin win=Window{4c8203c u0 Splash Screen 
+com.example.summittrack} 8
+08-06 12:52:30.829  1705  1738 D WindowManager: wms.commitFinishDrawingLocked: mDrawState=READY_TO_SHOW Window{311347 
+u0 com.example.summittrack/com.example.summittrack.MainActivity} in 
+Surface(name=com.example.summittrack/com.example.summittrack.MainActivity#4233)/@0x87243f
+08-06 12:52:30.830  1705  1738 I WindowManager: onFirstWindowDrawn, try to remove startingWindow. ar: 
+ActivityRecord{156137257 u0 com.example.summittrack/.MainActivity t9266}  associatedTask: null  isMainWindow: true  
+startingWindow: Window{4c8203c u0 Splash Screen com.example.summittrack}  startingData: 
+SplashScreenStartingData{61be8b3 removeAfterTransaction= 0}
+08-06 12:52:30.834  1705  1738 I SmartPower: Miui monitor launch : com.example.summittrack/.MainActivity  
+transitionTime:1350  launchTime:7937  launchFrom:com.miui.home  launchType:1
+08-06 12:52:30.834  1705  1738 I AppStartScenario: notifyScenarioChanged: active=false 
+param=Bundle[{renderThreadId=12302, pid=5818, uid=10384, name=com.example.summittrack.MainActivity, type=2, state=1, 
+processName=com.example.summittrack, packageName=com.example.summittrack}]
+08-06 12:52:30.838  1705  1738 D BarFollowAnimation: pairAppearanceRegionAndWin win=Window{4c8203c u0 Splash Screen 
+com.example.summittrack} 8
+08-06 12:52:30.845  1705  1738 I WindowManager: wms.showSurfaceRobustly mWin:Window{311347 u0 
+com.example.summittrack/com.example.summittrack.MainActivity} in 
+Surface(name=com.example.summittrack/com.example.summittrack.MainActivity#4233)/@0x87243f
+08-06 12:52:30.845  2433  2734 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false 
+callback=android.view.ViewRootImpl$$ExternalSyntheticLambda16@34c9a5d
+08-06 12:52:30.847  2433  2734 D BLASTBufferQueue: [VRI[summittrack]#185](f:0,a:1) destructor()
+08-06 12:52:30.847  2433  2734 D BufferQueueConsumer: [VRI[summittrack]#185(BLAST 
+Consumer)185](id:981000000cb,api:0,p:-1,c:2433) disconnect: caller 2433
+08-06 12:52:30.850  1705  1721 I ActivityTaskManager: Displayed com.example.summittrack/.MainActivity for user 0: 
++7s937ms
+08-06 12:52:30.850  1705  1721 I ActivityTaskManager: Fully drawn com.example.summittrack/.MainActivity: +7s937ms
+08-06 12:52:30.857  1705  2114 W AppCompatLetterboxPolicy: start not layout letterbox Window{4c8203c u0 Splash Screen 
+com.example.summittrack EXITING}
+08-06 12:52:30.858  1705  2114 D BarFollowAnimation: pairAppearanceRegionAndWin win=Window{4c8203c u0 Splash Screen 
+com.example.summittrack EXITING} 8
+08-06 12:52:30.859  1705  2114 D WindowManager: updateSystemBarAttributes displayId: 0 Window{311347 u0 
+com.example.summittrack/com.example.summittrack.MainActivity} winAppearance=
+08-06 12:52:30.860  1705  1735 D WmSystemUiDebug: on system bar attributes changed displayId=0 appearance= 
+appearanceRegions=[AppearanceRegion{LIGHT_STATUS_BARS bounds=[0,0][1080,2460]}] navbarColorManagedByIme=false 
+behavior=1 requestedVisibleTypes=[statusBars navigationBars captionBar systemGestures mandatorySystemGestures 
+tappableElement displayCutout windowDecor systemOverlays] packageName=com.example.summittrack letterboxDetails=[]
+08-06 12:52:30.861  1705  1738 D BarFollowAnimation: pairAppearanceRegionAndWin win=Window{4c8203c u0 Splash Screen 
+com.example.summittrack EXITING} 8
+08-06 12:52:30.865  1705  1737 I PowerHalWrapper: amsBoostNotify pid:2113,activity:com.miui.home.launcher.Launcher, 
+package:com.miui.home, mProcessCreatePackcom.example.summittrack 
+08-06 12:52:30.868   992   992 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] 
+com.example.summittrack/com.example.summittrack.MainActivity, pid:5818, activityId:156137257, fps:-1, isMultiWindow:0
+08-06 12:52:30.868  1050  1050 I SurfaceFlinger: onHandleDestroyed: layerId=4240, name=Surface(name=311347 
+com.example.summittrack/com.example.summittrack.MainActivity#4232)/@0xe83b49d - animation-leash of starting_reveal#4240
+08-06 12:52:30.872  2113  2113 D OnLongClickAgent: reset:   removeMessages MSG_LONG_CLICK
+08-06 12:52:30.872  2113  2113 D OnLongClickAgent: reset:   removeMessages MSG_LONG_CLICK
+08-06 12:52:30.872  2113  2113 D OnLongClickAgent: reset:   removeMessages MSG_LONG_CLICK
+08-06 12:52:30.872  2113  2113 D OnLongClickAgent: reset:   removeMessages MSG_LONG_CLICK
+08-06 12:52:30.872  2113  2113 D OnLongClickAgent: reset:   removeMessages MSG_LONG_CLICK
+08-06 12:52:30.872  2113  2113 D OnLongClickAgent: reset:   removeMessages MSG_LONG_CLICK
+08-06 12:52:30.872  2113  2113 D OnLongClickAgent: reset:   removeMessages MSG_LONG_CLICK
+08-06 12:52:30.872  2113  2113 D OnLongClickAgent: reset:   removeMessages MSG_LONG_CLICK
+08-06 12:52:30.872  2113  2113 D OnLongClickAgent: reset:   removeMessages MSG_LONG_CLICK
+08-06 12:52:30.872  2113  2113 D OnLongClickAgent: reset:   removeMessages MSG_LONG_CLICK
+08-06 12:52:30.872  2113  2113 D OnLongClickAgent: reset:   removeMessages MSG_LONG_CLICK
+08-06 12:52:30.872  2113  2113 D OnLongClickAgent: reset:   removeMessages MSG_LONG_CLICK
+08-06 12:52:30.879  1705  2338 D CoreBackPreview: Window{4c8203c u0 Splash Screen com.example.summittrack EXITING}: 
+Setting back callback null
+08-06 12:52:31.024  1705  1738 I WindowManager: StartingWindow exit animation finished, win = Window{4c8203c u0 Splash 
+Screen com.example.summittrack EXITING} remove = true
+08-06 12:52:31.024  1705  1738 I WindowManager: wms.hideSurface mWin:Window{4c8203c u0 Splash Screen 
+com.example.summittrack EXITING} reason:(onExitAnimationDone) in Surface(name=Splash Screen 
+com.example.summittrack#4221)/@0x5fa3040
+08-06 12:52:31.027  1705  1738 D WindowManager: postWindowRemoveCleanupLocked: Removing startingWindow Window{4c8203c 
+u0 Splash Screen com.example.summittrack} from ActivityRecord{156137257 u0 com.example.summittrack/.MainActivity 
+t9266} activity = ActivityRecord{156137257 u0 com.example.summittrack/.MainActivity t9266}
+08-06 12:52:31.028  1705  1738 D BarFollowAnimation: pairAppearanceRegionAndWin win=Window{311347 u0 
+com.example.summittrack/com.example.summittrack.MainActivity} 0
+08-06 12:52:31.029  1705  1738 D WindowManager: updateSystemBarAttributes displayId: 0 Window{311347 u0 
+com.example.summittrack/com.example.summittrack.MainActivity} winAppearance=
+08-06 12:52:31.030  1705  1735 D WmSystemUiDebug: on system bar attributes changed displayId=0 appearance= 
+appearanceRegions=[AppearanceRegion{ bounds=[0,0][1080,2460]}] navbarColorManagedByIme=false behavior=1 
+requestedVisibleTypes=[statusBars navigationBars captionBar systemGestures mandatorySystemGestures tappableElement 
+displayCutout windowDecor systemOverlays] packageName=com.example.summittrack letterboxDetails=[]
+08-06 12:52:31.037  1705  1738 D BarFollowAnimation: pairAppearanceRegionAndWin win=Window{311347 u0 
+com.example.summittrack/com.example.summittrack.MainActivity} 0
+08-06 12:52:31.046  1050  1050 I SurfaceFlinger: onHandleDestroyed: layerId=4221, name=Splash Screen 
+com.example.summittrack#4221
+08-06 12:52:31.046  1050  1050 I SurfaceFlinger: onHandleDestroyed: layerId=4241, name=Surface(name=4c8203c Splash 
+Screen com.example.summittrack#4220)/@0x9150428 - animation-leash of window_animation#4241
+08-06 12:52:31.046  1050  1050 I SurfaceFlinger: onHandleDestroyed: layerId=4220, name=4c8203c Splash Screen 
+com.example.summittrack#4220
+08-06 12:52:31.111  1705  4736 D BarFollowAnimation: onTaskInfoChanedForCaptionBar Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} shouldbeVisible:true isVisible:true isOnTop:true windowMode:1 preDisplayId:-1 
+displayId:0 mCaptionAssociatedTask:null mIsTouchedInCaption:false
+08-06 12:52:31.340  5818  5818 I ple.summittrack: AssetManager2(0xb4000071a9bf4a18) locale list changing from [] to 
+[en-US]
+08-06 12:52:31.344  5818  5818 I ple.summittrack: AssetManager2(0xb4000071a9bf3118) locale list changing from [] to 
+[en-US]
+08-06 12:52:31.354  5818 12500 D ProfileInstaller: Installing profile for com.example.summittrack
+08-06 12:52:31.402  1705  4736 D ConnectivityService: requestNetwork for uid/pid:10384/5818 activeRequest: null 
+callbackRequest: 5353 [NetworkRequest [ REQUEST id=5354, [ Capabilities: 
+INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 RequestorPkg: 
+com.example.summittrack UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false 
+declaredMethods: AVAIL|LOST|NC
+08-06 12:52:31.410  1705  1933 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=5354, [ Capabilities: 
+INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 RequestorPkg: 
+com.example.summittrack UnderlyingNetworks: Null] ]
+08-06 12:52:31.410  1705  1933 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=5354, [ 
+Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 
+RequestorPkg: com.example.summittrack UnderlyingNetworks: Null] ]
+08-06 12:52:31.411  1705  1933 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=5354, [ 
+Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 
+RequestorPkg: com.example.summittrack UnderlyingNetworks: Null] ]
+08-06 12:52:31.412  1705  1933 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=5354, [ 
+Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 
+RequestorPkg: com.example.summittrack UnderlyingNetworks: Null] ]
+08-06 12:52:31.470  5818  5818 D MMUD    : mtk_memory_debug_init com.example.summittrack 0xb4000070c710b5d0
+08-06 12:52:31.517  5818  5818 I flutter : [HikeNotifications] notification_channel_creation_started 
+timestamp=2026-08-06T04:52:31.517180Z channel=hike_day_reminders
+08-06 12:52:31.544  1705  1896 I ImeTracker: com.example.summittrack:bdcbabfb: onRequestHide at ORIGIN_SERVER reason 
+HIDE_UNSPECIFIED_WINDOW fromUser false
+08-06 12:52:31.552  1705  4736 D MiuiMirrorInputMethodImpl: InsetsControlTarget invalid!:Window{311347 u0 
+com.example.summittrack/com.example.summittrack.MainActivity}
+08-06 12:52:31.554  4263  4263 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1491 
+onStartInput(EditorInfo{EditorInfo{packageName=com.example.summittrack, inputType=0, inputTypeString=NULL, 
+enableLearning=false, autoCorrection=false, autoComplete=false, imeOptions=0, privateImeOptions=null, 
+actionName=UNSPECIFIED, actionLabel=null, initialSelStart=-1, initialSelEnd=-1, initialCapsMode=0, label=null, 
+fieldId=0, fieldName=null, extras=Bundle[mParcelledData.dataSize=72], hintText=null, hintLocales=[]}}, false)
+08-06 12:52:31.555  1705  1738 D BarFollowAnimation: pairAppearanceRegionAndWin win=Window{311347 u0 
+com.example.summittrack/com.example.summittrack.MainActivity} 0
+08-06 12:52:31.555  1705  1737 I ImeTracker: system_server:9eccd3b2: onCancelled at PHASE_SERVER_SHOULD_HIDE
+08-06 12:52:31.558  1705  4736 W PackageConfigPersister: App-specific configuration not found for packageName: 
+com.example.summittrack and userId: 0
+08-06 12:52:31.561  2433  2633 D MiuiDecorationController: relayout::taskId=9266, visible=true, bounds=Rect(0, 0 - 
+1080, 2460), focused=true, oldImmersive=false, newImmersive=false, windowMode=1, activityType=1, displayId=0, 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, callers=com.android.wm.shell.m
+ultitasking.miuimultiwinswitch.miuiwindowdecor.decoration.MiuiDecorationController.relayout:4 
+com.android.wm.shell.multitasking.miuimultiwinswitch.miuiwindowdecor.MulWinSwitchDecorViewModel.onTaskInfoChanged:18 
+com.android.wm.shell.multitasking.common.taskmanager.MultiTaskingTaskListener.onTaskInfoChanged:47 
+com.android.wm.shell.ShellTaskOrganizer.onTaskInfoChanged:136 
+android.window.TaskOrganizer$1.lambda$onTaskInfoChanged$6:300 
+08-06 12:52:31.563  1705  4736 D ActivityTaskManager:  setSkipCaptureLayers tr: Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity}
+08-06 12:52:31.584  1705  2114 D BarFollowAnimation: onTaskInfoChanedForCaptionBar Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity} shouldbeVisible:true isVisible:true isOnTop:true windowMode:1 preDisplayId:-1 
+displayId:0 mCaptionAssociatedTask:null mIsTouchedInCaption:false
+08-06 12:52:31.586  1705  2114 D BarFollowAnimation: pairAppearanceRegionAndWin win=Window{311347 u0 
+com.example.summittrack/com.example.summittrack.MainActivity} 8
+08-06 12:52:31.587  1705  2114 D WindowManager: updateSystemBarAttributes displayId: 0 Window{311347 u0 
+com.example.summittrack/com.example.summittrack.MainActivity} winAppearance=LIGHT_STATUS_BARS
+08-06 12:52:31.588  1705  1735 D WmSystemUiDebug: on system bar attributes changed displayId=0 
+appearance=LIGHT_STATUS_BARS appearanceRegions=[AppearanceRegion{LIGHT_STATUS_BARS bounds=[0,0][1080,2460]}] 
+navbarColorManagedByIme=false behavior=1 requestedVisibleTypes=[statusBars navigationBars captionBar systemGestures 
+mandatorySystemGestures tappableElement displayCutout windowDecor systemOverlays] packageName=com.example.summittrack 
+letterboxDetails=[]
+08-06 12:52:31.594  2433  2633 D MiuiDecorationController: relayout::taskId=9266, visible=true, bounds=Rect(0, 0 - 
+1080, 2460), focused=true, oldImmersive=false, newImmersive=false, windowMode=1, activityType=1, displayId=0, 
+baseActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, 
+topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity}, callers=com.android.wm.shell.m
+ultitasking.miuimultiwinswitch.miuiwindowdecor.decoration.MiuiDecorationController.relayout:4 
+com.android.wm.shell.multitasking.miuimultiwinswitch.miuiwindowdecor.MulWinSwitchDecorViewModel.onTaskInfoChanged:18 
+com.android.wm.shell.multitasking.common.taskmanager.MultiTaskingTaskListener.onTaskInfoChanged:47 
+com.android.wm.shell.ShellTaskOrganizer.onTaskInfoChanged:136 
+android.window.TaskOrganizer$1.lambda$onTaskInfoChanged$6:300 
+08-06 12:52:31.596  1705  2114 D ActivityTaskManager:  setSkipCaptureLayers tr: Task{b154a47 #9266 type=standard 
+I=com.example.summittrack/.MainActivity}
+08-06 12:52:31.655  1050  1050 I BufferQueueProducer: [3312832 SurfaceView[com.example.summittrack/com.example.summittr
+ack.MainActivity](BLAST)#4238](this:0xb400007c4168ba80,id:-1,api:0,p:-1,c:1050) queueBuffer: fps=7.53 dur=1062.33 
+max=485.58 min=33.18
+08-06 12:52:31.659  5818  5818 D MMUD    : mtk_memory_debug_init com.example.summittrack 0xb4000073a2fe75d0
+08-06 12:52:31.887  1705  2007 E HyperSentinel: ->pid:5818,processName:"com.example.summittrack",Rss Memory Size 
+Change 485020kb -> 582284kb
+08-06 12:52:32.665  5818  5818 I flutter : [HikeNotifications] notification_channel_created 
+timestamp=2026-08-06T04:52:32.665114Z channel=hike_day_reminders
+08-06 12:52:32.666  5818  5818 I flutter : [HikeNotifications] local_plugin_initialization_succeeded 
+timestamp=2026-08-06T04:52:32.665963Z
+08-06 12:52:32.669  5818  5818 I flutter : [HikeNotifications] service_initialization_succeeded 
+timestamp=2026-08-06T04:52:32.668746Z timezone=Asia/Manila
+08-06 12:52:32.688  5818  5818 I flutter : [HikeNotifications] reconciliation_started 
+timestamp=2026-08-06T04:52:32.688093Z
+08-06 12:52:32.688  1705  1762 I libprocessgroup: Removed cgroup /sys/fs/cgroup/apps/uid_10256/pid_10316
+08-06 12:52:32.697   992   992 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] 
+com.example.summittrack/com.example.summittrack.MainActivity, pid:5818, activityId:156137257, fps:-1, isMultiWindow:0
+08-06 12:52:32.702  5818  5818 I flutter : [HikeNotifications] token_refresh_listener_started 
+timestamp=2026-08-06T04:52:32.701965Z authenticated=true
+08-06 12:52:32.703  5818  5818 I flutter : [HikeNotifications] notification_background_tasks_started 
+timestamp=2026-08-06T04:52:32.703362Z
+08-06 12:52:32.727  5818  5818 I flutter : [HikeNotifications] auth_state_changed 
+timestamp=2026-08-06T04:52:32.706994Z previousUid=27d7941bd7 currentUid=27d7941bd7 currentUserNull=false
+08-06 12:52:32.728  1705  1762 I libprocessgroup: Removed cgroup /sys/fs/cgroup/apps/uid_10256/pid_10364
+08-06 12:52:32.738  5818  5818 I flutter : [HikeNotifications] current_date_key timestamp=2026-08-06T04:52:32.738503Z 
+currentDateKey=2026-08-06
+08-06 12:52:32.741   992   992 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] 
+com.example.summittrack/com.example.summittrack.MainActivity, pid:5818, activityId:156137257, fps:-1, isMultiWindow:0
+08-06 12:52:32.770  1705  1762 I libprocessgroup: Removed cgroup /sys/fs/cgroup/apps/uid_10256/pid_10119
+08-06 12:52:32.772  5818  5818 I ImeTracker: com.example.summittrack:bdcbabfb: onCancelled at 
+PHASE_CLIENT_ALREADY_HIDDEN
+08-06 12:52:32.782   992   992 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] 
+com.example.summittrack/com.example.summittrack.MainActivity, pid:5818, activityId:156137257, fps:-1, isMultiWindow:0
+08-06 12:52:32.784  1705  1931 I MiuiNetworkPolicy: removeUidState uid = 10256
+08-06 12:52:32.786  1050  1050 I BufferQueueProducer: [3312832 SurfaceView[com.example.summittrack/com.example.summittr
+ack.MainActivity](BLAST)#4238](this:0xb400007c4168ba80,id:-1,api:0,p:-1,c:1050) queueBuffer: fps=1.77 dur=1130.78 
+max=776.80 min=353.98
+08-06 12:52:32.818  5818  5818 I FLTFireMsgService: FlutterFirebaseMessagingBackgroundService started!
+08-06 12:52:32.898  5818  5818 I flutter : [HikeNotifications] device_id_reused timestamp=2026-08-06T04:52:32.896228Z 
+deviceId=ca5096b246
+08-06 12:52:33.084  1705  4532 D ConnectivityService: requestNetwork for uid/pid:10384/5818 activeRequest: null 
+callbackRequest: 5355 [NetworkRequest [ REQUEST id=5356, [ Capabilities: 
+INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 RequestorPkg: 
+com.example.summittrack UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false 
+declaredMethods: AVAIL|LOST
+08-06 12:52:33.095  1705  1933 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=5356, [ Capabilities: 
+INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 RequestorPkg: 
+com.example.summittrack UnderlyingNetworks: Null] ]
+08-06 12:52:33.096  1705  1933 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=5356, [ 
+Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 
+RequestorPkg: com.example.summittrack UnderlyingNetworks: Null] ]
+08-06 12:52:33.098  1705  1933 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=5356, [ 
+Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 
+RequestorPkg: com.example.summittrack UnderlyingNetworks: Null] ]
+08-06 12:52:33.099  1705  1933 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=5356, [ 
+Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 
+RequestorPkg: com.example.summittrack UnderlyingNetworks: Null] ]
+08-06 12:52:33.108  5818 12321 I ple.summittrack: AssetManager2(0xb4000071a9c0e698) locale list changing from [] to 
+[en-US]
+08-06 12:52:33.153  5818 12588 I ple.summittrack: hiddenapi: Accessing hidden method 
+Ldalvik/system/VMStack;->getStackClass2()Ljava/lang/Class; (runtime_flags=0, domain=core-platform, api=unsupported) 
+from Lhoyq; (domain=app, TargetSdkVersion=35) using reflection: allowed
+08-06 12:52:33.158  1705  2007 E HyperSentinel: ->pid:5818,processName:"com.example.summittrack",Rss Memory Size 
+Change 582284kb -> 705772kb
+08-06 12:52:33.184  5818 12586 W FlagRegistrar: Failed to register 
+com.google.android.gms.providerinstaller#com.example.summittrack
+08-06 12:52:33.191  5818 12588 W FlagStore: Unable to update local snapshot for 
+com.google.android.gms.providerinstaller#com.example.summittrack, may result in stale flags.
+08-06 12:52:33.243  1705  1762 I libprocessgroup: Removed cgroup /sys/fs/cgroup/apps/uid_10310/pid_8502
+08-06 12:52:33.252   992   992 I MTK_APPList: [notifyAPPstate] multi_resumed_app_info[0] 
+com.example.summittrack/com.example.summittrack.MainActivity, pid:5818, activityId:156137257, fps:-1, isMultiWindow:0
+08-06 12:52:33.255  1705  1931 I MiuiNetworkPolicy: removeUidState uid = 10310
+08-06 12:52:33.319  5818 12157 I ple.summittrack: Background concurrent mark compact GC freed 10MB AllocSpace bytes, 
+37(1360KB) LOS objects, 81% free, 5672KB/29MB, paused 1.594ms,5.380ms total 88.932ms
+08-06 12:52:33.317  5818  5818 W FinalizerDaemon: type=1400 audit(0.0:1158669): avc:  denied  { getopt } for  
+path="/dev/socket/usap_pool_primary" scontext=u:r:untrusted_app:s0:c128,c257,c512,c768 tcontext=u:r:zygote:s0 
+tclass=unix_stream_socket permissive=0 app=com.example.summittrack
+08-06 12:52:33.365  1705  3863 D ConnectivityService: requestNetwork for uid/pid:10384/5818 activeRequest: null 
+callbackRequest: 5357 [NetworkRequest [ REQUEST id=5358, [ Capabilities: 
+INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 RequestorPkg: 
+com.example.summittrack UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false 
+declaredMethods: AVAIL|BLK
+08-06 12:52:33.374  1705  1933 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=5358, [ Capabilities: 
+INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 RequestorPkg: 
+com.example.summittrack UnderlyingNetworks: Null] ]
+08-06 12:52:33.375  1705  1933 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=5358, [ 
+Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 
+RequestorPkg: com.example.summittrack UnderlyingNetworks: Null] ]
+08-06 12:52:33.376  1705  1933 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=5358, [ 
+Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 
+RequestorPkg: com.example.summittrack UnderlyingNetworks: Null] ]
+08-06 12:52:33.377  1705  1933 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=5358, [ 
+Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10384 RequestorUid: 10384 
+RequestorPkg: com.example.summittrack UnderlyingNetworks: Null] ]
+08-06 12:52:33.632  5818 12408 E ple.summittrack: DynamicFPS DF open fail: No such file or directory
+08-06 12:52:33.811  1050  1050 I BufferQueueProducer: [3312832 SurfaceView[com.example.summittrack/com.example.summittr
+ack.MainActivity](BLAST)#4238](this:0xb400007c4168ba80,id:-1,api:0,p:-1,c:1050) queueBuffer: fps=23.39 dur=1025.91 
+max=77.73 min=22.42
+08-06 12:52:34.142  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 12:52:34.144  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 12:52:34.221  5818  5818 I flutter : [HikeNotifications] device_reconciliation_read_succeeded 
+timestamp=2026-08-06T04:52:34.219723Z authenticated=true deviceId=5092b554a9 
+devicePath=users/27d7941bd7/devices/ca5096b246 exists=true notificationsEnabled=true tokenAvailable=true 
+tokenStatus=active
+08-06 12:52:34.281  5818  5818 I flutter : [HikeNotifications] reconciliation_permission_result 
+timestamp=2026-08-06T04:52:34.280971Z osPermission=allowed firebaseMessaging=authorized channel=high 
+androidRequest=not-requested classification=none
+08-06 12:52:34.288  5818  5818 I flutter : [HikeNotifications] messaging_auto_init_update_started 
+timestamp=2026-08-06T04:52:34.288036Z previous=true requested=true
+08-06 12:52:34.288  5818  5818 I flutter : [HikeNotifications] auto_init_started timestamp=2026-08-06T04:52:34.288615Z 
+requested=true previous=true
+08-06 12:52:34.317  5818  5818 I flutter : [HikeNotifications] messaging_auto_init_update_succeeded 
+timestamp=2026-08-06T04:52:34.317188Z requested=true current=true
+08-06 12:52:34.318  5818  5818 I flutter : [HikeNotifications] auto_init_completed 
+timestamp=2026-08-06T04:52:34.318470Z requested=true current=true elapsedMs=29
+08-06 12:52:34.319  5818  5818 I flutter : [HikeNotifications] token_request_started 
+timestamp=2026-08-06T04:52:34.319147Z source=getToken
+08-06 12:52:34.320  5818  5818 I flutter : [HikeNotifications] fcm_token_request_started 
+timestamp=2026-08-06T04:52:34.319683Z uid=27d7941bd7 source=getToken
+08-06 12:52:34.351  5818  5818 I flutter : [HikeNotifications] token_request_completed 
+timestamp=2026-08-06T04:52:34.348974Z elapsedMs=29 token_available=true token_length=142 masked_token=d7hx..._vSI
+08-06 12:52:34.354  5818  5818 I flutter : [HikeNotifications] fcm_token_result timestamp=2026-08-06T04:52:34.354381Z 
+result=valid tokenReceived=true tokenHash=6633dc6641 tokenLength=142
+08-06 12:52:34.355  5818  5818 I flutter : [HikeNotifications] stable_device_id_started 
+timestamp=2026-08-06T04:52:34.355005Z
+08-06 12:52:34.357  5818  5818 I flutter : [HikeNotifications] device_id_reused timestamp=2026-08-06T04:52:34.355731Z 
+deviceId=ca5096b246
+08-06 12:52:34.359  5818  5818 I flutter : [HikeNotifications] stable_device_id_completed 
+timestamp=2026-08-06T04:52:34.357794Z elapsedMs=2 deviceId=ca5096b246
+08-06 12:52:34.362  5818  5818 I flutter : [HikeNotifications] device_registration_context 
+timestamp=2026-08-06T04:52:34.361973Z authenticated=true deviceId=5092b554a9 
+devicePath=users/27d7941bd7/devices/ca5096b246 timezone=Asia/Manila
+08-06 12:52:34.765  5818  5818 I flutter : [HikeNotifications] device_document_read_succeeded 
+timestamp=2026-08-06T04:52:34.764141Z devicePath=users/27d7941bd7/devices/ca5096b246 exists=true 
+previousNotificationsEnabled=true previousTokenStatus=active
+08-06 12:52:34.770 12617 12619 W BpBinder: PerfMonitor binderTransact: time=205ms 
+interface=android.app.INotificationManager code=1598311760
+08-06 12:52:34.771  5818  5818 I flutter : [HikeNotifications] device_registration_skipped 
+timestamp=2026-08-06T04:52:34.771070Z reason=fresh-existing-record devicePath=users/27d7941bd7/devices/ca5096b246
+08-06 12:52:34.866  1050  1050 I BufferQueueProducer: [3312832 SurfaceView[com.example.summittrack/com.example.summittr
+ack.MainActivity](BLAST)#4238](this:0xb400007c4168ba80,id:-1,api:0,p:-1,c:1050) queueBuffer: fps=27.51 dur=1054.18 
+max=88.74 min=21.92
+08-06 12:52:34.906  5818  5818 I flutter : [HikeNotifications] reconciliation_completed 
+timestamp=2026-08-06T04:52:34.906281Z state=enabled
+08-06 12:52:35.596  5818 12408 E ple.summittrack: FrameInsert open fail: No such file or directory
+08-06 12:52:35.875  1050  1050 I BufferQueueProducer: [3312832 SurfaceView[com.example.summittrack/com.example.summittr
+ack.MainActivity](BLAST)#4238](this:0xb400007c4168ba80,id:-1,api:0,p:-1,c:1050) queueBuffer: fps=41.60 dur=1009.65 
+max=55.66 min=21.83
+08-06 12:52:36.907  1050  1050 I BufferQueueProducer: [3312832 SurfaceView[com.example.summittrack/com.example.summittr
+ack.MainActivity](BLAST)#4238](this:0xb400007c4168ba80,id:-1,api:0,p:-1,c:1050) queueBuffer: fps=39.75 dur=1031.55 
+max=88.49 min=10.35
+08-06 12:52:37.066 12625 12627 W BpBinder: PerfMonitor binderTransact: time=203ms 
+interface=android.app.INotificationManager code=1598311760
+08-06 12:52:37.916  1050  1050 I BufferQueueProducer: [3312832 SurfaceView[com.example.summittrack/com.example.summittr
+ack.MainActivity](BLAST)#4238](this:0xb400007c4168ba80,id:-1,api:0,p:-1,c:1050) queueBuffer: fps=44.58 dur=1009.50 
+max=33.82 min=10.64
+08-06 12:52:38.926  1050  1050 I BufferQueueProducer: [3312832 SurfaceView[com.example.summittrack/com.example.summittr
+ack.MainActivity](BLAST)#4238](this:0xb400007c4168ba80,id:-1,api:0,p:-1,c:1050) queueBuffer: fps=44.58 dur=1009.52 
+max=33.62 min=10.49
+08-06 12:52:38.940   997  1085 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:14156
+08-06 12:52:39.371 12637 12639 W BpBinder: PerfMonitor binderTransact: time=211ms 
+interface=android.app.INotificationManager code=1598311760
+08-06 12:52:39.957  1050  1050 I BufferQueueProducer: [3312832 SurfaceView[com.example.summittrack/com.example.summittr
+ack.MainActivity](BLAST)#4238](this:0xb400007c4168ba80,id:-1,api:0,p:-1,c:1050) queueBuffer: fps=42.65 dur=1031.54 
+max=44.38 min=10.78
+08-06 12:52:40.823  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 12:52:40.826  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 12:52:40.881  1705  1722 D MiSightJni: MiSight: Java_com_miui_misight_MiSight_nativeSendEvent enter called. '{"Pa
+ckageName":"com.example.summittrack","ActivityName":"com.example.summittrack\/.MainActivity","LaunchFromPackage":"com.m
+iui.home","LaunchDelay":7937,"TransitionDelay":1350,"LaunchType":1}'
+08-06 12:52:40.881  1705  1722 D MiEvent : flatten EventId 902005004 -t 1785991960 -paraList {"ActivityName":"com.examp
+le.summittrack/.MainActivity","LaunchDelay":7937,"LaunchFromPackage":"com.miui.home","LaunchType":1,"PackageName":"com.
+example.summittrack","TransitionDelay":1350}
+08-06 12:52:40.882  1705  1722 D MiEvent : report:EventId 902005004 -t 1785991960 -paraList {"ActivityName":"com.exampl
+e.summittrack/.MainActivity","LaunchDelay":7937,"LaunchFromPackage":"com.miui.home","LaunchType":1,"PackageName":"com.e
+xample.summittrack","TransitionDelay":1350} success
+08-06 12:52:40.888  1198  1249 D misight : Execute start execute sql /data/miuilog/misight/event.db:select 
+id,occured_cnt from event_info where event_id = '902005004' and version_id = '5' and param_list = '{"ActivityName":"com
+.example.summittrack/.MainA","LaunchDelay":7937,"LaunchFromPackage":"com.miui.home","LaunchType":1,"PackageName":"com.e
+xample.summittrack","TransitionDelay":1350}' and time_id = '240' limit 1
+08-06 12:52:40.922  1198  1249 D misight : Execute start execute sql /data/miuilog/misight/event.db:insert into 
+event_info (event_id,version_id,occured_cnt,first_time,param_list,expire,visible,time_id)  values ( 902005004,5,1,17859
+91960,'{"ActivityName":"com.example.summittrack/.MainA","LaunchDelay":7937,"LaunchFromPackage":"com.miui.home","LaunchT
+ype":1,"PackageName":"com.example.summittrack","TransitionDelay":1350}',0,0,240) 
+08-06 12:52:40.924  1198  1249 D misight : Execute start execute sql /mnt/rescue/misight/event.db:select 
+id,occured_cnt from event_info where event_id = '902005004' and version_id = '5' and param_list = '{"ActivityName":"com
+.example.summittrack/.MainA","LaunchDelay":7937,"LaunchFromPackage":"com.miui.home","LaunchType":1,"PackageName":"com.e
+xample.summittrack","TransitionDelay":1350}' and time_id = '240' limit 1
+08-06 12:52:40.928  1198  1249 D misight : Execute start execute sql /mnt/rescue/misight/event.db:insert into 
+event_info (event_id,version_id,occured_cnt,first_time,param_list,expire,visible,time_id)  values ( 902005004,5,1,17859
+91960,'{"ActivityName":"com.example.summittrack/.MainA","LaunchDelay":7937,"LaunchFromPackage":"com.miui.home","LaunchT
+ype":1,"PackageName":"com.example.summittrack","TransitionDelay":1350}',0,0,240) 
+08-06 12:52:40.967  1050  1050 I BufferQueueProducer: [3312832 SurfaceView[com.example.summittrack/com.example.summittr
+ack.MainActivity](BLAST)#4238](this:0xb400007c4168ba80,id:-1,api:0,p:-1,c:1050) queueBuffer: fps=43.58 dur=1009.66 
+max=44.44 min=10.87
+08-06 12:52:41.706 12655 12657 W BpBinder: PerfMonitor binderTransact: time=235ms 
+interface=android.app.INotificationManager code=1598311760
+08-06 12:52:41.988  1050  1050 I BufferQueueProducer: [3312832 SurfaceView[com.example.summittrack/com.example.summittr
+ack.MainActivity](BLAST)#4238](this:0xb400007c4168ba80,id:-1,api:0,p:-1,c:1050) queueBuffer: fps=45.07 dur=1020.54 
+max=44.05 min=10.87
+08-06 12:52:43.008  1050  1050 I BufferQueueProducer: [3312832 SurfaceView[com.example.summittrack/com.example.summittr
+ack.MainActivity](BLAST)#4238](this:0xb400007c4168ba80,id:-1,api:0,p:-1,c:1050) queueBuffer: fps=45.08 dur=1020.44 
+max=33.67 min=10.60
+08-06 12:52:43.293  1705  1884 I MIUIInput: [MotionEvent] publisher action=0x0, deviceId=6, 43739337, channel '311347 
+com.example.summittrack/com.example.summittrack.MainActivity'
+08-06 12:52:43.295  1705  1884 I MIUIInput: [MotionEvent] publisher action=0x1, deviceId=6, 43739341, channel '311347 
+com.example.summittrack/com.example.summittrack.MainActivity'
+08-06 12:52:43.304  5818  5818 I MIUIInput: [MotionEvent] ViewRootImpl windowName 
+'com.example.summittrack/com.example.summittrack.MainActivity', { action=ACTION_DOWN, id[0]=0, pointerCount=1, 
+eventTime=43739337, downTime=43739337, phoneEventTime=1785991963290 } moveCount:0
+08-06 12:52:43.331  5818  5818 I MIUIInput: [MotionEvent] ViewRootImpl windowName 
+'com.example.summittrack/com.example.summittrack.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, 
+eventTime=43739341, downTime=43739337, phoneEventTime=1785991963293 } moveCount:0
+08-06 12:52:43.387   997  1085 I mtkpower@impl: [powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:14160
+08-06 12:52:43.673  5818  5818 I flutter : [HikeNotifications] diagnostic_build_marker 
+timestamp=2026-08-06T04:52:43.672907Z marker=notification_toggle_fix_v3 location=settings_screen_initialization
+08-06 12:52:43.853  1705  1884 I MIUIInput: [MotionEvent] publisher action=0x0, deviceId=6, 43739899, channel '311347 
+com.example.summittrack/com.example.summittrack.MainActivity'
+
+

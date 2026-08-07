@@ -18,6 +18,26 @@ import flutter_local_notifications
     }
 
     GeneratedPluginRegistrant.register(with: self)
+    if let controller = window?.rootViewController as? FlutterViewController {
+      FlutterMethodChannel(
+        name: "com.example.summittrack/notification_settings",
+        binaryMessenger: controller.binaryMessenger
+      ).setMethodCallHandler { call, result in
+        guard call.method == "openNotificationSettings" else {
+          result(FlutterMethodNotImplemented)
+          return
+        }
+
+        guard let url = URL(string: UIApplication.openSettingsURLString) else {
+          result(false)
+          return
+        }
+
+        UIApplication.shared.open(url, options: [:]) { success in
+          result(success)
+        }
+      }
+    }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }

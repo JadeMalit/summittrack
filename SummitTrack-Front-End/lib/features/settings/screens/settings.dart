@@ -115,7 +115,18 @@ class _SettingsBody extends StatefulWidget {
 
 class _SettingsBodyState extends State<_SettingsBody> {
   bool _isNotificationActionProcessing = false;
-  bool _isNotificationDialogOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _recordNotificationUiDiagnostic('diagnostic_build_marker', {
+      'marker': notificationToggleDiagnosticBuildMarker,
+      'location': 'settings_screen_initialization',
+    });
+    unawaited(
+      HikeNotificationService.instance.refreshNotificationEnabledState(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -141,21 +152,58 @@ class _SettingsBodyState extends State<_SettingsBody> {
                 builder: (context, _) {
                   final notificationsEnabled =
                       HikeNotificationService.instance.notificationsEnabled;
+                  final ValueChanged<bool>? onNotificationChanged =
+                      _isNotificationActionProcessing
+                      ? null
+                      : (requestedValue) {
+                          _recordNotificationUiDiagnostic(
+                            'diagnostic_build_marker',
+                            {
+                              'marker': notificationToggleDiagnosticBuildMarker,
+                              'location': 'settings_switch_tap',
+                            },
+                          );
+                          _recordNotificationUiDiagnostic(
+                            'settings_switch_tap_received',
+                            {
+                              'requested_value': requestedValue,
+                              'current_switch_value': notificationsEnabled,
+                              'processing_state_before':
+                                  _isNotificationActionProcessing,
+                              'widget_mounted': mounted,
+                            },
+                          );
+                          _recordNotificationUiDiagnostic(
+                            'toggle_tap_received',
+                            {
+                              'requestedEnabled': requestedValue,
+                              'visibleEnabled': notificationsEnabled,
+                              'processing': _isNotificationActionProcessing,
+                            },
+                          );
+                          unawaited(
+                            _handleNotificationSwitchChange(
+                              context,
+                              enabled: requestedValue,
+                            ),
+                          );
+                        };
 
-                  return _SettingsTile(
-                    icon: Icons.notifications_rounded,
+                  return _SettingsTileShell(
+                    onTap: null,
+                    leading: Icon(
+                      Icons.notifications_rounded,
+                      color: context.appColors.accent,
+                    ),
                     title: 'Notifications',
                     subtitle: notificationsEnabled
-                        ? 'Hike-day reminders are enabled'
-                        : 'Hike reminders are turned off',
-                    onTap:
-                        _isNotificationActionProcessing ||
-                            _isNotificationDialogOpen
-                        ? null
-                        : () => _handleNotificationsTap(
-                            context,
-                            notificationsEnabled: notificationsEnabled,
-                          ),
+                        ? 'Hike reminders are turned on.'
+                        : 'Hike reminders are turned off.',
+                    trailing: _NotificationToggleButton(
+                      notificationsEnabled: notificationsEnabled,
+                      isProcessing: _isNotificationActionProcessing,
+                      onChanged: onNotificationChanged,
+                    ),
                   );
                 },
               ),
@@ -220,70 +268,212 @@ class _SettingsBodyState extends State<_SettingsBody> {
     );
   }
 
-  Future<void> _handleNotificationsTap(
+  Future<void> _handleNotificationSwitchChange(
     BuildContext context, {
-    required bool notificationsEnabled,
+    required bool enabled,
   }) async {
-    if (_isNotificationActionProcessing || _isNotificationDialogOpen) {
+    final stopwatch = Stopwatch()..start();
+    _recordNotificationUiDiagnostic('handler_started', {
+      'requested_value': enabled,
+      'current_switch_value':
+          HikeNotificationService.instance.notificationsEnabled,
+      'processing_state_before': _isNotificationActionProcessing,
+      'widget_mounted': mounted,
+    });
+    _recordNotificationUiDiagnostic('toggle_handler_entered', {
+      'requestedEnabled': enabled,
+      'visibleEnabled': HikeNotificationService.instance.notificationsEnabled,
+      'processing': _isNotificationActionProcessing,
+    });
+    if (_isNotificationActionProcessing) {
+      _recordNotificationUiDiagnostic('toggle_tap_ignored', {
+        'requestedEnabled': enabled,
+        'reason': 'operation-in-progress',
+      });
       return;
     }
 
-    if (notificationsEnabled) {
-      final shouldTurnOff = await _showTurnOffNotificationsDialog(context);
-      if (!mounted || !context.mounted || shouldTurnOff != true) {
+    try {
+      if (enabled) {
+        final result = await _runNotificationAction<NotificationEnableResult>(
+          () async {
+            _recordNotificationUiDiagnostic(
+              'notification_service_call_started',
+              {'requestedEnabled': true},
+            );
+            final result = await HikeNotificationService.instance
+                .enableFromSettings();
+            _recordNotificationUiDiagnostic('service_result_received', {
+              'requestedEnabled': true,
+              'success': result.enabled,
+              'failureKind': result.failureKind?.name ?? 'none',
+              'visibleEnabled':
+                  HikeNotificationService.instance.notificationsEnabled,
+            });
+            _recordNotificationUiDiagnostic('handler_result', {
+              'requested_value': true,
+              'success': result.enabled,
+              'failure_kind': result.failureKind?.name ?? 'none',
+              'final_switch_value':
+                  HikeNotificationService.instance.notificationsEnabled,
+            });
+            return result;
+          },
+        );
+        if (result == null) {
+          return;
+        }
+        if (context.mounted) {
+          _recordNotificationUiDiagnostic('dialog_attempted', {
+            'requested_value': true,
+            'title': result.enabled
+                ? 'Notifications Turned On'
+                : 'Notifications Not Enabled',
+          });
+          await _showNotificationEnableResult(context, result);
+        } else {
+          _recordNotificationUiDiagnostic('dialog_display_skipped', {
+            'reason': 'context-unmounted',
+            'requestedEnabled': true,
+          });
+        }
         return;
       }
 
-      await _runNotificationAction(() async {
-        final result = await HikeNotificationService.instance
-            .disableFromSettings();
-        if (context.mounted) {
-          widget.onShowSnack(context, result.message);
-        }
-      });
-
-      return;
-    }
-
-    final shouldEnable = await _showEnableNotificationsDialog(context);
-    if (!mounted || !context.mounted || shouldEnable != true) {
-      return;
-    }
-
-    await _runNotificationAction(() async {
-      final result = await HikeNotificationService.instance
-          .enableFromSettings();
-      if (context.mounted) {
-        _showNotificationResult(context, result);
+      final result = await _runNotificationAction<NotificationDisableResult>(
+        () async {
+          _recordNotificationUiDiagnostic('notification_service_call_started', {
+            'requestedEnabled': false,
+          });
+          final result = await HikeNotificationService.instance
+              .disableFromSettings();
+          _recordNotificationUiDiagnostic('service_result_received', {
+            'requestedEnabled': false,
+            'success': result.disabled,
+            'visibleEnabled':
+                HikeNotificationService.instance.notificationsEnabled,
+          });
+          _recordNotificationUiDiagnostic('handler_result', {
+            'requested_value': false,
+            'success': result.disabled,
+            'final_switch_value':
+                HikeNotificationService.instance.notificationsEnabled,
+          });
+          return result;
+        },
+      );
+      if (result == null) {
+        return;
       }
-    });
+      if (context.mounted) {
+        _recordNotificationUiDiagnostic('dialog_attempted', {
+          'requested_value': false,
+          'title': result.disabled
+              ? 'Notifications Turned Off'
+              : 'Notifications Not Updated',
+        });
+        await _showNotificationDisableResult(context, result);
+      } else {
+        _recordNotificationUiDiagnostic('dialog_display_skipped', {
+          'reason': 'context-unmounted',
+          'requestedEnabled': false,
+        });
+      }
+    } finally {
+      stopwatch.stop();
+      _recordNotificationUiDiagnostic('toggle_operation_finished', {
+        'requestedEnabled': enabled,
+        'elapsedMs': stopwatch.elapsedMilliseconds,
+        'visibleEnabled': HikeNotificationService.instance.notificationsEnabled,
+        'processing': _isNotificationActionProcessing,
+      });
+      _recordNotificationUiDiagnostic('processing_state_after', {
+        'processing_state_after': _isNotificationActionProcessing,
+        'elapsed_ms': stopwatch.elapsedMilliseconds,
+      });
+      _recordNotificationUiDiagnostic('final_switch_value', {
+        'final_switch_value':
+            HikeNotificationService.instance.notificationsEnabled,
+      });
+    }
   }
 
-  void _showNotificationResult(
+  Future<void> _showNotificationEnableResult(
     BuildContext context,
     NotificationEnableResult result,
-  ) {
-    if (!result.openSettingsSuggested) {
-      widget.onShowSnack(context, result.message);
+  ) async {
+    if (result.enabled) {
+      await _showNotificationStatusDialog(
+        context,
+        title: 'Notifications Turned On',
+        message: 'You will now receive reminders for your scheduled hikes.',
+      );
       return;
     }
 
-    final messenger = ScaffoldMessenger.of(context);
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(result.message),
-          action: SnackBarAction(
-            label: 'Settings',
-            onPressed: () {
-              unawaited(
-                HikeNotificationService.instance.openNotificationSettings(),
-              );
-            },
-          ),
-        ),
+    await _showNotificationStatusDialog(
+      context,
+      title: 'Notifications Not Enabled',
+      message: result.message,
+      showSettingsAction: result.openSettingsSuggested,
+    );
+  }
+
+  Future<void> _showNotificationDisableResult(
+    BuildContext context,
+    NotificationDisableResult result,
+  ) async {
+    if (result.disabled) {
+      await _showNotificationStatusDialog(
+        context,
+        title: 'Notifications Turned Off',
+        message:
+            'You will no longer receive reminders for your scheduled hikes.',
       );
+      return;
+    }
+
+    await _showNotificationStatusDialog(
+      context,
+      title: 'Notifications Not Updated',
+      message: result.message,
+    );
+  }
+
+  Future<void> _showNotificationStatusDialog(
+    BuildContext context, {
+    required String title,
+    required String message,
+    bool showSettingsAction = false,
+  }) async {
+    _recordNotificationUiDiagnostic('dialog_display_started', {'title': title});
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            if (showSettingsAction)
+              TextButton(
+                onPressed: () {
+                  unawaited(
+                    HikeNotificationService.instance.openNotificationSettings(),
+                  );
+                },
+                child: const Text('Settings'),
+              ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+    _recordNotificationUiDiagnostic('dialog_display_completed', {
+      'title': title,
+    });
   }
 
   Future<void> _showNotificationDiagnostics(BuildContext context) async {
@@ -357,129 +547,81 @@ class _SettingsBodyState extends State<_SettingsBody> {
     );
   }
 
-  Future<void> _runNotificationAction(Future<void> Function() action) async {
+  Future<T?> _runNotificationAction<T>(Future<T> Function() action) async {
     if (_isNotificationActionProcessing) {
-      return;
+      return null;
     }
 
     setState(() {
       _isNotificationActionProcessing = true;
     });
+    _recordNotificationUiDiagnostic('toggle_processing_state_changed', {
+      'processing': true,
+      'visibleEnabled': HikeNotificationService.instance.notificationsEnabled,
+    });
 
     try {
-      await action();
-    } catch (_) {
+      return await action();
+    } catch (error, stackTrace) {
+      debugPrint(
+        '[HikeNotifications] settings_action_failed '
+        'errorType=${error.runtimeType} error=$error',
+      );
+      debugPrintStack(
+        label: '[HikeNotifications] settings_action_stack',
+        stackTrace: stackTrace,
+      );
       if (mounted) {
         widget.onShowSnack(
           context,
-          'Notification setting could not be updated. Please try again.',
+          'Notification setting could not be updated: $error',
         );
       }
+      return null;
     } finally {
+      _recordNotificationUiDiagnostic('processing_cleanup_started', {
+        'processing_state_before': _isNotificationActionProcessing,
+        'final_switch_value':
+            HikeNotificationService.instance.notificationsEnabled,
+      });
       if (mounted) {
         setState(() {
           _isNotificationActionProcessing = false;
         });
+        _recordNotificationUiDiagnostic('toggle_processing_state_changed', {
+          'processing': false,
+          'visibleEnabled':
+              HikeNotificationService.instance.notificationsEnabled,
+        });
+      } else {
+        _isNotificationActionProcessing = false;
       }
+      _recordNotificationUiDiagnostic('processing_state_cleared', {
+        'processing_state_after': _isNotificationActionProcessing,
+        'final_switch_value':
+            HikeNotificationService.instance.notificationsEnabled,
+      });
+      _recordNotificationUiDiagnostic('processing_cleanup_completed', {
+        'processing_state_after': _isNotificationActionProcessing,
+        'final_switch_value':
+            HikeNotificationService.instance.notificationsEnabled,
+        'widget_mounted': mounted,
+      });
     }
   }
 
-  Future<bool?> _showTurnOffNotificationsDialog(BuildContext context) async {
-    _isNotificationDialogOpen = true;
-
-    try {
-      var dialogResolved = false;
-      return await showDialog<bool>(
-        context: context,
-        barrierDismissible: false,
-        builder: (dialogContext) {
-          void closeDialog(bool value) {
-            if (dialogResolved) {
-              return;
-            }
-
-            dialogResolved = true;
-            Navigator.of(dialogContext).pop(value);
-          }
-
-          return PopScope<bool>(
-            canPop: false,
-            onPopInvokedWithResult: (didPop, _) {
-              if (!didPop) {
-                closeDialog(false);
-              }
-            },
-            child: AlertDialog(
-              title: const Text('Turn Off Hike Notifications?'),
-              content: const Text(
-                'You will no longer receive reminders for your scheduled hikes.',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => closeDialog(false),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () => closeDialog(true),
-                  child: const Text('Turn Off'),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    } finally {
-      _isNotificationDialogOpen = false;
-    }
-  }
-
-  Future<bool?> _showEnableNotificationsDialog(BuildContext context) async {
-    _isNotificationDialogOpen = true;
-
-    try {
-      var dialogResolved = false;
-      return await showDialog<bool>(
-        context: context,
-        barrierDismissible: false,
-        builder: (dialogContext) {
-          void closeDialog(bool value) {
-            if (dialogResolved) {
-              return;
-            }
-
-            dialogResolved = true;
-            Navigator.of(dialogContext).pop(value);
-          }
-
-          return PopScope<bool>(
-            canPop: false,
-            onPopInvokedWithResult: (didPop, _) {
-              if (!didPop) {
-                closeDialog(false);
-              }
-            },
-            child: AlertDialog(
-              title: const Text('Enable Hike Notifications?'),
-              content: const Text(
-                'SummitTrack will remind you when you have a scheduled hike today.',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => closeDialog(false),
-                  child: const Text('No'),
-                ),
-                TextButton(
-                  onPressed: () => closeDialog(true),
-                  child: const Text('Yes, Enable'),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    } finally {
-      _isNotificationDialogOpen = false;
-    }
+  void _recordNotificationUiDiagnostic(
+    String event, [
+    Map<String, Object?> fields = const <String, Object?>{},
+  ]) {
+    final values = fields.entries
+        .map((entry) => '${entry.key}=${entry.value}')
+        .join(' ');
+    final details = values.isEmpty ? '' : ' $values';
+    debugPrint(
+      '[HikeNotifications] $event '
+      'timestamp=${DateTime.now().toUtc().toIso8601String()}$details',
+    );
   }
 }
 
@@ -678,6 +820,53 @@ class _DarkModeToggleButton extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _NotificationToggleButton extends StatelessWidget {
+  const _NotificationToggleButton({
+    required this.notificationsEnabled,
+    required this.isProcessing,
+    required this.onChanged,
+  });
+
+  final bool notificationsEnabled;
+  final bool isProcessing;
+  final ValueChanged<bool>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+
+    return SizedBox(
+      width: 64,
+      height: 42,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Switch(
+            value: notificationsEnabled,
+            onChanged: onChanged,
+            activeColor: colors.primary,
+            activeTrackColor: colors.accent.withValues(alpha: 0.72),
+            inactiveThumbColor: Colors.white,
+            inactiveTrackColor: colors.surfaceMuted,
+          ),
+          if (isProcessing)
+            Positioned(
+              right: 0,
+              child: SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: notificationsEnabled ? colors.primary : colors.accent,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

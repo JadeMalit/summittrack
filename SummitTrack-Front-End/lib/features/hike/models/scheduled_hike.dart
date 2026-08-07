@@ -22,6 +22,12 @@ class ScheduledHike {
     DateTime? createdAt,
     String? ownerUid,
   }) {
+    if (mountainId.trim().isEmpty || mountainName.trim().isEmpty) {
+      throw ArgumentError('A valid mountain must be selected.');
+    }
+    if (trailId.trim().isEmpty || trailName.trim().isEmpty) {
+      throw ArgumentError('A valid trail must be selected.');
+    }
     final date = dateOnly(hikeDate);
     final normalizedMountainId = _normalizedId(
       mountainId,
@@ -135,32 +141,25 @@ class ScheduledHike {
 
   Map<String, dynamic> toFirestore({
     required String ownerUid,
-    String? ownerEmail,
+    bool includeCreatedAt = true,
   }) {
     final normalizedOwnerUid = ownerUid.trim();
-    final normalizedOwnerEmail = ownerEmail?.trim();
     final normalizedHikeDate = dateOnly(hikeDate);
 
     return {
       'id': id,
       'ownerUid': normalizedOwnerUid,
       'userId': normalizedOwnerUid,
-      if (normalizedOwnerEmail != null && normalizedOwnerEmail.isNotEmpty)
-        'ownerEmail': normalizedOwnerEmail,
       'mountainId': mountainId,
       'mountainName': mountainName,
       'trailId': trailId,
       'trailName': trailName,
-      'hikeDate': Timestamp.fromDate(
-        DateTime.utc(
-          normalizedHikeDate.year,
-          normalizedHikeDate.month,
-          normalizedHikeDate.day,
-        ),
-      ),
+      'hikeDate': Timestamp.fromDate(manilaMidnightUtc(normalizedHikeDate)),
       'hikeDateKey': dateKey(normalizedHikeDate),
-      'createdAt': Timestamp.fromDate(createdAt.toUtc()),
-      'updatedAt': Timestamp.fromDate((updatedAt ?? DateTime.now()).toUtc()),
+      'status': 'scheduled',
+      'notificationEnabled': true,
+      if (includeCreatedAt) 'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
     };
   }
 
@@ -177,6 +176,20 @@ class ScheduledHike {
     final month = normalized.month.toString().padLeft(2, '0');
     final day = normalized.day.toString().padLeft(2, '0');
     return '${normalized.year}-$month-$day';
+  }
+
+  static DateTime manilaMidnightUtc(DateTime date) {
+    final normalized = dateOnly(date);
+    return DateTime.utc(
+      normalized.year,
+      normalized.month,
+      normalized.day,
+    ).subtract(const Duration(hours: 8));
+  }
+
+  static DateTime manilaDateForInstant(DateTime instant) {
+    final manila = instant.toUtc().add(const Duration(hours: 8));
+    return DateTime(manila.year, manila.month, manila.day);
   }
 
   static String _safeId(String value) {
@@ -205,8 +218,8 @@ class ScheduledHike {
 
   static DateTime? _readOptionalDate(Object? value) {
     if (value is Timestamp) {
-      final utcDate = value.toDate().toUtc();
-      return DateTime(utcDate.year, utcDate.month, utcDate.day);
+      final manilaDate = value.toDate().toUtc().add(const Duration(hours: 8));
+      return DateTime(manilaDate.year, manilaDate.month, manilaDate.day);
     }
 
     if (value is DateTime) {

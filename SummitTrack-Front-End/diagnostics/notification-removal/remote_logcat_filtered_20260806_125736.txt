@@ -1,0 +1,384 @@
+﻿
+08-06 13:01:56.778  1705  2014 I SmartPower: com.example.summittrack/10384(5818): background->idle(3001ms) R(become 
+invisible) adj=702.
+08-06 13:01:57.347 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:01:57.402 15142 15142 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:01:58.377  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:01:58.380  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:01:59.573 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:01:59.613 15149 15149 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:00.039  2433  2433 E AnimationHelper: updateTime sToAod:false mHasNotification: true, mClockType: classic
+08-06 13:02:01.603  1705  1760 I SmartPower: com.example.summittrack/10384(5818): idle->background(4825ms) R(broadcast 
+start Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 xflg=0x4 pkg=com.example.summittrack (has 
+extras) }) adj=0.
+08-06 13:02:01.607  1705  1721 D GnssSsruImpl: onLocationPermissionsChanged provider:network 
+packageName:com.example.summittrack
+08-06 13:02:01.607  1705  1721 D GnssSsruImpl: onLocationPermissionsChanged provider:passive 
+packageName:com.example.summittrack
+08-06 13:02:01.782  5818 15169 I ple.summittrack: hiddenapi: Accessing hidden method Landroid/os/WorkSource;->add(I)Z 
+(runtime_flags=0, domain=platform, api=unsupported,test-api) from Lcom/google/android/gms/common/util/WorkSourceUtil; 
+(domain=app, TargetSdkVersion=35) using reflection: allowed
+08-06 13:02:01.782  5818 15169 I ple.summittrack: hiddenapi: Accessing hidden method 
+Landroid/os/WorkSource;->add(ILjava/lang/String;)Z (runtime_flags=0, domain=platform, api=unsupported,test-api) from 
+Lcom/google/android/gms/common/util/WorkSourceUtil; (domain=app, TargetSdkVersion=35) using reflection: allowed
+08-06 13:02:01.782  5818 15169 I ple.summittrack: hiddenapi: Accessing hidden method Landroid/os/WorkSource;->get(I)I 
+(runtime_flags=0, domain=platform, api=unsupported) from Lcom/google/android/gms/common/util/WorkSourceUtil; 
+(domain=app, TargetSdkVersion=35) using reflection: allowed
+08-06 13:02:01.782  5818 15169 I ple.summittrack: hiddenapi: Accessing hidden method 
+Landroid/os/WorkSource;->getName(I)Ljava/lang/String; (runtime_flags=0, domain=platform, api=unsupported) from 
+Lcom/google/android/gms/common/util/WorkSourceUtil; (domain=app, TargetSdkVersion=35) using reflection: allowed
+08-06 13:02:01.793 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:01.833 15191 15191 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:01.862  5818  5818 I flutter : [HikeNotifications] background_message_received 
+timestamp=2026-08-06T05:02:01.828160Z messageId=0:1785992521922855%5de7facd5de7facd payloadValid=true 
+systemNotificationPresent=true
+08-06 13:02:01.880  5818 15194 W FirebaseMessaging: Unable to log event: analytics library is missing
+08-06 13:02:02.152  1705  1705 W NotificationHistory: Attempted to add notif for locked/gone/disabled user 0
+08-06 13:02:02.163  2433  2433 D FocusPlugin: 
+0|com.example.summittrack|0|c54bcc55274c120445d24b6d2a114c70f5e88955ebb6baaa5efe284cde023028|10384 is not focus 
+notification, isMedia: false
+08-06 13:02:02.165  2433  2433 D AlarmScheduler-TIMEOUT: addAlarm, 
+key=0|com.example.summittrack|0|c54bcc55274c120445d24b6d2a114c70f5e88955ebb6baaa5efe284cde023028|10384, 
+triggerTime=321680134
+08-06 13:02:02.165  2433  2433 D MiuiBubbleManager: onEntryAdded: 
+com.android.systemui.statusbar.notification.collection.NotificationEntry@c5326ec
+08-06 13:02:02.169  2433  2749 D NotificationProvider: call method=updateNotificationUsageInfo 
+extras=Bundle[{packageName=com.example.summittrack}]
+08-06 13:02:02.171  2113  2506 I Launcher.ApplicationsMessage: update com.example.summittrack/ to 1
+08-06 13:02:02.221  2433  2949 I IconCustomizer: find better bitmap : 144px, for com.example.summittrackat density 
+:480dpi, the device is : 440dpi
+08-06 13:02:02.224  2433  2949 D IconCustomizer: Generate customized icon for com.example.summittrack.png, true
+08-06 13:02:02.224  2433  2949 I IconCustomizer: composeIconWithTrans FullMask: for com.example.summittrack.png
+08-06 13:02:02.237  2433  2433 E backgroundBlur: setMiViewBlurMode disable 
+com.android.systemui.statusbar.notification.row.NotificationBackgroundView
+08-06 13:02:02.240  2433  2433 D NotificationRowContentBinderInjectorImpl: changeToFullAodContext: not need change 
+full aod style
+08-06 13:02:02.317  2433  2433 E backgroundBlur: setMiViewBlurMode disable 
+com.android.systemui.statusbar.notification.row.NotificationBackgroundView
+08-06 13:02:02.318  2433  2433 D AlertCoordinator: onViewBound, buzzBeep for 
+0|com.example.summittrack|0|c54bcc55274c120445d24b6d2a114c70f5e88955ebb6baaa5efe284cde023028|10384
+08-06 13:02:04.123 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:04.169 15207 15207 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:04.632  1705  2014 I SmartPower: com.example.summittrack/10384(5818): background->idle(3029ms) R(broadcast 
+start Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 xflg=0x4 pkg=com.example.summittrack (has 
+extras) }) adj=700.
+08-06 13:02:05.698  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:02:05.701  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:02:06.359 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:06.403 15215 15215 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:08.582 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:08.627 15221 15221 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:10.790 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:10.844 15236 15236 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:12.336  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:02:12.339  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:02:13.089 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:13.146 15241 15241 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:15.153 31505 10286 W System.err: 	at com.vega.launcher.network.interceptors.TimeOutSettingInterceptor.inter
+cept(dex-id-1015cc7939f53a0eb9f13e76b6da2fecb9729e79:17302005)
+08-06 13:02:15.358 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:15.415 15253 15253 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:15.474  9032  9260 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[lightspeed] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:02:15.480  9032  9280 E msys    : E[S 
+MSync]modular_sync_service_ffi::service_ffi::handle_network_response(1013)=>DB[231] - Encountered a network error 
+(2002: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP 
+code: 1 detail: SecureTCP connection establish timeout))
+08-06 13:02:17.590 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:17.635 15258 15258 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:19.834 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:19.879 15261 15261 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:20.698  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:02:20.701  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:02:22.052 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:22.107 15284 15284 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:22.661  1705  1721 D GnssSsruImpl: onLocationPermissionsChanged provider:network 
+packageName:com.example.summittrack
+08-06 13:02:22.661  1705  1721 D GnssSsruImpl: onLocationPermissionsChanged provider:passive 
+packageName:com.example.summittrack
+08-06 13:02:24.275 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:24.318 15288 15288 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:25.923  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:02:25.926  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:02:26.496 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:26.541 15298 15298 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:28.751 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:28.795 15305 15305 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:31.007 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:31.048 15310 15310 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:31.229  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:02:31.232  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:02:33.213 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:33.259 15317 15317 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:33.776 28937 29785 I BtGatt.ScanManager: msg.what = MSG_BALANCED_TIMEOUT, msg.arg1 = BALANCED_TIMEOUT
+08-06 13:02:33.776 28937 29785 D BtGatt.ScanManager: handleBalancedTimeout() called with: client = [ [ScanClient 
+scanModeApp 1 scanModeUsed 1 [appScanStats com.google.uid.shared:10147]]]
+08-06 13:02:33.778 28937 29785 D BtGatt.ScanManager: handleBalancedTimeout() -- com.google.android.gms is foreground
+08-06 13:02:35.444 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:35.488 15320 15320 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:37.651 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:37.693 15327 15327 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:38.339  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:02:38.342  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:02:39.872 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:39.915 15333 15333 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:40.134 15333 15335 W BpBinder: PerfMonitor binderTransact: time=218ms 
+interface=android.app.INotificationManager code=1598311760
+08-06 13:02:42.186 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:42.244 15355 15355 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:44.459 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:44.515 15374 15374 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:45.720  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:02:45.723  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:02:46.685 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:46.731 15384 15384 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:48.803 28937 29785 I BtGatt.ScanManager: msg.what = MSG_CHECK_SCAN_STATUS, msg.arg1 = 
+CHECK_BACKGROUND_TIMEOUT
+08-06 13:02:48.933 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:48.989 15389 15389 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:51.153 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:51.196 15394 15394 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:52.140  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:02:52.144  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:02:53.403 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:53.460 15399 15399 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:55.725 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:55.771 15405 15405 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:57.933 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:02:57.987 15413 15413 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:02:58.838  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:02:58.841  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:03:00.041  2433  2433 E AnimationHelper: updateTime sToAod:false mHasNotification: true, mClockType: classic
+08-06 13:03:00.197 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:00.252 15421 15421 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:02.430 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:02.486 15427 15427 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:04.681 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:04.726 15430 15430 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:06.083  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:03:06.087  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:03:06.899 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:06.941 15435 15435 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:09.142 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:09.198 15446 15446 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:11.369 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:11.415 15450 15450 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:13.350  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:03:13.353  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:03:13.581 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:13.638 15458 15458 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:15.811 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:15.867 15469 15469 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:18.069 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:18.126 15478 15478 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:19.962  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:03:19.965  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:03:20.350 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:20.407 15483 15483 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:22.658  9032  9260 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[lightspeed] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:03:22.664  9032  9280 E msys    : E[S 
+MSync]modular_sync_service_ffi::service_ffi::handle_network_response(1013)=>DB[231] - Encountered a network error 
+(2002: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP 
+code: 1 detail: SecureTCP connection establish timeout))
+08-06 13:03:22.709 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:22.753 15488 15488 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:24.926 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:24.969 15491 15491 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:27.147 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:27.192 15494 15494 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:27.881  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:03:27.884  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:03:29.364 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:29.412 15502 15502 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:31.590 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:31.647 15508 15508 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:33.103  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:03:33.106  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:03:33.824 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:33.873 15515 15515 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:36.041 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:36.098 15518 15518 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:38.305 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:38.362 15521 15521 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:38.410  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:03:38.414  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:03:40.571 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:40.616 15531 15531 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:42.805 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:42.859 15534 15534 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:44.575  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:03:44.578  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:03:45.072 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:45.124 15545 15545 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:47.300 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:47.344 15550 15550 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:48.847 28937 29785 I BtGatt.ScanManager: msg.what = MSG_CHECK_SCAN_STATUS, msg.arg1 = 
+CHECK_BACKGROUND_TIMEOUT
+08-06 13:03:49.544 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:49.599 15555 15555 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:51.265  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:03:51.269  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:03:51.769 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:51.815 15560 15560 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:53.735 28937 29785 I BtGatt.ScanManager: msg.what = MSG_BALANCED_TIMEOUT_RECENTLY, msg.arg1 = 
+BALANCED_TIMEOUT_RECENTLY
+08-06 13:03:53.735 28937 29785 D BtGatt.ScanManager: handleBalancedTimeoutRecently() called with: client = [ 
+[ScanClient scanModeApp 1 scanModeUsed 1 [appScanStats com.google.uid.shared:10147]]], infoId = [24]
+08-06 13:03:53.737 28937 29785 D BtGatt.ScanManager: handleBalancedTimeoutRecently() -- com.google.android.gms is 
+foreground
+08-06 13:03:53.990 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:54.031 15565 15565 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:56.210 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:56.266 15568 15568 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:03:57.203  9032  9293 I DGW     : I[notifyStreamGroupError:1909] StreamGroupTransport[rpsignaling] notify 
+StreamGroup error: StreamGroupNetworkRequest request cancelled: max retries reached; last err (TransientError domain: 
+MNSSecureTCP code: 1 detail: SecureTCP connection establish timeout)
+08-06 13:03:57.206  9032  9293 I DGW     : I[onStreamGroupError:672] DGW: StreamGroup error: StreamGroupNetworkRequest 
+request cancelled: max retries reached; last err (TransientError domain: MNSSecureTCP code: 1 detail: SecureTCP 
+connection establish timeout)
+08-06 13:03:58.436 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:03:58.480 15573 15573 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:04:00.033  2433  2433 E AnimationHelper: updateTime sToAod:false mHasNotification: true, mClockType: classic
+08-06 13:04:00.654 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:04:00.698 15581 15581 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:04:00.909 15581 15583 W BpBinder: PerfMonitor binderTransact: time=210ms 
+interface=android.app.INotificationManager code=1598311760
+08-06 13:04:02.963 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:04:03.007 15584 15584 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+08-06 13:04:03.196 29655 29655 I adbd    : adbd service requested 'shell,v2,raw:dumpsys notification --noredact'
+08-06 13:04:03.247 15587 15587 W dumpsys : Thread Pool max thread count is 0. Cannot cache binder as linkToDeath 
+cannot be implemented. serviceName: notification
+
+

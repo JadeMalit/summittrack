@@ -27,7 +27,15 @@ class HikeScheduleStore extends ChangeNotifier {
   static const _storageKeyPrefix = 'summittrack_scheduled_hikes_v1_';
   static const _userDocumentScheduleField = 'scheduledHikesById';
   static const _permissionMessage =
-      'You do not have permission to access these scheduled hikes.';
+      'You do not have permission to access this scheduled hike.';
+
+  @visibleForTesting
+  static String scheduleDocumentPathForTesting({
+    required String userId,
+    required String hikeId,
+  }) {
+    return 'users/$userId/scheduled_hikes/$hikeId';
+  }
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
@@ -99,7 +107,12 @@ class HikeScheduleStore extends ChangeNotifier {
     );
     _logSchedule('Selected trail: ${hike.trailName} (${hike.trailId})');
     _logSchedule('Selected date: ${ScheduledHike.dateKey(hike.hikeDate)}');
-    _logSchedule('Current user UID: ${user.uid}');
+    _logAccess('scheduled_hike_access_started', {
+      'operation': 'save',
+      'queryType': 'user_subcollection_document',
+    });
+    _logAuthenticatedUser(user);
+    _logAccess('requested_hike_id', {'hikeId': hike.id});
 
     await _waitForCurrentUserLoad(user);
 
@@ -110,7 +123,7 @@ class HikeScheduleStore extends ChangeNotifier {
 
     try {
       _logSchedule('Starting save');
-      await _saveToAccountStorage(user, ownedHike);
+      await _saveToAccountStorage(user, ownedHike, includeCreatedAt: true);
       _logSchedule('Save success');
     } catch (error) {
       _logSchedule('Save failure: ${_errorSummary(error)}');
@@ -162,7 +175,11 @@ class HikeScheduleStore extends ChangeNotifier {
     final ownedOldHike = oldHike.copyWith(ownerUid: user.uid);
 
     try {
-      await _saveToAccountStorage(user, ownedUpdatedHike);
+      await _saveToAccountStorage(
+        user,
+        ownedUpdatedHike,
+        includeCreatedAt: oldHike.id != updatedHike.id,
+      );
       if (oldHike.id != updatedHike.id) {
         await _deleteFromAccountStorage(user, oldHike.id);
       }
@@ -356,7 +373,7 @@ class HikeScheduleStore extends ChangeNotifier {
 
     try {
       _logFetch('Fetch started');
-      _logFetch('Current user UID: ${user.uid}');
+      _logFetch('Current user UID: ${_safeIdentifier(user.uid)}');
       final cloudHikes = await _loadCloudSchedules(user);
       if (!_isCurrentLoad(user.uid, generation)) {
         return;
@@ -404,26 +421,55 @@ class HikeScheduleStore extends ChangeNotifier {
       _logFetch(
         'Permission failure source: primary scheduled_hikes read denied',
       );
-      _logFetch('Query path: ${_userDocumentSchedulePath(user.uid)}');
+      _logFetch(
+        'Query path: ${_safePath(_userDocumentSchedulePath(user.uid))}',
+      );
 
       return _loadUserDocumentSchedules(user, requiredFallback: true);
     }
   }
 
   Future<List<ScheduledHike>> _loadPrimaryCollectionSchedules(User user) async {
-    _logFetch('Query path: ${_scheduleCollectionPath(user.uid)}');
+    final queryPath = _scheduleCollectionPath(user.uid);
+    _logFetch('Query path: ${_safePath(queryPath)}');
+    _logAccess('scheduled_hike_access_started', {
+      'operation': 'query',
+      'queryType': 'user_subcollection',
+      'requested_firestore_path': _safePath(queryPath),
+    });
+    _logAuthenticatedUser(user);
+    _logAccess('scheduled_hike_query_started', {
+      'operation': 'get',
+      'requested_firestore_path': _safePath(queryPath),
+    });
 
-    final snapshot = await _scheduleCollection(user.uid).get();
-    return snapshot.docs
-        .map(
-          (doc) => ScheduledHike.fromFirestore(
-            documentId: doc.id,
-            data: doc.data(),
-            ownerUid: user.uid,
-          ),
-        )
-        .where((hike) => hike.ownerUid == null || hike.ownerUid == user.uid)
-        .toList();
+    try {
+      final snapshot = await _scheduleCollection(user.uid).get();
+      _logAccess('scheduled_hike_query_completed', {
+        'operation': 'get',
+        'documentCount': snapshot.docs.length,
+        'requested_firestore_path': _safePath(queryPath),
+      });
+      return snapshot.docs
+          .map(
+            (doc) => ScheduledHike.fromFirestore(
+              documentId: doc.id,
+              data: doc.data(),
+              ownerUid: user.uid,
+            ),
+          )
+          .where((hike) => hike.ownerUid == null || hike.ownerUid == user.uid)
+          .toList();
+    } catch (error, stackTrace) {
+      _logAccessFailure(
+        event: 'scheduled_hike_query_failed',
+        operation: 'get',
+        firestorePath: queryPath,
+        error: error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
   }
 
   Future<List<ScheduledHike>> _loadUserDocumentSchedules(
@@ -514,77 +560,77 @@ class HikeScheduleStore extends ChangeNotifier {
     );
   }
 
-  Future<void> _saveToAccountStorage(User user, ScheduledHike ownedHike) async {
-    try {
-      await _saveToPrimaryCollection(user, ownedHike);
-    } on FirebaseException catch (error) {
-      if (!_isPermissionDenied(error)) {
-        rethrow;
-      }
-
-      _logSchedule(
-        'Permission failure source: primary scheduled_hikes write denied',
-      );
-      await _saveToUserDocumentFallback(user, ownedHike);
-    }
+  Future<void> _saveToAccountStorage(
+    User user,
+    ScheduledHike ownedHike, {
+    required bool includeCreatedAt,
+  }) async {
+    await _saveToPrimaryCollection(
+      user,
+      ownedHike,
+      includeCreatedAt: includeCreatedAt,
+    );
   }
 
   Future<void> _saveToPrimaryCollection(
     User user,
-    ScheduledHike ownedHike,
-  ) async {
-    final documentPath = '${_scheduleCollectionPath(user.uid)}/${ownedHike.id}';
-    _logSchedule('Storage path/endpoint: $documentPath');
+    ScheduledHike ownedHike, {
+    required bool includeCreatedAt,
+  }) async {
+    final documentPath = _scheduleDocumentPath(user.uid, ownedHike.id);
+    final documentReference = _scheduleCollection(user.uid).doc(ownedHike.id);
+    _logSchedule('Storage path/endpoint: ${_safePath(documentPath)}');
+    _logAccess('requested_firestore_path', {
+      'operation': 'set',
+      'requested_firestore_path': _safePath(documentPath),
+    });
+    _logAccess('requested_hike_id', {'hikeId': ownedHike.id});
+    _logAccess('scheduled_hike_query_started', {
+      'operation': 'transaction_get',
+      'requested_firestore_path': _safePath(documentPath),
+    });
 
-    await _scheduleCollection(user.uid)
-        .doc(ownedHike.id)
-        .set(
-          ownedHike.toFirestore(ownerUid: user.uid, ownerEmail: user.email),
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final existingSnapshot = await transaction.get(documentReference);
+        final shouldIncludeCreatedAt =
+            includeCreatedAt && !existingSnapshot.exists;
+        _logAccess('scheduled_hike_query_completed', {
+          'operation': 'transaction_get',
+          'documentExists': existingSnapshot.exists,
+          'includeCreatedAt': shouldIncludeCreatedAt,
+          'requested_firestore_path': _safePath(documentPath),
+        });
+
+        transaction.set(
+          documentReference,
+          ownedHike.toFirestore(
+            ownerUid: user.uid,
+            includeCreatedAt: shouldIncludeCreatedAt,
+          ),
           SetOptions(merge: true),
         );
+      });
+    } catch (error, stackTrace) {
+      _logAccessFailure(
+        event: 'scheduled_hike_query_failed',
+        operation: 'transaction_get_or_set',
+        firestorePath: documentPath,
+        error: error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
 
     _logSchedule('Save response status: primary success');
   }
 
-  Future<void> _saveToUserDocumentFallback(
-    User user,
-    ScheduledHike ownedHike,
-  ) async {
-    _logSchedule(
-      'Storage path/endpoint: ${_userDocumentSchedulePath(user.uid)}',
-    );
-
-    await _userDocument(user.uid).set({
-      _userDocumentScheduleField: {
-        ownedHike.id: ownedHike.toFirestore(
-          ownerUid: user.uid,
-          ownerEmail: user.email,
-        ),
-      },
-    }, SetOptions(merge: true));
-
-    _logSchedule('Save response status: user document fallback success');
-  }
-
   Future<void> _deleteFromAccountStorage(User user, String hikeId) async {
-    var primaryDeleted = false;
-
-    try {
-      await _scheduleCollection(user.uid).doc(hikeId).delete();
-      primaryDeleted = true;
-    } on FirebaseException catch (error) {
-      if (!_isPermissionDenied(error)) {
-        rethrow;
-      }
-    }
+    await _scheduleCollection(user.uid).doc(hikeId).delete();
 
     try {
       await _deleteFromUserDocumentFallback(user, hikeId);
     } catch (error) {
-      if (!primaryDeleted) {
-        rethrow;
-      }
-
       _logSchedule(
         'Optional user document fallback delete failed: ${_errorSummary(error)}',
       );
@@ -695,6 +741,10 @@ class HikeScheduleStore extends ChangeNotifier {
     return 'users/$userId/scheduled_hikes';
   }
 
+  String _scheduleDocumentPath(String userId, String hikeId) {
+    return scheduleDocumentPathForTesting(userId: userId, hikeId: hikeId);
+  }
+
   String _userDocumentSchedulePath(String userId) {
     return 'users/$userId.$_userDocumentScheduleField';
   }
@@ -738,7 +788,7 @@ class HikeScheduleStore extends ChangeNotifier {
   }
 
   static void _validateSchedulableDate(DateTime hikeDate) {
-    final today = ScheduledHike.dateOnly(DateTime.now());
+    final today = ScheduledHike.manilaDateForInstant(DateTime.now());
     final normalizedHikeDate = ScheduledHike.dateOnly(hikeDate);
 
     if (normalizedHikeDate.isBefore(today)) {
@@ -806,6 +856,87 @@ class HikeScheduleStore extends ChangeNotifier {
     if (kDebugMode) {
       debugPrint('[ScheduledHikes] $message');
     }
+  }
+
+  static void _logAuthenticatedUser(User user) {
+    _logAccess('authenticated_uid_available', {
+      'available': true,
+      'uidHash': _safeIdentifier(user.uid),
+      'emailMasked': _maskedEmail(user.email),
+    });
+  }
+
+  static void _logAccess(String event, Map<String, Object?> fields) {
+    if (!kDebugMode) {
+      return;
+    }
+
+    final values = fields.entries
+        .map((entry) => '${entry.key}=${entry.value}')
+        .join(' ');
+    debugPrint('[ScheduledHikeAccess] $event $values');
+  }
+
+  static void _logAccessFailure({
+    required String event,
+    required String operation,
+    required String firestorePath,
+    required Object error,
+    required StackTrace stackTrace,
+  }) {
+    final fields = <String, Object?>{
+      'operation': operation,
+      'requested_firestore_path': _safePath(firestorePath),
+      'errorType': error.runtimeType,
+      if (error is FirebaseException) ...{
+        'firebase_error_code': error.code,
+        'firebase_error_message': error.message ?? 'none',
+      },
+      'stackTrace': _shortStackTrace(stackTrace),
+    };
+    _logAccess(event, fields);
+  }
+
+  static String _safePath(String path) {
+    final segments = path.split('/');
+    for (var index = 0; index < segments.length; index++) {
+      if (index > 0 && segments[index - 1] == 'users') {
+        segments[index] = _safeIdentifier(segments[index]);
+      }
+    }
+    return segments.join('/');
+  }
+
+  static String _safeIdentifier(String value) {
+    final text = value.trim();
+    if (text.isEmpty) {
+      return 'none';
+    }
+    if (text.length <= 8) {
+      return '${text.substring(0, 1)}...${text.substring(text.length - 1)}';
+    }
+    return '${text.substring(0, 4)}...${text.substring(text.length - 4)}';
+  }
+
+  static String _maskedEmail(String? email) {
+    final value = email?.trim();
+    if (value == null || value.isEmpty) {
+      return 'none';
+    }
+    final atIndex = value.indexOf('@');
+    if (atIndex <= 0 || atIndex == value.length - 1) {
+      return _safeIdentifier(value);
+    }
+    final local = value.substring(0, atIndex);
+    final domain = value.substring(atIndex + 1);
+    final maskedLocal = local.length <= 2
+        ? '${local.substring(0, 1)}***'
+        : '${local.substring(0, 1)}***${local.substring(local.length - 1)}';
+    return '$maskedLocal@$domain';
+  }
+
+  static String _shortStackTrace(StackTrace stackTrace) {
+    return stackTrace.toString().split('\n').take(4).join(' | ');
   }
 
   static String _normalizeId(String value) => value.trim().toLowerCase();

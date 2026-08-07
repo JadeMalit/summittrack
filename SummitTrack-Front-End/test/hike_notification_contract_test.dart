@@ -51,6 +51,8 @@ void main() {
       expect(decoded, isNotNull);
       expect(decoded!.eventKey, eventKey);
       expect(decoded.deviceId, deviceId);
+      expect(decoded.toMap()['dateKey'], hikeDateKey);
+      expect(decoded.toMap()['screen'], 'scheduled_hike_details');
     });
 
     test('tampered event key is rejected', () {

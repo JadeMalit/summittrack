@@ -15,11 +15,41 @@ import '../../hike/models/scheduled_hike.dart';
 import '../../hike/screens/lets_hike_calendar_weather_modal.dart';
 import '../../hike/services/hike_schedule_store.dart';
 import '../../hike/utils/mountain_schedule_identity.dart';
+import '../../notifications/services/hike_notification_service.dart';
 import '../widgets/elevation_gradient_map_3d.dart';
 import '../widgets/first_aid_emergency_tips.dart';
 import '../widgets/foldable_trail_checklist_card.dart';
 import '../widgets/trail_3d_satellite_widget.dart';
 import '../widgets/trail_photo_uploader.dart';
+
+@visibleForTesting
+String hikeScheduledNotificationConfirmationMessage({
+  required DateTime hikeDate,
+  required HikeReminderDeliveryState deliveryState,
+  DateTime? now,
+}) {
+  return switch (deliveryState) {
+    HikeReminderDeliveryState.enabled =>
+      _isSameManilaDate(hikeDate, now)
+          ? 'Notifications are turned on. You will receive a reminder for your '
+                'hike today.'
+          : 'Notifications are turned on. You will receive a reminder on the '
+                'scheduled date.',
+    HikeReminderDeliveryState.disabled =>
+      'Turn on Notifications in Settings to receive a hike reminder.',
+    HikeReminderDeliveryState.unknown =>
+      'Your hike was saved, but the notification status could not be '
+          'confirmed.',
+  };
+}
+
+bool _isSameManilaDate(DateTime hikeDate, DateTime? now) {
+  final hikeDateKey = ScheduledHike.dateKey(hikeDate);
+  final todayKey = ScheduledHike.dateKey(
+    ScheduledHike.manilaDateForInstant(now ?? DateTime.now()),
+  );
+  return hikeDateKey == todayKey;
+}
 
 class TrailDetailScreen extends StatelessWidget {
   const TrailDetailScreen({
@@ -640,14 +670,46 @@ class _LetsHikeButton extends StatelessWidget {
       return;
     }
 
+    final deliveryState = await HikeNotificationService.instance
+        .currentReminderDeliveryState();
+
     if (!context.mounted) {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Hike date confirmed: ${_formatHikeDate(selectedDate)}'),
+    await _showHikeScheduledConfirmation(
+      context,
+      hikeDate: selectedDate,
+      reminderMessage: hikeScheduledNotificationConfirmationMessage(
+        hikeDate: selectedDate,
+        deliveryState: deliveryState,
       ),
+    );
+  }
+
+  Future<void> _showHikeScheduledConfirmation(
+    BuildContext context, {
+    required DateTime hikeDate,
+    required String reminderMessage,
+  }) {
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Hike Scheduled'),
+          content: Text(
+            'Your hike at $mountainName is scheduled for '
+            '${_formatHikeDate(hikeDate)}.\n\n'
+            '$reminderMessage',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -671,7 +733,7 @@ class _LetsHikeButton extends StatelessWidget {
   }
 
   bool _isPastHikeDate(DateTime date) {
-    final today = _dateOnly(DateTime.now());
+    final today = ScheduledHike.manilaDateForInstant(DateTime.now());
     final hikeDate = _dateOnly(date);
     return hikeDate.isBefore(today);
   }

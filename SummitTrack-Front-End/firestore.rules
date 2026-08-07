@@ -22,11 +22,16 @@ service cloud.firestore {
         && request.resource.data.userId == uid
         && request.resource.data.id is string
         && request.resource.data.mountainId is string
+        && request.resource.data.mountainId.size() > 0
         && request.resource.data.mountainName is string
+        && request.resource.data.mountainName.size() > 0
         && request.resource.data.trailId is string
         && request.resource.data.trailName is string
         && request.resource.data.hikeDate is timestamp
         && request.resource.data.hikeDateKey is string
+        && request.resource.data.hikeDateKey.matches('^\\d{4}-\\d{2}-\\d{2}$')
+        && request.resource.data.status == 'scheduled'
+        && request.resource.data.notificationEnabled is bool
         && request.resource.data.createdAt is timestamp
         && request.resource.data.updatedAt is timestamp;
     }
@@ -37,81 +42,33 @@ service cloud.firestore {
           'platform',
           'notificationsEnabled',
           'timezone',
-          'appVersion',
-          'buildNumber',
+          'tokenStatus',
           'updatedAt',
         ])
-        && request.resource.data.platform is string
+        && request.resource.data.keys().hasAll([
+          'fcmToken',
+          'platform',
+          'notificationsEnabled',
+          'timezone',
+          'tokenStatus',
+          'updatedAt',
+        ])
+        && request.resource.data.fcmToken is string
+        && request.resource.data.fcmToken.size() > 0
+        && request.resource.data.platform in ['android', 'ios']
         && request.resource.data.notificationsEnabled is bool
         && request.resource.data.timezone is string
-        && request.resource.data.appVersion is string
-        && request.resource.data.buildNumber is string
-        && request.resource.data.updatedAt is timestamp
-        && (
-          !request.resource.data.keys().hasAny(['fcmToken'])
-          || request.resource.data.fcmToken is string
-        );
-    }
-
-    function ownsNotificationEventData(uid, deviceId) {
-      return request.resource.data.keys().hasOnly([
-          'eventKey',
-          'type',
-          'uid',
-          'deviceId',
-          'hikeId',
-          'hikeDateKey',
-          'status',
-          'source',
-          'notificationId',
-          'localScheduleConfirmed',
-          'claimedUntilMillis',
-          'expiresAtMillis',
-          'attempts',
-          'claimedAt',
-          'confirmedAt',
-          'displayedAt',
-          'updatedAt',
-          'errorClass',
-        ])
-        && request.resource.data.eventKey is string
-        && request.resource.data.type == 'scheduled_hike_today'
-        && request.resource.data.uid == uid
-        && request.resource.data.deviceId == deviceId
-        && request.resource.data.hikeId is string
-        && request.resource.data.hikeDateKey is string
-        && request.resource.data.status in [
-          'claiming',
-          'scheduled',
-          'displayed',
-          'retryable',
+        && request.resource.data.timezone.size() > 0
+        && request.resource.data.tokenStatus in [
+          'active',
+          'disabled',
+          'invalid',
         ]
-        && request.resource.data.source is string
-        && request.resource.data.notificationId is int
-        && request.resource.data.notificationId > 0
-        && request.resource.data.localScheduleConfirmed is bool
-        && request.resource.data.claimedUntilMillis is int
-        && request.resource.data.expiresAtMillis is int
         && request.resource.data.updatedAt is timestamp
         && (
-          !request.resource.data.keys().hasAny(['attempts'])
-          || request.resource.data.attempts is int
-        )
-        && (
-          !request.resource.data.keys().hasAny(['claimedAt'])
-          || request.resource.data.claimedAt is timestamp
-        )
-        && (
-          !request.resource.data.keys().hasAny(['confirmedAt'])
-          || request.resource.data.confirmedAt is timestamp
-        )
-        && (
-          !request.resource.data.keys().hasAny(['displayedAt'])
-          || request.resource.data.displayedAt is timestamp
-        )
-        && (
-          !request.resource.data.keys().hasAny(['errorClass'])
-          || request.resource.data.errorClass is string
+          request.resource.data.tokenStatus == 'active'
+            ? request.resource.data.notificationsEnabled == true
+            : request.resource.data.notificationsEnabled == false
         );
     }
 
@@ -121,23 +78,25 @@ service cloud.firestore {
 
       match /scheduled_hikes/{hikeId} {
         allow read: if ownsUserDocument(uid);
-        allow create, update: if ownsUserDocument(uid)
+        allow create: if ownsUserDocument(uid)
           && ownsScheduledHikeData(uid)
-          && request.resource.data.id == hikeId;
+          && request.resource.data.id == hikeId
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
+        allow update: if ownsUserDocument(uid)
+          && ownsScheduledHikeData(uid)
+          && request.resource.data.id == hikeId
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.updatedAt == request.time;
         allow delete: if ownsUserDocument(uid);
       }
 
       match /devices/{deviceId} {
         allow read: if ownsUserDocument(uid);
-        allow create, update: if ownsUserDocument(uid) && ownsDeviceData();
-        allow delete: if ownsUserDocument(uid);
-
-        match /notificationEvents/{eventId} {
-          allow read: if ownsUserDocument(uid);
-          allow create, update: if ownsUserDocument(uid)
-            && ownsNotificationEventData(uid, deviceId);
-          allow delete: if ownsUserDocument(uid);
-        }
+        allow create, update: if ownsUserDocument(uid)
+          && ownsDeviceData()
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if false;
       }
 
       match /trail_photos/{trailId}/photos/{photoId} {
@@ -145,6 +104,10 @@ service cloud.firestore {
         allow create, update: if ownsUserDocument(uid) && ownsTrailPhotoData(uid, trailId);
         allow delete: if ownsUserDocument(uid);
       }
+    }
+
+    match /notification_jobs/{jobId} {
+      allow read, write: if false;
     }
   }
 }
