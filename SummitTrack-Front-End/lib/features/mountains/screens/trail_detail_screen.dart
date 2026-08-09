@@ -12,7 +12,7 @@ import '../../../models/hike_navigation_metadata.dart';
 import '../../../screens/navigation/hike_navigation_confirmation.dart';
 import '../../../services/tracking/hike_tracking_service.dart';
 import '../../hike/models/scheduled_hike.dart';
-import '../../hike/screens/hike.dart'; // 🟢 ADDED: Import para sa HikeScreen
+import '../../hike/screens/hike.dart';
 import '../../hike/screens/lets_hike_calendar_weather_modal.dart';
 import '../../hike/services/hike_schedule_store.dart';
 import '../../hike/utils/mountain_schedule_identity.dart';
@@ -71,7 +71,6 @@ class TrailDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    final bottomInset = MediaQuery.of(context).padding.bottom;
     final isOfflineMode = AppModeProvider.instance.isOfflineMode;
     final mountainId = MountainScheduleIdentity.idFromRoute(parentRoute);
     final mountainName = MountainScheduleIdentity.displayNameForMountainId(
@@ -81,7 +80,7 @@ class TrailDetailScreen extends StatelessWidget {
       navigationTrailId ?? trailPhotoId,
     );
 
-    // 🏔️ Kinukuha ang totoong Peak Elevation at Total Distance ng bundok mula sa waypoints
+    // 🏔️ Waypoints, Peak Elevation & Distance
     final waypoints = TrailWaypointHelper.getWaypointsForTrail(
       trail,
       trailPhotoId,
@@ -91,10 +90,11 @@ class TrailDetailScreen extends StatelessWidget {
         : null;
     final totalDistance = waypoints.isNotEmpty ? waypoints.last.distance : null;
 
+    final isDark = context.isDarkMode;
+    final bgColor = isDark ? colors.background : _backgroundColor;
+
     return Scaffold(
-      backgroundColor: context.isDarkMode
-          ? colors.background
-          : _backgroundColor,
+      backgroundColor: bgColor,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -114,7 +114,8 @@ class TrailDetailScreen extends StatelessWidget {
                 },
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(16, 16, 16, 24 + bottomInset),
+                // 100 bottom padding para hindi matakpan ng floating button ang huling item sa scroll view
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -168,7 +169,7 @@ class TrailDetailScreen extends StatelessWidget {
                         trailPhotoId,
                       ),
                       elevation: maxElevation,
-                      distance: totalDistance, // 👈 TOTOONG DISTANCE NG BUNDOK
+                      distance: totalDistance,
                     ),
 
                     // ⛰️ 2. 3D ELEVATION & SLOPE PROFILE
@@ -192,19 +193,12 @@ class TrailDetailScreen extends StatelessWidget {
                         const SizedBox(height: 10),
                         _StartNavigationButton(metadata: navigationMetadata!),
                         const SizedBox(height: 10),
-                        const _ViewLiveHikeDashboardButton(), // 🟢 ADDED: Live Hike Dashboard Button
+                        const _ViewLiveHikeDashboardButton(),
                       ],
                       const SizedBox(height: 18),
                       const _SectionHeading(title: 'Add Photo or Video'),
                       const SizedBox(height: 10),
                       TrailPhotoUploader(trailId: trailPhotoId),
-                      const SizedBox(height: 22),
-                      _LetsHikeButton(
-                        mountainId: mountainId,
-                        mountainName: mountainName,
-                        trailId: trailPhotoId,
-                        trailName: trail.name,
-                      ),
                     ],
                   ],
                 ),
@@ -213,6 +207,23 @@ class TrailDetailScreen extends StatelessWidget {
           ),
         ),
       ),
+
+      // 🟢 STYLED & ANIMATED FLOATING BOTTOM DOCK
+      bottomNavigationBar: isOfflineMode
+          ? null
+          : Container(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              color: Colors.transparent,
+              child: SafeArea(
+                top: false,
+                child: _LetsHikeAnimatedButton(
+                  mountainId: mountainId,
+                  mountainName: mountainName,
+                  trailId: trailPhotoId,
+                  trailName: trail.name,
+                ),
+              ),
+            ),
     );
   }
 }
@@ -240,7 +251,327 @@ Future<void> _handleStartNavigation(
   ).pushNamed(AppRoutes.hikeNavigation, arguments: startRequest);
 }
 
-/// 🟢 BAGONG WIDGET: Button para pumunta sa Live Hike Dashboard
+/// 🟢 TRIPLE-ANIMATED FLOATING "LET'S HIKE" BUTTON
+class _LetsHikeAnimatedButton extends StatefulWidget {
+  const _LetsHikeAnimatedButton({
+    required this.mountainId,
+    required this.mountainName,
+    required this.trailId,
+    required this.trailName,
+  });
+
+  final String mountainId;
+  final String mountainName;
+  final String trailId;
+  final String trailName;
+
+  @override
+  State<_LetsHikeAnimatedButton> createState() =>
+      __LetsHikeAnimatedButtonState();
+}
+
+class __LetsHikeAnimatedButtonState extends State<_LetsHikeAnimatedButton>
+    with TickerProviderStateMixin {
+  late AnimationController _floatController;
+  late Animation<double> _yOffsetAnimation;
+  late Animation<double> _glowRadiusAnimation;
+
+  late AnimationController _shimmerController;
+  late Animation<double> _shimmerTranslation;
+
+  bool _isPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 🌊 1. Floating & Breathing Glow Setup (Smooth Loop)
+    _floatController = AnimationController(
+      duration: const Duration(milliseconds: 1800),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _yOffsetAnimation = Tween<double>(begin: 0, end: -8).animate(
+      CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
+    );
+
+    _glowRadiusAnimation = Tween<double>(begin: 12, end: 26).animate(
+      CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
+    );
+
+    // ✨ 2. Shimmer Light Sweep Effect
+    _shimmerController = AnimationController(
+      duration: const Duration(milliseconds: 2400),
+      vsync: this,
+    )..repeat();
+
+    _shimmerTranslation = Tween<double>(begin: -1.5, end: 2.5).animate(
+      CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _floatController.dispose();
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final isDark = context.isDarkMode;
+
+    return AnimatedBuilder(
+      animation: Listenable.merge([_floatController, _shimmerController]),
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _yOffsetAnimation.value),
+          child: GestureDetectingWrapper(
+            onTapDown: () => setState(() => _isPressed = true),
+            onTapUp: () => setState(() => _isPressed = false),
+            onTapCancel: () => setState(() => _isPressed = false),
+            onTap: () => _handleLetsHike(context),
+            child: AnimatedScale(
+              scale: _isPressed ? 0.92 : 1.0,
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.easeOut,
+              child: Container(
+                height: 64,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isDark
+                        ? [colors.primary, colors.accent]
+                        : const [
+                            Color(0xFF38C812),
+                            Color(0xFF63E33B),
+                            Color(0xFF2FA20E),
+                          ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF38C812).withOpacity(0.50),
+                      blurRadius: _glowRadiusAnimation.value,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 6),
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.45),
+                    width: 1.5,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Shimmer Light Sweep Layer
+                      Positioned.fill(
+                        child: FractionalTranslation(
+                          translation: Offset(_shimmerTranslation.value, 0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.white.withOpacity(0.35),
+                                  Colors.transparent,
+                                ],
+                                stops: const [0.35, 0.5, 0.65],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Button Content
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Transform.scale(
+                            scale: 1.0 + (_floatController.value * 0.08),
+                            child: Container(
+                              padding: const EdgeInsets.all(7),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.12),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.explore_rounded,
+                                color: Color(0xFF1E261A),
+                                size: 26,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Let\'s Hike',
+                            style: GoogleFonts.fredoka(
+                              fontSize: 23,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.6,
+                              color: isDark ? Colors.white : const Color(0xFF1E261A),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _handleLetsHike(BuildContext context) async {
+    final selectedDate = await showLetsHikeCalendarWeatherModal(
+      context: context,
+      trailName: widget.trailName,
+    );
+
+    if (selectedDate == null || !context.mounted) {
+      return;
+    }
+
+    if (_isPastHikeDate(selectedDate)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select today or a future date.')),
+      );
+      return;
+    }
+
+    final scheduledHike = ScheduledHike.create(
+      mountainId: widget.mountainId,
+      mountainName: widget.mountainName,
+      trailId: widget.trailId,
+      trailName: widget.trailName,
+      hikeDate: selectedDate,
+    );
+
+    try {
+      await HikeScheduleStore.instance.saveScheduledHike(scheduledHike);
+    } on ArgumentError catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select today or a future date.')),
+      );
+      return;
+    } on HikeScheduleException catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+      return;
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to save hike date. Please try again.'),
+        ),
+      );
+      return;
+    }
+
+    final deliveryState = await HikeNotificationService.instance
+        .currentReminderDeliveryState();
+
+    if (!context.mounted) return;
+
+    await _showHikeScheduledConfirmation(
+      context,
+      hikeDate: selectedDate,
+      reminderMessage: hikeScheduledNotificationConfirmationMessage(
+        hikeDate: selectedDate,
+        deliveryState: deliveryState,
+      ),
+    );
+  }
+
+  Future<void> _showHikeScheduledConfirmation(
+    BuildContext context, {
+    required DateTime hikeDate,
+    required String reminderMessage,
+  }) {
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Hike Scheduled'),
+          content: Text(
+            'Your hike at ${widget.mountainName} is scheduled for '
+            '${_formatHikeDate(hikeDate)}.\n\n'
+            '$reminderMessage',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _formatHikeDate(DateTime date) {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  bool _isPastHikeDate(DateTime date) {
+    final today = ScheduledHike.manilaDateForInstant(DateTime.now());
+    return _dateOnly(date).isBefore(today);
+  }
+
+  DateTime _dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+}
+
+/// Helper Wrapper para sa Touch Events
+class GestureDetectingWrapper extends StatelessWidget {
+  const GestureDetectingWrapper({
+    super.key,
+    required this.child,
+    required this.onTapDown,
+    required this.onTapUp,
+    required this.onTapCancel,
+    required this.onTap,
+  });
+
+  final Widget child;
+  final VoidCallback onTapDown;
+  final VoidCallback onTapUp;
+  final VoidCallback onTapCancel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => onTapDown(),
+      onTapUp: (_) => onTapUp(),
+      onTapCancel: () => onTapCancel(),
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: child,
+    );
+  }
+}
+
 class _ViewLiveHikeDashboardButton extends StatelessWidget {
   const _ViewLiveHikeDashboardButton();
 
@@ -585,200 +916,5 @@ class _StartNavigationButton extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _LetsHikeButton extends StatelessWidget {
-  const _LetsHikeButton({
-    required this.mountainId,
-    required this.mountainName,
-    required this.trailId,
-    required this.trailName,
-  });
-
-  final String mountainId;
-  final String mountainName;
-  final String trailId;
-  final String trailName;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.appColors;
-
-    return SizedBox(
-      width: double.infinity,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: context.isDarkMode
-                ? [colors.primary, colors.accent]
-                : const [
-                    Color(0xFF41D11C),
-                    Color(0xFF8DEB6B),
-                    Color(0xFFEAF5E8),
-                  ],
-          ),
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: colors.shadow,
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: ElevatedButton(
-          onPressed: () => _handleLetsHike(context),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            padding: const EdgeInsets.symmetric(vertical: 18),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-          ),
-          child: Text(
-            'Let\'s Hike',
-            style: GoogleFonts.fredoka(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: context.isDarkMode
-                  ? Colors.white
-                  : const Color(0xFF1E261A),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _handleLetsHike(BuildContext context) async {
-    final selectedDate = await showLetsHikeCalendarWeatherModal(
-      context: context,
-      trailName: trailName,
-    );
-
-    if (selectedDate == null || !context.mounted) {
-      return;
-    }
-
-    if (_isPastHikeDate(selectedDate)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select today or a future date.')),
-      );
-      return;
-    }
-
-    final scheduledHike = ScheduledHike.create(
-      mountainId: mountainId,
-      mountainName: mountainName,
-      trailId: trailId,
-      trailName: trailName,
-      hikeDate: selectedDate,
-    );
-
-    try {
-      await HikeScheduleStore.instance.saveScheduledHike(scheduledHike);
-    } on ArgumentError catch (_) {
-      if (!context.mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select today or a future date.')),
-      );
-      return;
-    } on HikeScheduleException catch (error) {
-      if (!context.mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
-      return;
-    } catch (_) {
-      if (!context.mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to save hike date. Please try again.'),
-        ),
-      );
-      return;
-    }
-
-    final deliveryState = await HikeNotificationService.instance
-        .currentReminderDeliveryState();
-
-    if (!context.mounted) {
-      return;
-    }
-
-    await _showHikeScheduledConfirmation(
-      context,
-      hikeDate: selectedDate,
-      reminderMessage: hikeScheduledNotificationConfirmationMessage(
-        hikeDate: selectedDate,
-        deliveryState: deliveryState,
-      ),
-    );
-  }
-
-  Future<void> _showHikeScheduledConfirmation(
-    BuildContext context, {
-    required DateTime hikeDate,
-    required String reminderMessage,
-  }) {
-    return showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Hike Scheduled'),
-          content: Text(
-            'Your hike at $mountainName is scheduled for '
-            '${_formatHikeDate(hikeDate)}.\n\n'
-            '$reminderMessage',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  String _formatHikeDate(DateTime date) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
-  }
-
-  bool _isPastHikeDate(DateTime date) {
-    final today = ScheduledHike.manilaDateForInstant(DateTime.now());
-    final hikeDate = _dateOnly(date);
-    return hikeDate.isBefore(today);
-  }
-
-  DateTime _dateOnly(DateTime date) {
-    return DateTime(date.year, date.month, date.day);
   }
 }
