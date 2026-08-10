@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../notifications/services/hike_notification_service.dart';
 import '../models/scheduled_hike.dart';
+import '../utils/mountain_schedule_identity.dart';
 
 class HikeScheduleException implements Exception {
   const HikeScheduleException(this.message);
@@ -35,6 +36,25 @@ class HikeScheduleStore extends ChangeNotifier {
     required String hikeId,
   }) {
     return 'users/$userId/scheduled_hikes/$hikeId';
+  }
+
+  @visibleForTesting
+  static ScheduledHike? activeHikeForTrailTodayForTesting({
+    required Iterable<ScheduledHike> scheduledHikes,
+    required String? activeUserId,
+    required String mountainId,
+    required String trailId,
+    required DateTime today,
+    String? trailName,
+  }) {
+    return _activeHikeForTrailToday(
+      scheduledHikes: scheduledHikes,
+      activeUserId: activeUserId,
+      mountainId: mountainId,
+      trailId: trailId,
+      today: today,
+      trailName: trailName,
+    );
   }
 
   final FirebaseAuth _auth;
@@ -69,12 +89,95 @@ class HikeScheduleStore extends ChangeNotifier {
 
   /// Kukunin ang scheduled hike sa specific na bundok kung ARAW NG HIKE ngayon.
   ScheduledHike? activeHikeForMountainToday(String mountainId) {
-    final normalizedMountainId = _normalizeId(mountainId);
+    final normalizedMountainId = _normalizeMountainId(mountainId);
     final matches = _scheduledHikes.where((hike) {
-      return _normalizeId(hike.mountainId) == normalizedMountainId &&
+      return _mountainMatches(hike, normalizedMountainId) &&
+          _belongsToActiveUser(hike) &&
+          hike.isActive &&
           hike.isHikeToday;
     });
     return matches.isEmpty ? null : matches.first;
+  }
+
+  ScheduledHike? activeHikeForTrailToday(
+    String mountainId,
+    String trailId, {
+    DateTime? today,
+    String? trailName,
+  }) {
+    return _activeHikeForTrailToday(
+      scheduledHikes: _scheduledHikes,
+      activeUserId: _activeUserId,
+      mountainId: mountainId,
+      trailId: trailId,
+      today: today ?? DateTime.now(),
+      trailName: trailName,
+    );
+  }
+
+  static ScheduledHike? _activeHikeForTrailToday({
+    required Iterable<ScheduledHike> scheduledHikes,
+    required String? activeUserId,
+    required String mountainId,
+    required String trailId,
+    required DateTime today,
+    String? trailName,
+  }) {
+    final normalizedMountainId = _normalizeMountainId(mountainId);
+    final currentTrailKeys = _trailIdentityKeys(
+      trailId: trailId,
+      trailName: trailName,
+      mountainId: normalizedMountainId,
+    );
+    final todayKey = ScheduledHike.dateKey(today);
+
+    for (final hike in _sorted(scheduledHikes)) {
+      final scheduledTrailKeys = _trailIdentityKeys(
+        trailId: hike.trailId,
+        trailName: hike.trailName,
+        mountainId: normalizedMountainId,
+      );
+      final scheduledDateKey = ScheduledHike.dateKey(hike.hikeDate);
+      final userMatch = _belongsToUser(hike, activeUserId);
+      final statusMatch = hike.isActive;
+      final mountainMatch = _mountainMatches(hike, normalizedMountainId);
+      final trailMatch = currentTrailKeys
+          .intersection(scheduledTrailKeys)
+          .isNotEmpty;
+      final dateMatch = scheduledDateKey == todayKey;
+      final eligible =
+          userMatch && statusMatch && mountainMatch && trailMatch && dateMatch;
+
+      _logStartNavigationEligibility(
+        currentMountainId: normalizedMountainId,
+        currentTrailId: trailId,
+        currentTrailKeys: currentTrailKeys,
+        scheduledHike: hike,
+        scheduledTrailKeys: scheduledTrailKeys,
+        scheduledDateKey: scheduledDateKey,
+        todayKey: todayKey,
+        userMatch: userMatch,
+        mountainMatch: mountainMatch,
+        trailMatch: trailMatch,
+        dateMatch: dateMatch,
+        statusMatch: statusMatch,
+        eligible: eligible,
+      );
+
+      if (eligible) {
+        return hike;
+      }
+    }
+
+    if (scheduledHikes.isEmpty) {
+      _logStartNavigationNoSchedules(
+        currentMountainId: normalizedMountainId,
+        currentTrailId: trailId,
+        todayKey: todayKey,
+      );
+    }
+
+    return null;
   }
 
   void start() {
@@ -269,11 +372,11 @@ class HikeScheduleStore extends ChangeNotifier {
     DateTime? today,
   }) {
     final normalizedToday = ScheduledHike.dateOnly(today ?? DateTime.now());
-    final normalizedMountainId = _normalizeId(mountainId);
+    final normalizedMountainId = _normalizeMountainId(mountainId);
 
     return _sorted(
       _scheduledHikes.where((hike) {
-        return _normalizeId(hike.mountainId) == normalizedMountainId &&
+        return _mountainMatches(hike, normalizedMountainId) &&
             hike.isUpcomingFrom(normalizedToday);
       }),
     );
@@ -856,6 +959,18 @@ class HikeScheduleStore extends ChangeNotifier {
     return error.code == 'permission-denied' || error.code == 'unauthorized';
   }
 
+  bool _belongsToActiveUser(ScheduledHike hike) {
+    return _belongsToUser(hike, _activeUserId);
+  }
+
+  static bool _belongsToUser(ScheduledHike hike, String? activeUserId) {
+    if (activeUserId == null) {
+      return false;
+    }
+
+    return hike.ownerUid == null || hike.ownerUid == activeUserId;
+  }
+
   static String _readDocumentId(Map<String, dynamic> data) {
     final id = data['id']?.toString().trim();
     return id == null || id.isEmpty ? 'scheduled_hike' : id;
@@ -954,5 +1069,190 @@ class HikeScheduleStore extends ChangeNotifier {
     return stackTrace.toString().split('\n').take(4).join(' | ');
   }
 
-  static String _normalizeId(String value) => value.trim().toLowerCase();
+  static bool _mountainMatches(
+    ScheduledHike hike,
+    String normalizedCurrentMountainId,
+  ) {
+    return _mountainIdentityKeys(hike).contains(normalizedCurrentMountainId);
+  }
+
+  static Set<String> _mountainIdentityKeys(ScheduledHike hike) {
+    return <String>{
+      _normalizeMountainId(hike.mountainId),
+      _normalizeMountainId(hike.mountainName),
+    }..removeWhere((value) => value == 'unknown-mountain');
+  }
+
+  static Set<String> _trailIdentityKeys({
+    required String trailId,
+    required String mountainId,
+    String? trailName,
+  }) {
+    final keys = <String>{};
+
+    void addIdentity(String value) {
+      final normalized = _normalizeTrailIdentity(value);
+      if (normalized.isEmpty) {
+        return;
+      }
+
+      keys.add(normalized);
+      keys.add(_stripGenericTrailSuffix(normalized));
+
+      final withoutMountainPrefix = _stripMountainPrefix(
+        normalized,
+        mountainId,
+      );
+      keys.add(withoutMountainPrefix);
+      keys.add(_stripGenericTrailSuffix(withoutMountainPrefix));
+    }
+
+    addIdentity(trailId);
+    if (trailName != null) {
+      addIdentity(trailName);
+    }
+
+    keys.removeWhere((value) => value.isEmpty);
+    return keys;
+  }
+
+  static String _stripGenericTrailSuffix(String value) {
+    return value.replaceAll(RegExp(r'-(trail|trails|route)$'), '');
+  }
+
+  static String _stripMountainPrefix(String value, String mountainId) {
+    for (final prefix in _mountainTrailPrefixes(mountainId)) {
+      final expectedPrefix = '$prefix-';
+      if (value.startsWith(expectedPrefix)) {
+        return value.substring(expectedPrefix.length);
+      }
+    }
+
+    return value;
+  }
+
+  static Set<String> _mountainTrailPrefixes(String mountainId) {
+    final displayName = MountainScheduleIdentity.displayNameForMountainId(
+      mountainId,
+    );
+    final normalizedDisplayName = _normalizeTrailIdentity(displayName);
+    final withoutMtPrefix = mountainId.replaceFirst(RegExp(r'^mt-'), '');
+    final prefixes = <String>{
+      mountainId,
+      withoutMtPrefix,
+      normalizedDisplayName,
+      normalizedDisplayName.replaceFirst(RegExp(r'^mt-'), ''),
+    };
+
+    for (final value in List<String>.from(prefixes)) {
+      final segments = value.split('-').where((segment) => segment.isNotEmpty);
+      if (segments.isNotEmpty) {
+        prefixes.add(segments.first);
+      }
+    }
+
+    prefixes.removeWhere((value) => value.isEmpty);
+    return prefixes;
+  }
+
+  static String _normalizeMountainId(String value) {
+    return MountainScheduleIdentity.normalizeMountainId(value);
+  }
+
+  static String _normalizeTrailIdentity(String value) {
+    var normalized = value.trim().toLowerCase();
+    normalized = normalized.replaceAll('&', 'and');
+    normalized = normalized
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'-+'), '-')
+        .replaceAll(RegExp(r'^-|-$'), '');
+    return normalized;
+  }
+
+  static void _logStartNavigationEligibility({
+    required String currentMountainId,
+    required String currentTrailId,
+    required Set<String> currentTrailKeys,
+    required ScheduledHike scheduledHike,
+    required Set<String> scheduledTrailKeys,
+    required String scheduledDateKey,
+    required String todayKey,
+    required bool userMatch,
+    required bool mountainMatch,
+    required bool trailMatch,
+    required bool dateMatch,
+    required bool statusMatch,
+    required bool eligible,
+  }) {
+    if (!kDebugMode) {
+      return;
+    }
+
+    debugPrint(
+      '[StartNavigation] currentMountainId=$currentMountainId '
+      'scheduledMountainId=${scheduledHike.mountainId} '
+      'mountainMatch=$mountainMatch',
+    );
+    debugPrint(
+      '[StartNavigation] currentTrailId=$currentTrailId '
+      'scheduledTrailId=${scheduledHike.trailId} '
+      'trailMatch=$trailMatch',
+    );
+    debugPrint(
+      '[StartNavigation] scheduledDateKey=$scheduledDateKey '
+      'currentLocalDateKey=$todayKey status=${scheduledHike.status}',
+    );
+    debugPrint(
+      '[StartNavigation] userMatch=$userMatch dateMatch=$dateMatch '
+      'statusMatch=$statusMatch eligible=$eligible',
+    );
+    debugPrint(
+      '[StartNavigation] currentTrailKeys=${_formatIdentityKeys(currentTrailKeys)} '
+      'scheduledTrailKeys=${_formatIdentityKeys(scheduledTrailKeys)}',
+    );
+    if (!eligible) {
+      debugPrint(
+        '[StartNavigation] failedComparisons=${_failedComparisons(userMatch: userMatch, mountainMatch: mountainMatch, trailMatch: trailMatch, dateMatch: dateMatch, statusMatch: statusMatch)}',
+      );
+    }
+  }
+
+  static void _logStartNavigationNoSchedules({
+    required String currentMountainId,
+    required String currentTrailId,
+    required String todayKey,
+  }) {
+    if (!kDebugMode) {
+      return;
+    }
+
+    debugPrint(
+      '[StartNavigation] currentMountainId=$currentMountainId '
+      'currentTrailId=$currentTrailId currentLocalDateKey=$todayKey '
+      'eligible=false failedComparisons=no_scheduled_hikes',
+    );
+  }
+
+  static String _formatIdentityKeys(Set<String> keys) {
+    final sortedKeys = keys.toList()..sort();
+    return sortedKeys.join(',');
+  }
+
+  static String _failedComparisons({
+    required bool userMatch,
+    required bool mountainMatch,
+    required bool trailMatch,
+    required bool dateMatch,
+    required bool statusMatch,
+  }) {
+    final failed = <String>[
+      if (!userMatch) 'user',
+      if (!mountainMatch) 'mountain',
+      if (!trailMatch) 'trail',
+      if (!dateMatch) 'date',
+      if (!statusMatch) 'status',
+    ];
+
+    return failed.isEmpty ? 'none' : failed.join(',');
+  }
 }

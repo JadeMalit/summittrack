@@ -76,8 +76,10 @@ class TrailDetailScreen extends StatelessWidget {
     final mountainName = MountainScheduleIdentity.displayNameForMountainId(
       mountainId,
     );
-    final navigationMetadata = NavigationTrails.forTrailId(
-      navigationTrailId ?? trailPhotoId,
+    final navigationMetadata = NavigationTrails.forTrail(
+      mountainId: mountainId,
+      trailId: navigationTrailId ?? trailPhotoId,
+      trail: trail,
     );
 
     // 🏔️ Waypoints, Peak Elevation & Distance
@@ -191,7 +193,12 @@ class TrailDetailScreen extends StatelessWidget {
                         const SizedBox(height: 18),
                         const _SectionHeading(title: 'Navigation'),
                         const SizedBox(height: 10),
-                        _StartNavigationButton(metadata: navigationMetadata!),
+                        _ScheduleAwareStartNavigationButton(
+                          metadata: navigationMetadata!,
+                          mountainId: mountainId,
+                          trailId: trailPhotoId,
+                          trailName: trail.name,
+                        ),
                         const SizedBox(height: 10),
                         const _ViewLiveHikeDashboardButton(),
                       ],
@@ -216,14 +223,121 @@ class TrailDetailScreen extends StatelessWidget {
               color: Colors.transparent,
               child: SafeArea(
                 top: false,
-                child: _LetsHikeAnimatedButton(
+                child: _ScheduleAwareLetsHikeButton(
                   mountainId: mountainId,
                   mountainName: mountainName,
                   trailId: trailPhotoId,
                   trailName: trail.name,
+                  canShowStartNavigation:
+                      navigationMetadata?.isNavigationEnabled == true,
                 ),
               ),
             ),
+    );
+  }
+}
+
+class _ScheduleAwareStartNavigationButton extends StatefulWidget {
+  const _ScheduleAwareStartNavigationButton({
+    required this.metadata,
+    required this.mountainId,
+    required this.trailId,
+    required this.trailName,
+  });
+
+  final HikeNavigationMetadata metadata;
+  final String mountainId;
+  final String trailId;
+  final String trailName;
+
+  @override
+  State<_ScheduleAwareStartNavigationButton> createState() =>
+      _ScheduleAwareStartNavigationButtonState();
+}
+
+class _ScheduleAwareStartNavigationButtonState
+    extends State<_ScheduleAwareStartNavigationButton> {
+  final HikeScheduleStore _scheduleStore = HikeScheduleStore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleStore.load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: _scheduleStore,
+      builder: (context, _) {
+        final activeScheduledHike = _scheduleStore.activeHikeForTrailToday(
+          widget.mountainId,
+          widget.trailId,
+          trailName: widget.trailName,
+        );
+
+        if (activeScheduledHike == null) {
+          return const SizedBox.shrink();
+        }
+
+        return _StartNavigationButton(metadata: widget.metadata);
+      },
+    );
+  }
+}
+
+class _ScheduleAwareLetsHikeButton extends StatefulWidget {
+  const _ScheduleAwareLetsHikeButton({
+    required this.mountainId,
+    required this.mountainName,
+    required this.trailId,
+    required this.trailName,
+    required this.canShowStartNavigation,
+  });
+
+  final String mountainId;
+  final String mountainName;
+  final String trailId;
+  final String trailName;
+  final bool canShowStartNavigation;
+
+  @override
+  State<_ScheduleAwareLetsHikeButton> createState() =>
+      _ScheduleAwareLetsHikeButtonState();
+}
+
+class _ScheduleAwareLetsHikeButtonState
+    extends State<_ScheduleAwareLetsHikeButton> {
+  final HikeScheduleStore _scheduleStore = HikeScheduleStore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleStore.load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: _scheduleStore,
+      builder: (context, _) {
+        final activeScheduledHike = _scheduleStore.activeHikeForTrailToday(
+          widget.mountainId,
+          widget.trailId,
+          trailName: widget.trailName,
+        );
+
+        if (widget.canShowStartNavigation && activeScheduledHike != null) {
+          return const SizedBox.shrink();
+        }
+
+        return _LetsHikeAnimatedButton(
+          mountainId: widget.mountainId,
+          mountainName: widget.mountainName,
+          trailId: widget.trailId,
+          trailName: widget.trailName,
+        );
+      },
     );
   }
 }
@@ -597,11 +711,9 @@ class _ViewLiveHikeDashboardButton extends StatelessWidget {
           ),
         ),
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const HikeScreen(),
-            ),
-          );
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (context) => const HikeScreen()));
         },
       ),
     );

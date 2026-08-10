@@ -52,6 +52,28 @@ bool notificationPreferenceRequiresCloudDisable(bool? storedPreference) {
   return storedPreference == false;
 }
 
+@visibleForTesting
+bool shouldRecoverInvalidCloudToken({
+  required bool? storedPreference,
+  required String cloudTokenStatus,
+}) {
+  return storedPreference == true && cloudTokenStatus == 'invalid';
+}
+
+@visibleForTesting
+bool shouldPersistTokenRefresh({
+  required bool? storedPreference,
+  required bool cloudDeviceExists,
+  required bool cloudNotificationsEnabled,
+  required String cloudTokenStatus,
+}) {
+  final cloudDeviceActive =
+      cloudDeviceExists &&
+      cloudNotificationsEnabled &&
+      cloudTokenStatus == 'active';
+  return cloudDeviceActive || storedPreference == true;
+}
+
 @pragma('vm:entry-point')
 Future<void> summitTrackFirebaseMessagingBackgroundHandler(
   RemoteMessage message,
@@ -199,6 +221,7 @@ class HikeNotificationService extends ChangeNotifier
   static const _localNotificationOperationTimeout = Duration(seconds: 5);
   static const _tokenStatusActive = 'active';
   static const _tokenStatusDisabled = 'disabled';
+  static const _tokenStatusInvalid = 'invalid';
   static const _reminderTimeZone = 'Asia/Manila';
   static const MethodChannel _settingsChannel = MethodChannel(
     'com.example.summittrack/notification_settings',
@@ -1044,13 +1067,18 @@ class HikeNotificationService extends ChangeNotifier
       }
     }
 
-    if (cloudState.tokenStatus == 'invalid') {
-      await _setEnabledPreference(false);
+    final recoveringInvalidToken = shouldRecoverInvalidCloudToken(
+      storedPreference: resolvedPreference,
+      cloudTokenStatus: cloudState.tokenStatus,
+    );
+
+    if (cloudState.tokenStatus == _tokenStatusInvalid &&
+        !recoveringInvalidToken) {
       _channelBlocked = false;
       _setEffectiveEnabled(false);
       await _syncTokenRefreshSubscription();
       _recordDiagnostic('reconciliation_completed', {
-        'state': 'invalid-token-requires-manual-enable',
+        'state': 'invalid-token-without-local-enable',
         'devicePath': cloudState.devicePath,
       });
       return;
@@ -1106,7 +1134,10 @@ class HikeNotificationService extends ChangeNotifier
 
     _channelBlocked = false;
     try {
-      await _registerCurrentDevice();
+      await _registerCurrentDevice(
+        force: recoveringInvalidToken,
+        renewIfTokenKnownInvalid: recoveringInvalidToken,
+      );
     } catch (error) {
       _setEffectiveEnabled(false);
       _recordDiagnostic('device_registration_failed', {
@@ -1125,7 +1156,11 @@ class HikeNotificationService extends ChangeNotifier
     await _cancelAllHikeNotificationsInternal(uid: user.uid);
     await _syncTokenRefreshSubscription();
     _schedulePendingNavigationAttempt();
-    _recordDiagnostic('reconciliation_completed', {'state': 'enabled'});
+    _recordDiagnostic('reconciliation_completed', {
+      'state': recoveringInvalidToken
+          ? 'enabled-invalid-token-recovered'
+          : 'enabled',
+    });
   }
 
   Future<void> reconcileScheduledHikes(
@@ -1868,9 +1903,10 @@ class HikeNotificationService extends ChangeNotifier
   Future<void> _handleTokenRefreshOnce(String token) async {
     await _loadPreferences(reload: true);
     final user = _auth.currentUser;
+    final localPreference = _storedEnabledPreference();
     _recordDiagnostic('token_refresh_received', {
       'authenticated': user != null,
-      'localPreference': _storedEnabledPreference() ?? 'missing',
+      'localPreference': localPreference ?? 'missing',
       'tokenHash': token.trim().isEmpty
           ? 'none'
           : _safeIdentifier(token.trim()),
@@ -1890,14 +1926,24 @@ class HikeNotificationService extends ChangeNotifier
 
     try {
       final cloudState = await _readCurrentDeviceState(user.uid);
-      if (!cloudState.readSucceeded ||
-          !cloudState.exists ||
-          !cloudState.notificationsEnabled ||
-          cloudState.tokenStatus != _tokenStatusActive) {
+      if (!cloudState.readSucceeded) {
+        _recordDiagnostic('token_refresh_skipped', {
+          'reason': 'cloud-device-read-failed',
+          'devicePath': cloudState.devicePath,
+        });
+        return;
+      }
+      if (!shouldPersistTokenRefresh(
+        storedPreference: localPreference,
+        cloudDeviceExists: cloudState.exists,
+        cloudNotificationsEnabled: cloudState.notificationsEnabled,
+        cloudTokenStatus: cloudState.tokenStatus,
+      )) {
         _recordDiagnostic('token_refresh_skipped', {
           'reason': 'cloud-device-not-active',
           'devicePath': cloudState.devicePath,
           'cloudStatus': cloudState.tokenStatus,
+          'localPreference': localPreference ?? 'missing',
         });
         return;
       }
@@ -2162,12 +2208,18 @@ class HikeNotificationService extends ChangeNotifier
   Future<void> _registerCurrentDevice({
     String? tokenOverride,
     bool force = false,
+    bool renewIfTokenKnownInvalid = false,
   }) async {
     final running = _registrationFuture;
     if (running != null) {
       await running;
-      if (tokenOverride?.trim().isNotEmpty == true) {
-        await _registerCurrentDevice(tokenOverride: tokenOverride, force: true);
+      if (tokenOverride?.trim().isNotEmpty == true ||
+          renewIfTokenKnownInvalid) {
+        await _registerCurrentDevice(
+          tokenOverride: tokenOverride,
+          force: true,
+          renewIfTokenKnownInvalid: renewIfTokenKnownInvalid,
+        );
       }
       return;
     }
@@ -2177,6 +2229,7 @@ class HikeNotificationService extends ChangeNotifier
         _registerCurrentDeviceOnce(
           tokenOverride: tokenOverride,
           force: force,
+          renewIfTokenKnownInvalid: renewIfTokenKnownInvalid,
         ).whenComplete(() {
           if (identical(_registrationFuture, sharedFuture)) {
             _registrationFuture = null;
@@ -2189,6 +2242,7 @@ class HikeNotificationService extends ChangeNotifier
   Future<void> _registerCurrentDeviceOnce({
     String? tokenOverride,
     required bool force,
+    required bool renewIfTokenKnownInvalid,
   }) async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -2228,7 +2282,7 @@ class HikeNotificationService extends ChangeNotifier
       });
       rawToken = await _messaging.getToken().timeout(_initializationTimeout);
     }
-    final token = rawToken?.trim() ?? '';
+    var token = rawToken?.trim() ?? '';
     _recordDiagnostic('token_request_completed', {
       'elapsedMs': tokenStopwatch.elapsedMilliseconds,
       'token_available': token.isNotEmpty,
@@ -2285,6 +2339,66 @@ class HikeNotificationService extends ChangeNotifier
         'classification': _classifyFailure(error).name,
         'error': _safeErrorSummary(error),
       });
+    }
+
+    final existingToken = existingData?['fcmToken']?.toString().trim() ?? '';
+    if (renewIfTokenKnownInvalid &&
+        existingData?['tokenStatus'] == _tokenStatusInvalid &&
+        existingToken.isNotEmpty &&
+        existingToken == token) {
+      _recordDiagnostic('known_invalid_token_renewal_started', {
+        'devicePath': devicePath,
+        'tokenHash': _safeIdentifier(token),
+      });
+      try {
+        await _messaging.deleteToken().timeout(_initializationTimeout);
+        final renewedToken =
+            (await _messaging.getToken().timeout(
+              _initializationTimeout,
+            ))?.trim() ??
+            '';
+        _recordDiagnostic('known_invalid_token_renewal_completed', {
+          'devicePath': devicePath,
+          'tokenAvailable': renewedToken.isNotEmpty,
+          'tokenLength': renewedToken.length,
+          'previousTokenHash': _safeIdentifier(token),
+          'newTokenHash': renewedToken.isEmpty
+              ? 'none'
+              : _safeIdentifier(renewedToken),
+          'tokenChanged': renewedToken != token,
+        });
+        if (renewedToken.isEmpty) {
+          throw const NotificationServiceException(
+            message: 'Firebase did not return a replacement token yet.',
+            kind: NotificationFailureKind.temporary,
+            operation: 'device-registration',
+          );
+        }
+        if (renewedToken == token) {
+          throw const NotificationServiceException(
+            message:
+                'Firebase returned the same token that was already rejected.',
+            kind: NotificationFailureKind.temporary,
+            operation: 'device-registration',
+          );
+        }
+        token = renewedToken;
+      } catch (error) {
+        _recordDiagnostic('known_invalid_token_renewal_failed', {
+          'devicePath': devicePath,
+          'classification': _classifyFailure(error).name,
+          'error': _safeErrorSummary(error),
+          ..._firebaseErrorDiagnosticFields(error),
+        });
+        if (error is NotificationServiceException) {
+          rethrow;
+        }
+        throw NotificationServiceException(
+          message: _safeErrorSummary(error),
+          kind: _classifyFailure(error),
+          operation: 'device-registration',
+        );
+      }
     }
 
     if (!force && existingData != null) {
