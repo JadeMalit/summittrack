@@ -8,7 +8,7 @@ class AppConfig {
 
   static const String graphHopperProfile = String.fromEnvironment(
     'GRAPHHOPPER_PROFILE',
-    defaultValue: 'hike',
+    defaultValue: 'foot',
   );
 
   static const String openFreeMapStyleUrl = String.fromEnvironment(

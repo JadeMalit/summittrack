@@ -76,9 +76,7 @@ class TrailDetailScreen extends StatelessWidget {
     final mountainName = MountainScheduleIdentity.displayNameForMountainId(
       mountainId,
     );
-    final navigationMetadata = NavigationTrails.forTrailId(
-      navigationTrailId ?? trailPhotoId,
-    );
+  final navigationMetadata = NavigationTrails.forTrailId(trailPhotoId);
 
     // 🏔️ Waypoints, Peak Elevation & Distance
     final waypoints = TrailWaypointHelper.getWaypointsForTrail(
@@ -232,10 +230,10 @@ Future<void> _handleStartNavigation(
   BuildContext context,
   HikeNavigationMetadata metadata,
 ) async {
-  if (HikeTrackingService.instance.hasActiveSession) {
-    Navigator.of(context).pushNamed(AppRoutes.hikeNavigation);
-    return;
-  }
+ // if (HikeTrackingService.instance.hasActiveSession) {
+  //  Navigator.of(context).pushNamed(AppRoutes.hikeNavigation);
+  //  return;
+  //}
 
   final startRequest = await showHikeNavigationConfirmation(
     context: context,

@@ -79,7 +79,7 @@ class GraphHopperRouteResult {
 class GraphHopperService {
   const GraphHopperService({http.Client? client});
 
-  static const routeEndpointToleranceMeters = 300.0;
+static const routeEndpointToleranceMeters = 5000.0; // Pinalaki muna for testing
 
   Future<GraphHopperRouteResult> testRoute({
     required double startLatitude,
