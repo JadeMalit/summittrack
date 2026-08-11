@@ -1,4 +1,7 @@
 import '../../core/routing/app_routes.dart';
+import '../../features/hike/utils/mountain_schedule_identity.dart';
+import '../../data/trail_data/trail_data.dart';
+import '../../data/trail_data/trail_gps_helper.dart';
 import '../../models/hike_navigation_metadata.dart';
 import '../../models/route_coordinate.dart';
 

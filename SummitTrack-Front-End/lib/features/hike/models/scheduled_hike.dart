@@ -11,7 +11,10 @@ class ScheduledHike {
     required this.createdAt,
     this.ownerUid,
     this.updatedAt,
+    this.status = activeStatus,
   });
+
+  static const activeStatus = 'scheduled';
 
   factory ScheduledHike.create({
     required String mountainId,
@@ -68,6 +71,7 @@ class ScheduledHike {
       createdAt: createdAt ?? DateTime.fromMillisecondsSinceEpoch(0),
       ownerUid: _normalizedOptional(json['ownerUid'] ?? json['userId']),
       updatedAt: updatedAt,
+      status: _readStatus(json['status']),
     );
   }
 
@@ -97,6 +101,7 @@ class ScheduledHike {
       ownerUid:
           _normalizedOptional(data['ownerUid'] ?? data['userId']) ?? ownerUid,
       updatedAt: updatedAt,
+      status: _readStatus(data['status']),
     );
   }
 
@@ -109,6 +114,7 @@ class ScheduledHike {
   final DateTime createdAt;
   final String? ownerUid;
   final DateTime? updatedAt;
+  final String status;
 
   /// Helper Getter: Nagre-return ng `true` kapag ang araw ngayon ay tumutugma sa nakaplanong `hikeDate`.
   bool get isHikeToday {
@@ -126,7 +132,13 @@ class ScheduledHike {
     return !target.isAfter(today);
   }
 
-  ScheduledHike copyWith({String? ownerUid, DateTime? updatedAt}) {
+  bool get isActive => status == activeStatus;
+
+  ScheduledHike copyWith({
+    String? ownerUid,
+    DateTime? updatedAt,
+    String? status,
+  }) {
     return ScheduledHike(
       id: id,
       mountainId: mountainId,
@@ -137,6 +149,7 @@ class ScheduledHike {
       createdAt: createdAt,
       ownerUid: ownerUid ?? this.ownerUid,
       updatedAt: updatedAt ?? this.updatedAt,
+      status: status ?? this.status,
     );
   }
 
@@ -150,6 +163,7 @@ class ScheduledHike {
       'trailName': trailName,
       'hikeDate': dateKey(hikeDate),
       'hikeDateKey': dateKey(hikeDate),
+      'status': status,
       'createdAt': createdAt.toIso8601String(),
       if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
     };
@@ -172,7 +186,7 @@ class ScheduledHike {
       'trailName': trailName,
       'hikeDate': Timestamp.fromDate(manilaMidnightUtc(normalizedHikeDate)),
       'hikeDateKey': dateKey(normalizedHikeDate),
-      'status': 'scheduled',
+      'status': activeStatus,
       'notificationEnabled': true,
       if (includeCreatedAt) 'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
@@ -226,6 +240,11 @@ class ScheduledHike {
   static String _readString(Object? value, {required String fallback}) {
     final text = value?.toString().trim();
     return text == null || text.isEmpty ? fallback : text;
+  }
+
+  static String _readStatus(Object? value) {
+    final text = value?.toString().trim().toLowerCase();
+    return text == null || text.isEmpty ? activeStatus : text;
   }
 
   static DateTime _readDate(Object? value) {
