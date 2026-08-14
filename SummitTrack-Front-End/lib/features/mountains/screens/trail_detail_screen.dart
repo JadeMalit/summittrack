@@ -10,7 +10,6 @@ import '../../../data/trail_data/trail_gps_helper.dart';
 import '../../../data/trail_data/trail_waypoint_helper.dart';
 import '../../../models/hike_navigation_metadata.dart';
 import '../../../screens/navigation/hike_navigation_confirmation.dart';
-import '../../../services/tracking/hike_tracking_service.dart';
 import '../../hike/models/scheduled_hike.dart';
 import '../../hike/screens/hike.dart';
 import '../../hike/screens/lets_hike_calendar_weather_modal.dart';
@@ -33,9 +32,9 @@ String hikeScheduledNotificationConfirmationMessage({
     HikeReminderDeliveryState.enabled =>
       _isSameManilaDate(hikeDate, now)
           ? 'Notifications are turned on. You will receive a reminder for your '
-                'hike today.'
+              'hike today.'
           : 'Notifications are turned on. You will receive a reminder on the '
-                'scheduled date.',
+              'scheduled date.',
     HikeReminderDeliveryState.disabled =>
       'Turn on Notifications in Settings to receive a hike reminder.',
     HikeReminderDeliveryState.unknown =>
@@ -76,15 +75,8 @@ class TrailDetailScreen extends StatelessWidget {
     final mountainName = MountainScheduleIdentity.displayNameForMountainId(
       mountainId,
     );
-<<<<<<< HEAD
-  final navigationMetadata = NavigationTrails.forTrailId(trailPhotoId);
-=======
-    final navigationMetadata = NavigationTrails.forTrail(
-      mountainId: mountainId,
-      trailId: navigationTrailId ?? trailPhotoId,
-      trail: trail,
-    );
->>>>>>> 19f00d8927a34e58c34837c251bbbdda74444c69
+    final effectiveTrailId = navigationTrailId ?? trailPhotoId;
+    final navigationMetadata = NavigationTrails.forTrailId(effectiveTrailId);
 
     // 🏔️ Waypoints, Peak Elevation & Distance
     final waypoints = TrailWaypointHelper.getWaypointsForTrail(
@@ -350,11 +342,6 @@ Future<void> _handleStartNavigation(
   BuildContext context,
   HikeNavigationMetadata metadata,
 ) async {
- // if (HikeTrackingService.instance.hasActiveSession) {
-  //  Navigator.of(context).pushNamed(AppRoutes.hikeNavigation);
-  //  return;
-  //}
-
   final startRequest = await showHikeNavigationConfirmation(
     context: context,
     metadata: metadata,
@@ -807,9 +794,9 @@ class _TrailBanner extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.08),
-                    Colors.black.withValues(alpha: 0.28),
-                    Colors.black.withValues(alpha: 0.52),
+                    Colors.black.withOpacity(0.08),
+                    Colors.black.withOpacity(0.28),
+                    Colors.black.withOpacity(0.52),
                   ],
                 ),
               ),
@@ -819,7 +806,7 @@ class _TrailBanner extends StatelessWidget {
             top: 14,
             left: 14,
             child: Material(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: Colors.black.withOpacity(0.3),
               shape: const CircleBorder(),
               child: IconButton(
                 onPressed: onBack,
