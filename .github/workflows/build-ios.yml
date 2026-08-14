@@ -31,18 +31,29 @@ jobs:
 
       - name: Build Unsigned iOS App
         working-directory: SummitTrack-Front-End
-        run: flutter build ios --release --no-codesign
+        run: |
+          flutter build ios --config-only --release
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace \
+                     -scheme Runner \
+                     -configuration Release \
+                     -sdk iphoneos \
+                     -derivedDataPath ../build/ios_output \
+                     CODE_SIGNING_ALLOWED=NO \
+                     CODE_SIGNING_REQUIRED=NO \
+                     CODE_SIGN_IDENTITY="" \
+                     clean build
 
       - name: Package Payload to .ipa
         working-directory: SummitTrack-Front-End
         run: |
-          cd build/ios/iphoneos
-          mkdir Payload
-          cp -r Runner.app Payload/
+          mkdir -p build/ios_output/Payload
+          cp -r build/ios_output/Build/Products/Release-iphoneos/Runner.app build/ios_output/Payload/
+          cd build/ios_output
           zip -r -9 MyApp.ipa Payload
 
       - name: Upload .ipa Artifact
         uses: actions/upload-artifact@v4
         with:
           name: iOS-App-IPA
-          path: SummitTrack-Front-End/build/ios/iphoneos/MyApp.ipa
+          path: SummitTrack-Front-End/build/ios_output/MyApp.ipa
