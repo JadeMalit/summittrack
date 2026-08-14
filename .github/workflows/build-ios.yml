@@ -17,7 +17,13 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          cache: true
+          cache: false
+
+      - name: Clean Previous Builds & Artifacts
+        working-directory: SummitTrack-Front-End
+        run: |
+          flutter clean
+          rm -rf ios/Pods ios/Podfile.lock build/
 
       - name: Install Dependencies
         working-directory: SummitTrack-Front-End
