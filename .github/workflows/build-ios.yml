@@ -13,7 +13,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Xcode 16.2 (Swift 6 Support for Firebase 11)
+      - name: Set up Xcode 16.2 (Swift 6 Support)
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '16.2'
@@ -36,6 +36,10 @@ jobs:
       - name: Install Dependencies
         working-directory: SummitTrack-Front-End
         run: flutter pub get
+
+      - name: Patch Firebase Storage Non-Modular Header
+        run: |
+          find ~/.pub-cache -name "FLTTaskStateChannelStreamHandler.h" -exec sed -i '' 's|<Firebase/Firebase.h>|<FirebaseStorage/FirebaseStorage.h>|g' {} + || true
 
       - name: Setup CocoaPods & Pod Install
         working-directory: SummitTrack-Front-End/ios
