@@ -1,5 +1,8 @@
 platform :ios, '15.0'
 
+# 🚀 Unlocks Firebase 11.x to match GoogleSignIn 8.x (GoogleUtilities 8.x & RecaptchaInterop 101.x)
+$FirebaseSDKVersion = '11.0.0'
+
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 project 'Runner', {
@@ -33,9 +36,6 @@ flutter_ios_podfile_setup
 
 target 'Runner' do
   use_frameworks! :linkage => :static
-
-  # 🔒 Pin GoogleSignIn to < 8.0.0 for 100% Firebase 10.x compatibility
-  pod 'GoogleSignIn', '< 8.0.0'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
