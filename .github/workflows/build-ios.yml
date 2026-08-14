@@ -19,11 +19,14 @@ jobs:
           channel: 'stable'
           cache: false
 
+      - name: Disable Swift Package Manager (Prevents Duplicate Symbols)
+        run: flutter config --no-enable-swift-package-manager
+
       - name: Clean Previous Builds & Caches
         working-directory: SummitTrack-Front-End
         run: |
           flutter clean
-          rm -rf ios/Pods ios/Podfile.lock ios/.symlinks build/
+          rm -rf ios/Pods ios/Podfile.lock ios/.symlinks ios/Flutter/ephemeral build/
 
       - name: Install Dependencies
         working-directory: SummitTrack-Front-End
