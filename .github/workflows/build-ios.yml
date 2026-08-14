@@ -37,10 +37,6 @@ jobs:
         working-directory: SummitTrack-Front-End
         run: flutter pub get
 
-      - name: Patch Firebase Storage Header to Modular FirebaseCore
-        run: |
-          find ~/.pub-cache -name "FLTTaskStateChannelStreamHandler.h" -exec sed -i '' 's|<Firebase/Firebase.h>|<FirebaseCore/FirebaseCore.h>|g' {} + || true
-
       - name: Setup CocoaPods & Pod Install
         working-directory: SummitTrack-Front-End/ios
         run: |
