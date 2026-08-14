@@ -1,6 +1,6 @@
 platform :ios, '15.0'
 
-# 🚀 Unlocks Firebase 11.x to match GoogleSignIn 8.x (GoogleUtilities 8.x & RecaptchaInterop 101.x)
+# 🚀 Unlocks Firebase 11.x to match GoogleSignIn 8.x
 $FirebaseSDKVersion = '11.0.0'
 
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
