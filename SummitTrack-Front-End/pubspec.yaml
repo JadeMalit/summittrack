@@ -46,8 +46,10 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
 
+# 🔒 Dito natin pinipilit ang tamang iOS plugin version para tumugma sa Firebase
 dependency_overrides:
   google_maps_flutter_android: 2.14.2
+  google_sign_in_ios: 5.7.7
 
 flutter:
   uses-material-design: true
