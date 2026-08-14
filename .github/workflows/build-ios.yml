@@ -19,7 +19,7 @@ jobs:
           channel: 'stable'
           cache: false
 
-      - name: Disable Swift Package Manager (Prevents Duplicate Symbols)
+      - name: Disable Swift Package Manager
         run: flutter config --no-enable-swift-package-manager
 
       - name: Clean Previous Builds & Caches
