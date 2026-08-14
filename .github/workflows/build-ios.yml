@@ -19,11 +19,12 @@ jobs:
           channel: 'stable'
           cache: false
 
-      - name: Clean Previous Builds & Artifacts
+      - name: Clean Previous Builds & Caches
         working-directory: SummitTrack-Front-End
         run: |
           flutter clean
-          rm -rf ios/Pods ios/Podfile.lock
+          rm -rf ios/Pods ios/Podfile.lock ios/.symlinks build/
+          rm -rf ~/.cocoapods/repos/trunk
 
       - name: Install Dependencies
         working-directory: SummitTrack-Front-End
