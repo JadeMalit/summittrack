@@ -37,17 +37,15 @@ jobs:
         working-directory: SummitTrack-Front-End
         run: flutter pub get
 
+      - name: Patch Firebase Storage Header to Modular FirebaseCore
+        run: |
+          find ~/.pub-cache -name "FLTTaskStateChannelStreamHandler.h" -exec sed -i '' 's|<Firebase/Firebase.h>|<FirebaseCore/FirebaseCore.h>|g' {} + || true
+
       - name: Setup CocoaPods & Pod Install
         working-directory: SummitTrack-Front-End/ios
         run: |
           pod repo update
           pod install --repo-update
-
-      - name: Force Allow Non-Modular Headers in Pods Project
-        working-directory: SummitTrack-Front-End/ios
-        run: |
-          sed -i '' 's/CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO/CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES/g' Pods/Pods.xcodeproj/project.pbxproj || true
-          sed -i '' 's/CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES;/CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;/g' Pods/Pods.xcodeproj/project.pbxproj || true
 
       - name: Build Unsigned iOS App
         working-directory: SummitTrack-Front-End
