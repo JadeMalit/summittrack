@@ -32,7 +32,7 @@ jobs:
       - name: Build Unsigned iOS App
         working-directory: SummitTrack-Front-End
         run: |
-          flutter build ios --config-only --release
+          flutter build ios --release --no-codesign --config-only
           cd ios
           xcodebuild -workspace Runner.xcworkspace \
                      -scheme Runner \
@@ -42,6 +42,8 @@ jobs:
                      CODE_SIGNING_ALLOWED=NO \
                      CODE_SIGNING_REQUIRED=NO \
                      CODE_SIGN_IDENTITY="" \
+                     DEVELOPMENT_TEAM="" \
+                     PROVISIONING_PROFILE_SPECIFIER="" \
                      clean build
 
       - name: Package Payload to .ipa
