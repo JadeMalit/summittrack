@@ -23,6 +23,12 @@ jobs:
         working-directory: SummitTrack-Front-End
         run: flutter pub get
 
+      - name: Setup CocoaPods & Pod Install
+        working-directory: SummitTrack-Front-End/ios
+        run: |
+          pod repo update
+          pod install --repo-update
+
       - name: Build Unsigned iOS App
         working-directory: SummitTrack-Front-End
         run: flutter build ios --release --no-codesign
