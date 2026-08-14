@@ -20,12 +20,15 @@ jobs:
           cache: true
 
       - name: Install Dependencies
+        working-directory: SummitTrack-Front-End
         run: flutter pub get
 
       - name: Build Unsigned iOS App
+        working-directory: SummitTrack-Front-End
         run: flutter build ios --release --no-codesign
 
       - name: Package Payload to .ipa
+        working-directory: SummitTrack-Front-End
         run: |
           cd build/ios/iphoneos
           mkdir Payload
@@ -36,4 +39,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: iOS-App-IPA
-          path: build/ios/iphoneos/MyApp.ipa
+          path: SummitTrack-Front-End/build/ios/iphoneos/MyApp.ipa
