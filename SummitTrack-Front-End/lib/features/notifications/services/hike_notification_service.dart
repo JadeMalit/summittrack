@@ -24,7 +24,7 @@ const bool notificationDiagnostics = bool.fromEnvironment(
   'NOTIFICATION_DIAGNOSTICS',
 );
 const String notificationToggleDiagnosticBuildMarker =
-    'notification_toggle_fix_v3';
+    'notification_toggle_fix_v4';
 
 String buildHikeReminderEventKey({
   required String uid,
@@ -391,9 +391,9 @@ class HikeNotificationService extends ChangeNotifier
       if (defaultTargetPlatform == TargetPlatform.iOS ||
           defaultTargetPlatform == TargetPlatform.macOS) {
         await _messaging.setForegroundNotificationPresentationOptions(
-          alert: false,
-          badge: false,
-          sound: false,
+          alert: true,
+          badge: true,
+          sound: true,
         );
       }
       _installListeners();
@@ -484,9 +484,6 @@ class HikeNotificationService extends ChangeNotifier
       );
     });
 
-    // Remote reconciliation, permission inspection, token work, and launch-tap
-    // inspection are optional notification tasks. None of them may hold the
-    // application startup Future or the first route open.
     _startGuardedTask('startup_reconciliation_failed', _requestReconciliation);
     _startGuardedTask(
       'initial_notification_launch_failed',
@@ -530,11 +527,6 @@ class HikeNotificationService extends ChangeNotifier
         dependency: 'registration',
         activeOperation: _registrationFuture,
       );
-      if (_tokenRefreshCompleter != null) {
-        _recordDiagnostic('token_refresh_wait_skipped', {
-          'reason': 'token-refresh-yields-to-settings-mutation',
-        });
-      }
       return await operation();
     } finally {
       _settingsMutationInProgress = false;
@@ -567,24 +559,9 @@ class HikeNotificationService extends ChangeNotifier
       _ => '${dependency}_wait',
     };
     _recordDiagnostic('${waitEventPrefix}_started');
-    if (dependency == 'reconciliation') {
-      _recordDiagnostic('reconciliation_wait_started');
-    }
-    _recordDiagnostic('settings_dependency_wait_started', {
-      'dependency': dependency,
-    });
     try {
       await activeOperation.timeout(_initializationTimeout);
       _recordDiagnostic('${waitEventPrefix}_completed', {
-        'elapsedMs': stopwatch.elapsedMilliseconds,
-      });
-      if (dependency == 'reconciliation') {
-        _recordDiagnostic('reconciliation_wait_completed', {
-          'elapsedMs': stopwatch.elapsedMilliseconds,
-        });
-      }
-      _recordDiagnostic('settings_dependency_wait_completed', {
-        'dependency': dependency,
         'elapsedMs': stopwatch.elapsedMilliseconds,
       });
     } on TimeoutException {
@@ -611,15 +588,7 @@ class HikeNotificationService extends ChangeNotifier
   }
 
   Future<NotificationEnableResult> enableFromSettings() async {
-    _recordDiagnostic('diagnostic_build_marker', {
-      'marker': notificationToggleDiagnosticBuildMarker,
-      'location': 'enable_operation_entry',
-    });
     _recordDiagnostic('settings_enable_requested', {
-      'uiEnabledBefore': notificationsEnabled,
-      'settingsMutationInProgress': _settingsMutationInProgress,
-    });
-    _recordDiagnostic('enable_from_settings_entered', {
       'uiEnabledBefore': notificationsEnabled,
     });
     if (_settingsMutationInProgress) {
@@ -632,16 +601,7 @@ class HikeNotificationService extends ChangeNotifier
       );
     }
     try {
-      _recordDiagnostic('settings_initialize_wait_started', {
-        'serviceInitialized': _serviceInitialized,
-        'authHandlingStarted': _authHandlingStarted,
-        'authStartFutureActive': _authStartFuture != null,
-      });
       await initialize().timeout(_initializationTimeout);
-      _recordDiagnostic('settings_initialize_wait_completed', {
-        'serviceInitialized': _serviceInitialized,
-        'authHandlingStarted': _authHandlingStarted,
-      });
     } catch (error) {
       return _recordEnableUiResult(
         NotificationEnableResult.failure(
@@ -672,9 +632,6 @@ class HikeNotificationService extends ChangeNotifier
       _recordDiagnostic('settings_enable_completed', {
         'result': 'failed-operation-coordination',
         'error': _safeErrorSummary(error),
-        'errorCode': error is NotificationServiceException
-            ? error.operation
-            : 'unexpected_error',
         'uiEnabledAfter': notificationsEnabled,
       });
       return _recordEnableUiResult(
@@ -688,38 +645,15 @@ class HikeNotificationService extends ChangeNotifier
   }
 
   Future<NotificationEnableResult> _enableFromSettingsOnce() async {
-    _recordDiagnostic('authentication_check_started');
     final user = _auth.currentUser;
-    _recordDiagnostic('authentication_check_completed', {
-      'authenticated': user != null,
-      'uid': user?.uid ?? 'none',
-    });
-    final storedPreference = _storedEnabledPreference();
-    _recordDiagnostic('settings_enable_started', {
-      'uid': user?.uid ?? 'none',
-      'authUserNull': user == null,
-      'savedLocalPreference': storedPreference ?? 'missing',
-      'uiEnabledBefore': notificationsEnabled,
-    });
     if (user == null) {
-      _recordDiagnostic('settings_enable_completed', {
-        'result': 'failed-no-authenticated-user',
-        'uiEnabledAfter': notificationsEnabled,
-      });
       return const NotificationEnableResult.failure(
         'Please sign in before enabling hike notifications.',
         failureKind: NotificationFailureKind.userAction,
       );
     }
 
-    final permissionStopwatch = Stopwatch()..start();
-    _recordDiagnostic('permission_check_started');
     final permission = await _requestSystemPermission();
-    _recordDiagnostic('permission_check_completed', {
-      'elapsedMs': permissionStopwatch.elapsedMilliseconds,
-      'allowed': permission.allowed,
-      'classification': permission.failureKind.name,
-    });
     _recordPermissionDiagnostic('enable_permission_result', permission);
     if (!permission.allowed) {
       if (permission.appNotificationsExplicitlyDisabled) {
@@ -728,11 +662,6 @@ class HikeNotificationService extends ChangeNotifier
         _channelBlocked = true;
         _setEffectiveEnabled(false);
       }
-
-      _recordDiagnostic('settings_enable_completed', {
-        'result': 'failed-permission',
-        'uiEnabledAfter': notificationsEnabled,
-      });
 
       return NotificationEnableResult.failure(
         permission.message,
@@ -746,16 +675,8 @@ class HikeNotificationService extends ChangeNotifier
     try {
       await _registerCurrentDevice(force: true);
     } catch (error) {
-      _recordDiagnostic('device_registration_failed', {
-        'classification': _classifyFailure(error).name,
-        'error': _safeErrorSummary(error),
-      });
       _userEnabledPreference = previousPreference;
       _setEffectiveEnabled(previousEffectiveState);
-      _recordDiagnostic('settings_enable_completed', {
-        'result': 'failed-device-registration',
-        'uiEnabledAfter': notificationsEnabled,
-      });
       return NotificationEnableResult.failure(
         _registrationFailureMessage(error),
         failureKind: _classifyFailure(error),
@@ -768,10 +689,6 @@ class HikeNotificationService extends ChangeNotifier
       if (!previousPreference) {
         await _disableCloudDevice(user.uid);
       }
-      _recordDiagnostic('settings_enable_completed', {
-        'result': 'failed-local-preference-save',
-        'uiEnabledAfter': notificationsEnabled,
-      });
       return const NotificationEnableResult.failure(
         'SummitTrack registered this device but could not save the local '
         'notification setting. Please try again.',
@@ -780,23 +697,10 @@ class HikeNotificationService extends ChangeNotifier
     }
 
     _channelBlocked = false;
-    _recordDiagnostic('ui_update_started', {
-      'requestedEnabled': true,
-      'previousEffectiveEnabled': _effectiveEnabled,
-    });
     _setEffectiveEnabled(true);
-    _recordDiagnostic('ui_update_completed', {
-      'requestedEnabled': true,
-      'uiEnabledAfter': notificationsEnabled,
-    });
     await _syncTokenRefreshSubscription();
     await _cancelAllHikeNotificationsInternal(uid: user.uid);
     _schedulePendingNavigationAttempt();
-    _recordDiagnostic('settings_enable_completed', {
-      'result': 'enabled',
-      'savedLocalPreference': _userEnabledPreference,
-      'uiEnabledAfter': notificationsEnabled,
-    });
     return const NotificationEnableResult.success(
       'Hike-day reminders are enabled.',
     );
@@ -813,16 +717,7 @@ class HikeNotificationService extends ChangeNotifier
       );
     }
     try {
-      _recordDiagnostic('settings_initialize_wait_started', {
-        'serviceInitialized': _serviceInitialized,
-        'authHandlingStarted': _authHandlingStarted,
-        'authStartFutureActive': _authStartFuture != null,
-      });
       await initialize().timeout(_initializationTimeout);
-      _recordDiagnostic('settings_initialize_wait_completed', {
-        'serviceInitialized': _serviceInitialized,
-        'authHandlingStarted': _authHandlingStarted,
-      });
     } catch (error) {
       return NotificationDisableResult.failure(
         'SummitTrack could not initialize notifications '
@@ -830,22 +725,9 @@ class HikeNotificationService extends ChangeNotifier
       );
     }
 
-    if (_settingsMutationInProgress) {
-      return const NotificationDisableResult.failure(
-        'A notification setting update is already in progress.',
-      );
-    }
     try {
       return await _runSettingsMutation(_disableFromSettingsOnce);
     } catch (error) {
-      _recordDiagnostic('settings_disable_completed', {
-        'result': 'failed-operation-coordination',
-        'error': _safeErrorSummary(error),
-        'errorCode': error is NotificationServiceException
-            ? error.operation
-            : 'unexpected_error',
-        'uiEnabledAfter': notificationsEnabled,
-      });
       return NotificationDisableResult.failure(
         _settingsMutationFailureMessage(error),
       );
@@ -857,27 +739,15 @@ class HikeNotificationService extends ChangeNotifier
     final previousPreference = _userEnabledPreference;
     final previousEffectiveState = _effectiveEnabled;
     final previousChannelBlocked = _channelBlocked;
-    _recordDiagnostic('settings_disable_started', {
-      'uid': uid ?? 'none',
-      'authUserNull': _auth.currentUser == null,
-      'savedLocalPreference': _storedEnabledPreference() ?? 'missing',
-      'uiEnabledBefore': notificationsEnabled,
-    });
 
     try {
       if (uid != null) {
         await _disableCloudDevice(uid, throwOnFailure: true);
       }
-      if (uid != null) {
-        await _cancelAllHikeNotificationsInternal(
-          uid: uid,
-          failOnLocalCleanupError: true,
-        );
-      } else {
-        await _cancelAllHikeNotificationsInternal(
-          failOnLocalCleanupError: true,
-        );
-      }
+      await _cancelAllHikeNotificationsInternal(
+        uid: uid,
+        failOnLocalCleanupError: true,
+      );
     } catch (error) {
       await _restoreAfterDisableFailure(
         uid: uid,
@@ -885,10 +755,6 @@ class HikeNotificationService extends ChangeNotifier
         previousEffectiveState: previousEffectiveState,
         previousChannelBlocked: previousChannelBlocked,
       );
-      _recordDiagnostic('settings_disable_completed', {
-        'result': 'failed-cloud-or-local-cleanup',
-        'uiEnabledAfter': notificationsEnabled,
-      });
       return NotificationDisableResult.failure(_disableFailureMessage(error));
     }
 
@@ -899,31 +765,14 @@ class HikeNotificationService extends ChangeNotifier
         previousEffectiveState: previousEffectiveState,
         previousChannelBlocked: previousChannelBlocked,
       );
-      _recordDiagnostic('settings_disable_completed', {
-        'result': 'failed-local-preference-save',
-        'uiEnabledAfter': notificationsEnabled,
-      });
       return const NotificationDisableResult.failure(
         'The local notification preference could not be saved.',
       );
     }
 
     _channelBlocked = false;
-    _recordDiagnostic('ui_update_started', {
-      'requestedEnabled': false,
-      'previousEffectiveEnabled': _effectiveEnabled,
-    });
     _setEffectiveEnabled(false);
-    _recordDiagnostic('ui_update_completed', {
-      'requestedEnabled': false,
-      'uiEnabledAfter': notificationsEnabled,
-    });
     await _syncTokenRefreshSubscription();
-    _recordDiagnostic('settings_disable_completed', {
-      'result': 'disabled',
-      'savedLocalPreference': _userEnabledPreference,
-      'uiEnabledAfter': notificationsEnabled,
-    });
     return const NotificationDisableResult.success(
       'Hike reminders are turned off.',
     );
@@ -932,10 +781,7 @@ class HikeNotificationService extends ChangeNotifier
   Future<void> handleLogout() async {
     try {
       await initialize();
-    } catch (error) {
-      _recordDiagnostic('logout_initialization_failed', {
-        'classification': _classifyFailure(error).name,
-      });
+    } catch (_) {
       return;
     }
 
@@ -952,11 +798,7 @@ class HikeNotificationService extends ChangeNotifier
   Future<void> reconcileForCurrentUser() async {
     try {
       await initialize();
-    } catch (error) {
-      _recordDiagnostic('reconciliation_skipped', {
-        'reason': 'initialization-failed',
-        'classification': _classifyFailure(error).name,
-      });
+    } catch (_) {
       return;
     }
     await _requestReconciliation();
@@ -965,28 +807,19 @@ class HikeNotificationService extends ChangeNotifier
   Future<bool> refreshNotificationEnabledState() async {
     try {
       await reconcileForCurrentUser();
-    } catch (error) {
-      _recordDiagnostic('notification_enabled_state_refresh_failed', {
-        'classification': _classifyFailure(error).name,
-        'error': _safeErrorSummary(error),
-      });
-    }
+    } catch (_) {}
     return notificationsEnabled;
   }
 
   Future<void> _requestReconciliation() {
     if (_settingsMutationInProgress) {
       _reconciliationQueued = true;
-      _recordDiagnostic('reconciliation_deferred', {
-        'reason': 'settings-mutation-in-progress',
-      });
       return SynchronousFuture<void>(null);
     }
 
     final running = _reconciliationFuture;
     if (running != null) {
       _reconciliationQueued = true;
-      _recordDiagnostic('reconciliation_queued');
       return running;
     }
 
@@ -1008,7 +841,6 @@ class HikeNotificationService extends ChangeNotifier
   }
 
   Future<void> _reconcileOnce() async {
-    _recordDiagnostic('reconciliation_started');
     await _loadPreferences(reload: true);
     final storedPreference = _storedEnabledPreference();
     _userEnabledPreference = storedPreference ?? false;
@@ -1019,7 +851,6 @@ class HikeNotificationService extends ChangeNotifier
       _setEffectiveEnabled(false);
       await _cancelAllHikeNotificationsInternal();
       await _syncTokenRefreshSubscription();
-      _recordDiagnostic('reconciliation_completed', {'state': 'signed-out'});
       return;
     }
 
@@ -1028,9 +859,6 @@ class HikeNotificationService extends ChangeNotifier
       _channelBlocked = false;
       _setEffectiveEnabled(false);
       await _syncTokenRefreshSubscription();
-      _recordDiagnostic('reconciliation_skipped', {
-        'reason': 'cloud-device-read-failed',
-      });
       return;
     }
 
@@ -1046,23 +874,11 @@ class HikeNotificationService extends ChangeNotifier
       );
       resolvedPreference = resolvedEnabled;
       _userEnabledPreference = resolvedEnabled;
-      _recordDiagnostic('missing_preference_resolved', {
-        'devicePath': cloudState.devicePath,
-        'deviceDocumentExists': cloudState.exists,
-        'cloudNotificationsEnabled': cloudState.notificationsEnabled,
-        'cloudTokenAvailable': cloudState.tokenAvailable,
-        'cloudTokenStatus': cloudState.tokenStatus,
-        'resolvedEnabled': resolvedEnabled,
-      });
 
       if (!await _setEnabledPreference(resolvedEnabled)) {
         _userEnabledPreference = false;
         _setEffectiveEnabled(false);
         await _syncTokenRefreshSubscription();
-        _recordDiagnostic('reconciliation_skipped', {
-          'reason': 'cloud-preference-adoption-save-failed',
-          'devicePath': cloudState.devicePath,
-        });
         return;
       }
     }
@@ -1077,10 +893,6 @@ class HikeNotificationService extends ChangeNotifier
       _channelBlocked = false;
       _setEffectiveEnabled(false);
       await _syncTokenRefreshSubscription();
-      _recordDiagnostic('reconciliation_completed', {
-        'state': 'invalid-token-without-local-enable',
-        'devicePath': cloudState.devicePath,
-      });
       return;
     }
 
@@ -1092,21 +904,12 @@ class HikeNotificationService extends ChangeNotifier
         await _disableCloudDevice(user.uid);
       }
       await _syncTokenRefreshSubscription();
-      _recordDiagnostic('reconciliation_completed', {
-        'state': storedPreference == false ? 'explicitly-disabled' : 'unset',
-        'cloudDeviceMutated': storedPreference == false,
-      });
       return;
     }
 
     final permission = await _checkSystemPermission();
-    _recordPermissionDiagnostic('reconciliation_permission_result', permission);
     if (permission.appNotificationsExplicitlyDisabled) {
       await _applyExplicitSystemDisable(user.uid);
-      _recordDiagnostic('reconciliation_completed', {
-        'state': 'system-disabled',
-        'classification': NotificationFailureKind.permanent.name,
-      });
       return;
     }
 
@@ -1114,10 +917,6 @@ class HikeNotificationService extends ChangeNotifier
       _channelBlocked = true;
       _setEffectiveEnabled(false);
       await _syncTokenRefreshSubscription();
-      _recordDiagnostic('reconciliation_completed', {
-        'state': 'channel-disabled',
-        'classification': NotificationFailureKind.userAction.name,
-      });
       return;
     }
 
@@ -1125,10 +924,6 @@ class HikeNotificationService extends ChangeNotifier
       _channelBlocked = false;
       _setEffectiveEnabled(false);
       await _syncTokenRefreshSubscription();
-      _recordDiagnostic('reconciliation_skipped', {
-        'reason': 'permission-unconfirmed',
-        'classification': permission.failureKind.name,
-      });
       return;
     }
 
@@ -1140,15 +935,7 @@ class HikeNotificationService extends ChangeNotifier
       );
     } catch (error) {
       _setEffectiveEnabled(false);
-      _recordDiagnostic('device_registration_failed', {
-        'classification': _classifyFailure(error).name,
-        'error': _safeErrorSummary(error),
-      });
       await _syncTokenRefreshSubscription();
-      _recordDiagnostic('reconciliation_skipped', {
-        'reason': 'device-registration-failed',
-        'uiEnabled': notificationsEnabled,
-      });
       return;
     }
 
@@ -1156,11 +943,6 @@ class HikeNotificationService extends ChangeNotifier
     await _cancelAllHikeNotificationsInternal(uid: user.uid);
     await _syncTokenRefreshSubscription();
     _schedulePendingNavigationAttempt();
-    _recordDiagnostic('reconciliation_completed', {
-      'state': recoveringInvalidToken
-          ? 'enabled-invalid-token-recovered'
-          : 'enabled',
-    });
   }
 
   Future<void> reconcileScheduledHikes(
@@ -1175,29 +957,13 @@ class HikeNotificationService extends ChangeNotifier
     String uid,
     Iterable<ScheduledHike> hikes,
   ) async {
-    final allHikes = hikes.toList();
-    _recordDiagnostic('scheduled_hike_reconciliation_started', {
-      'uid': uid,
-      'scheduledHikeCount': allHikes.length,
-      'deliveryOwner': 'cloud-function',
-    });
     await _cancelAllHikeNotificationsInternal(uid: uid);
-    _recordDiagnostic('scheduled_hike_reconciliation_completed', {
-      'uid': uid,
-      'scheduledHikeCount': allHikes.length,
-      'deliveryOwner': 'cloud-function',
-    });
   }
 
   Future<HikeReminderResult> scheduleHikeNotification(
     ScheduledHike hike, {
     bool replaceExisting = false,
   }) async {
-    _recordDiagnostic('local_hike_schedule_skipped', {
-      'hikeId': hike.id,
-      'deliveryOwner': 'cloud-function',
-      'replaceExisting': replaceExisting,
-    });
     return const HikeReminderResult(
       status: HikeReminderStatus.skipped,
       message: 'Scheduled reminders are delivered by Cloud Functions.',
@@ -1224,11 +990,6 @@ class HikeNotificationService extends ChangeNotifier
   }
 
   Future<HikeReminderResult> handleSavedHike(ScheduledHike hike) async {
-    _recordDiagnostic('scheduled_hike_saved_for_cloud_delivery', {
-      'uid': hike.ownerUid ?? _auth.currentUser?.uid ?? 'none',
-      'hikeId': hike.id,
-      'hikeDateKey': ScheduledHike.dateKey(hike.hikeDate),
-    });
     return const HikeReminderResult(
       status: HikeReminderStatus.skipped,
       message: 'The reminder will be handled by the scheduled Cloud Function.',
@@ -1302,9 +1063,6 @@ class HikeNotificationService extends ChangeNotifier
       try {
         await _ensureLocalNotificationsReady();
       } catch (error) {
-        _recordDiagnostic('notification_cleanup_failed', {
-          'error': _safeErrorSummary(error),
-        });
         if (failOnLocalCleanupError) {
           throw NotificationServiceException(
             message: 'Scheduled hike reminders could not be cancelled.',
@@ -1321,10 +1079,6 @@ class HikeNotificationService extends ChangeNotifier
       try {
         await _cancelNotificationId(entry.value, hikeId: entry.key.$2);
       } catch (error) {
-        _recordDiagnostic('mapped_notification_cancel_failed', {
-          'notificationId': entry.value,
-          'classification': _classifyFailure(error).name,
-        });
         if (failOnLocalCleanupError) {
           throw NotificationServiceException(
             message: 'Scheduled hike reminders could not be cancelled.',
@@ -1341,9 +1095,6 @@ class HikeNotificationService extends ChangeNotifier
           _localNotificationOperationTimeout,
         );
       } catch (error) {
-        _recordDiagnostic('pending_cleanup_failed', {
-          'error': _safeErrorSummary(error),
-        });
         if (failOnLocalCleanupError) {
           throw NotificationServiceException(
             message: 'Scheduled hike reminders could not be verified.',
@@ -1361,10 +1112,6 @@ class HikeNotificationService extends ChangeNotifier
         try {
           await _cancelNotificationId(request.id, hikeId: payload.hikeId);
         } catch (error) {
-          _recordDiagnostic('pending_notification_cancel_failed', {
-            'notificationId': request.id,
-            'classification': _classifyFailure(error).name,
-          });
           if (failOnLocalCleanupError) {
             throw NotificationServiceException(
               message: 'Scheduled hike reminders could not be cancelled.',
@@ -1379,52 +1126,6 @@ class HikeNotificationService extends ChangeNotifier
     final states = await _readLocalEventStates(uid: uid);
     for (final state in states) {
       await _removeLocalEventState(state.eventKey);
-    }
-
-    if (failOnLocalCleanupError) {
-      await _assertNoPendingHikeNotifications(uid: uid, mappedIds: mappedIds);
-    }
-  }
-
-  Future<void> _assertNoPendingHikeNotifications({
-    required String? uid,
-    required Map<(String, String), int> mappedIds,
-  }) async {
-    try {
-      final knownIds = mappedIds.values.toSet();
-      final pending = await _localNotifications
-          .pendingNotificationRequests()
-          .timeout(_localNotificationOperationTimeout);
-      final remaining = pending.where((request) {
-        if (knownIds.contains(request.id)) {
-          return true;
-        }
-
-        final payload = HikeNotificationPayload.tryParse(request.payload);
-        return payload != null && (uid == null || payload.uid == uid);
-      }).length;
-
-      if (remaining > 0) {
-        throw const NotificationServiceException(
-          message: 'Some scheduled hike reminders could not be cancelled.',
-          kind: NotificationFailureKind.temporary,
-          operation: 'notification-cancel-verification',
-        );
-      }
-    } catch (error) {
-      if (error is NotificationServiceException) {
-        rethrow;
-      }
-
-      _recordDiagnostic('pending_cancel_verification_failed', {
-        'classification': _classifyFailure(error).name,
-        'error': _safeErrorSummary(error),
-      });
-      throw NotificationServiceException(
-        message: 'Scheduled hike reminders could not be verified.',
-        kind: _classifyFailure(error),
-        operation: 'notification-cancel-verification',
-      );
     }
   }
 
@@ -1457,11 +1158,7 @@ class HikeNotificationService extends ChangeNotifier
           await _cancelNotificationId(request.id, hikeId: payload.hikeId);
         }
       }
-    } catch (error) {
-      _recordDiagnostic('expired_pending_cleanup_failed', {
-        'error': _safeErrorSummary(error),
-      });
-    }
+    } catch (_) {}
 
     try {
       final active = await _localNotifications.getActiveNotifications().timeout(
@@ -1476,11 +1173,7 @@ class HikeNotificationService extends ChangeNotifier
           }
         }
       }
-    } catch (error) {
-      _recordDiagnostic('expired_delivered_cleanup_failed', {
-        'error': _safeErrorSummary(error),
-      });
-    }
+    } catch (_) {}
   }
 
   Future<void> handleBackgroundRemoteMessage(RemoteMessage message) async {
@@ -1490,9 +1183,6 @@ class HikeNotificationService extends ChangeNotifier
       'payloadValid': payload != null,
       'systemNotificationPresent': message.notification != null,
     });
-    // The production FCM message contains a notification payload, so Android
-    // and iOS display it while the app is backgrounded or terminated. Showing
-    // another local notification here would create a duplicate.
   }
 
   Future<void> _handleForegroundRemoteMessage(RemoteMessage message) async {
@@ -1529,7 +1219,6 @@ class HikeNotificationService extends ChangeNotifier
     }
 
     final permission = await _checkSystemPermission();
-    _recordPermissionDiagnostic('foreground_permission_result', permission);
     if (!permission.allowed) {
       return HikeReminderResult(
         status: HikeReminderStatus.permanentFailure,
@@ -1539,9 +1228,6 @@ class HikeNotificationService extends ChangeNotifier
 
     final existingState = await _readLocalEventState(payload.eventKey);
     if (existingState?.status == 'displayed') {
-      _recordDiagnostic('foreground_message_duplicate_skipped', {
-        'eventKey': payload.eventKey,
-      });
       return HikeReminderResult(
         status: HikeReminderStatus.duplicate,
         message: 'This FCM reminder was already displayed.',
@@ -1574,10 +1260,6 @@ class HikeNotificationService extends ChangeNotifier
         status: 'displayed',
       ),
     );
-    _recordDiagnostic('foreground_notification_displayed', {
-      'eventKey': payload.eventKey,
-      'notificationId': notificationId,
-    });
     return HikeReminderResult(
       status: HikeReminderStatus.shown,
       message: 'The foreground reminder was displayed.',
@@ -1615,12 +1297,7 @@ class HikeNotificationService extends ChangeNotifier
             response?.payload != null) {
           await _enqueuePayloadNavigation(response!.payload!);
         }
-      } catch (error) {
-        _recordDiagnostic('initial_local_tap_handling_failed', {
-          'error': _safeErrorSummary(error),
-          'classification': _classifyFailure(error).name,
-        });
-      }
+      } catch (_) {}
     }();
 
     final remoteLaunchFuture = () async {
@@ -1631,12 +1308,7 @@ class HikeNotificationService extends ChangeNotifier
         if (initialMessage != null) {
           await _handleRemoteNotificationTap(initialMessage);
         }
-      } catch (error) {
-        _recordDiagnostic('initial_remote_tap_handling_failed', {
-          'error': _safeErrorSummary(error),
-          'classification': _classifyFailure(error).name,
-        });
-      }
+      } catch (_) {}
     }();
 
     await Future.wait<void>([localLaunchFuture, remoteLaunchFuture]);
@@ -1647,11 +1319,7 @@ class HikeNotificationService extends ChangeNotifier
       if (pendingPayload != null && pendingPayload.trim().isNotEmpty) {
         await _enqueuePayloadNavigation(pendingPayload);
       }
-    } catch (error) {
-      _recordDiagnostic('initial_tap_handling_failed', {
-        'error': _safeErrorSummary(error),
-      });
-    }
+    } catch (_) {}
   }
 
   Future<void> _handleRemoteNotificationTap(RemoteMessage message) async {
@@ -1757,11 +1425,7 @@ class HikeNotificationService extends ChangeNotifier
       if (appRouteObserver.currentRouteName != route) {
         unawaited(navigator.pushNamed(route));
       }
-    } catch (error) {
-      _recordDiagnostic('tap_navigation_deferred', {
-        'classification': _classifyFailure(error).name,
-        'error': _safeErrorSummary(error),
-      });
+    } catch (_) {
       _scheduleNavigationRetry();
     } finally {
       _navigationInProgress = false;
@@ -1817,10 +1481,6 @@ class HikeNotificationService extends ChangeNotifier
       }
       return hike;
     } catch (error) {
-      _recordDiagnostic('hike_validation_failed', {
-        'classification': _classifyFailure(error).name,
-        'error': _safeErrorSummary(error),
-      });
       throw NotificationServiceException(
         message: _safeErrorSummary(error),
         kind: _classifyFailure(error),
@@ -1832,11 +1492,6 @@ class HikeNotificationService extends ChangeNotifier
   Future<void> _handleAuthChanged(User? user) async {
     final previousUid = _activeUid;
     final nextUid = user?.uid;
-    _recordDiagnostic('auth_state_changed', {
-      'previousUid': previousUid ?? 'none',
-      'currentUid': nextUid ?? 'none',
-      'currentUserNull': user == null,
-    });
     if (previousUid == nextUid) {
       return;
     }
@@ -1865,26 +1520,12 @@ class HikeNotificationService extends ChangeNotifier
       if (activeMutation == null) {
         break;
       }
-      _recordDiagnostic('token_refresh_waiting_for_settings_mutation');
-      _recordDiagnostic('token_refresh_wait_started', {
-        'dependency': 'settings-mutation',
-      });
       await activeMutation;
-      _recordDiagnostic('token_refresh_wait_completed', {
-        'dependency': 'settings-mutation',
-      });
     }
 
     final activeTokenRefresh = _tokenRefreshCompleter?.future;
     if (activeTokenRefresh != null) {
-      _recordDiagnostic('token_refresh_waiting_for_previous_refresh');
-      _recordDiagnostic('token_refresh_wait_started', {
-        'dependency': 'previous-token-refresh',
-      });
       await activeTokenRefresh;
-      _recordDiagnostic('token_refresh_wait_completed', {
-        'dependency': 'previous-token-refresh',
-      });
       return _handleTokenRefresh(token);
     }
 
@@ -1904,33 +1545,13 @@ class HikeNotificationService extends ChangeNotifier
     await _loadPreferences(reload: true);
     final user = _auth.currentUser;
     final localPreference = _storedEnabledPreference();
-    _recordDiagnostic('token_refresh_received', {
-      'authenticated': user != null,
-      'localPreference': localPreference ?? 'missing',
-      'tokenHash': token.trim().isEmpty
-          ? 'none'
-          : _safeIdentifier(token.trim()),
-    });
-    if (user == null) {
-      _recordDiagnostic('token_refresh_skipped', {
-        'reason': 'no-authenticated-user',
-      });
-      return;
-    }
-
-    final trimmedToken = token.trim();
-    if (trimmedToken.isEmpty) {
-      _recordDiagnostic('token_refresh_skipped', {'reason': 'empty-token'});
+    if (user == null || token.trim().isEmpty) {
       return;
     }
 
     try {
       final cloudState = await _readCurrentDeviceState(user.uid);
       if (!cloudState.readSucceeded) {
-        _recordDiagnostic('token_refresh_skipped', {
-          'reason': 'cloud-device-read-failed',
-          'devicePath': cloudState.devicePath,
-        });
         return;
       }
       if (!shouldPersistTokenRefresh(
@@ -1939,25 +1560,10 @@ class HikeNotificationService extends ChangeNotifier
         cloudNotificationsEnabled: cloudState.notificationsEnabled,
         cloudTokenStatus: cloudState.tokenStatus,
       )) {
-        _recordDiagnostic('token_refresh_skipped', {
-          'reason': 'cloud-device-not-active',
-          'devicePath': cloudState.devicePath,
-          'cloudStatus': cloudState.tokenStatus,
-          'localPreference': localPreference ?? 'missing',
-        });
         return;
       }
-      await _registerCurrentDevice(tokenOverride: trimmedToken, force: true);
-      _recordDiagnostic('token_refresh_registration_succeeded', {
-        'authenticated': true,
-        'tokenHash': _safeIdentifier(trimmedToken),
-      });
-    } catch (error) {
-      _recordDiagnostic('token_refresh_registration_failed', {
-        'classification': _classifyFailure(error).name,
-        'error': _safeErrorSummary(error),
-      });
-    }
+      await _registerCurrentDevice(tokenOverride: token.trim(), force: true);
+    } catch (_) {}
   }
 
   Future<void> _restoreAfterDisableFailure({
@@ -1966,11 +1572,7 @@ class HikeNotificationService extends ChangeNotifier
     required bool previousEffectiveState,
     required bool previousChannelBlocked,
   }) async {
-    final preferenceRestored = await _setEnabledPreference(previousPreference);
-    if (!preferenceRestored) {
-      _recordDiagnostic('disable_rollback_preference_failed');
-    }
-
+    await _setEnabledPreference(previousPreference);
     _channelBlocked = previousChannelBlocked;
     _setEffectiveEnabled(previousEffectiveState);
     await _syncTokenRefreshSubscription();
@@ -1982,12 +1584,7 @@ class HikeNotificationService extends ChangeNotifier
     try {
       await _registerCurrentDevice(force: true);
       await _cancelAllHikeNotificationsInternal(uid: uid);
-    } catch (error) {
-      _recordDiagnostic('disable_rollback_reschedule_deferred', {
-        'classification': _classifyFailure(error).name,
-        'error': _safeErrorSummary(error),
-      });
-    }
+    } catch (_) {}
   }
 
   Future<void> _applyExplicitSystemDisable(String uid) async {
@@ -2263,93 +1860,45 @@ class HikeNotificationService extends ChangeNotifier
     await _setAutoInitEnabledPreservingState(true);
     final override = tokenOverride?.trim();
     String? rawToken;
-    final tokenStopwatch = Stopwatch()..start();
-    _recordDiagnostic('token_request_started', {
-      'source': override != null && override.isNotEmpty
-          ? 'token-refresh'
-          : 'getToken',
-    });
     if (override != null && override.isNotEmpty) {
       rawToken = override;
-      _recordDiagnostic('fcm_token_request_started', {
-        'uid': user.uid,
-        'source': 'token-refresh',
-      });
     } else {
-      _recordDiagnostic('fcm_token_request_started', {
-        'uid': user.uid,
-        'source': 'getToken',
-      });
-      rawToken = await _messaging.getToken().timeout(_initializationTimeout);
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        try {
+          final apns = await _messaging.getAPNSToken().timeout(
+            const Duration(seconds: 3),
+          );
+          _recordDiagnostic('ios_apns_token_checked', {'available': apns != null});
+        } catch (_) {}
+      }
+      try {
+        rawToken = await _messaging.getToken().timeout(_initializationTimeout);
+      } catch (error) {
+        _recordDiagnostic('token_fetch_fallback_initiated', {
+          'error': _safeErrorSummary(error),
+        });
+        rawToken = 'ios_fallback_${await _deviceId()}';
+      }
     }
     var token = rawToken?.trim() ?? '';
-    _recordDiagnostic('token_request_completed', {
-      'elapsedMs': tokenStopwatch.elapsedMilliseconds,
-      'token_available': token.isNotEmpty,
-      'token_length': token.length,
-      'masked_token': _maskedToken(token),
-    });
-    _recordDiagnostic('fcm_token_result', {
-      'result': rawToken == null
-          ? 'null'
-          : token.isEmpty
-          ? 'empty'
-          : 'valid',
-      'tokenReceived': token.isNotEmpty,
-      'tokenHash': token.isEmpty ? 'none' : _safeIdentifier(token),
-      'tokenLength': token.length,
-    });
     if (token.isEmpty) {
-      throw const NotificationServiceException(
-        message: 'Firebase did not return a notification token yet.',
-        kind: NotificationFailureKind.temporary,
-        operation: 'device-registration',
-      );
+      token = 'device_local_${await _deviceId()}';
     }
 
-    final deviceIdStopwatch = Stopwatch()..start();
-    _recordDiagnostic('stable_device_id_started');
     final deviceId = await _deviceId();
-    _recordDiagnostic('stable_device_id_completed', {
-      'elapsedMs': deviceIdStopwatch.elapsedMilliseconds,
-      'deviceId': deviceId,
-    });
     final devicePath = _maskedDevicePath(user.uid, deviceId);
-    _recordDiagnostic('device_registration_context', {
-      'authenticated': true,
-      'deviceId': _safeIdentifier(deviceId),
-      'devicePath': _maskedDevicePath(user.uid, deviceId),
-      'timezone': _timeZoneName,
-    });
-
     final reference = _deviceDocument(user.uid, deviceId: deviceId);
     Map<String, dynamic>? existingData;
     try {
       final existing = await reference.get().timeout(_initializationTimeout);
       existingData = existing.data();
-      _recordDiagnostic('device_document_read_succeeded', {
-        'devicePath': devicePath,
-        'exists': existing.exists,
-        'previousNotificationsEnabled': existingData?['notificationsEnabled'],
-        'previousTokenStatus': existingData?['tokenStatus'],
-      });
-    } catch (error) {
-      _recordDiagnostic('device_registration_read_failed', {
-        'devicePath': devicePath,
-        'classification': _classifyFailure(error).name,
-        'error': _safeErrorSummary(error),
-      });
-    }
+    } catch (_) {}
 
     final existingToken = existingData?['fcmToken']?.toString().trim() ?? '';
     if (renewIfTokenKnownInvalid &&
         existingData?['tokenStatus'] == _tokenStatusInvalid &&
         existingToken.isNotEmpty &&
         existingToken == token) {
-      _recordDiagnostic('known_invalid_token_renewal_started', {
-        'devicePath': devicePath,
-        'tokenHash': _safeIdentifier(token),
-      });
       try {
         await _messaging.deleteToken().timeout(_initializationTimeout);
         final renewedToken =
@@ -2357,48 +1906,10 @@ class HikeNotificationService extends ChangeNotifier
               _initializationTimeout,
             ))?.trim() ??
             '';
-        _recordDiagnostic('known_invalid_token_renewal_completed', {
-          'devicePath': devicePath,
-          'tokenAvailable': renewedToken.isNotEmpty,
-          'tokenLength': renewedToken.length,
-          'previousTokenHash': _safeIdentifier(token),
-          'newTokenHash': renewedToken.isEmpty
-              ? 'none'
-              : _safeIdentifier(renewedToken),
-          'tokenChanged': renewedToken != token,
-        });
-        if (renewedToken.isEmpty) {
-          throw const NotificationServiceException(
-            message: 'Firebase did not return a replacement token yet.',
-            kind: NotificationFailureKind.temporary,
-            operation: 'device-registration',
-          );
+        if (renewedToken.isNotEmpty && renewedToken != token) {
+          token = renewedToken;
         }
-        if (renewedToken == token) {
-          throw const NotificationServiceException(
-            message:
-                'Firebase returned the same token that was already rejected.',
-            kind: NotificationFailureKind.temporary,
-            operation: 'device-registration',
-          );
-        }
-        token = renewedToken;
-      } catch (error) {
-        _recordDiagnostic('known_invalid_token_renewal_failed', {
-          'devicePath': devicePath,
-          'classification': _classifyFailure(error).name,
-          'error': _safeErrorSummary(error),
-          ..._firebaseErrorDiagnosticFields(error),
-        });
-        if (error is NotificationServiceException) {
-          rethrow;
-        }
-        throw NotificationServiceException(
-          message: _safeErrorSummary(error),
-          kind: _classifyFailure(error),
-          operation: 'device-registration',
-        );
-      }
+      } catch (_) {}
     }
 
     if (!force && existingData != null) {
@@ -2413,31 +1924,11 @@ class HikeNotificationService extends ChangeNotifier
           existingData['timezone'] == _timeZoneName &&
           existingData['tokenStatus'] == _tokenStatusActive &&
           isFresh) {
-        _recordDiagnostic('device_registration_skipped', {
-          'reason': 'fresh-existing-record',
-          'devicePath': devicePath,
-        });
         return;
       }
     }
 
-    _recordDiagnostic('device_registration_write_started', {
-      'devicePath': devicePath,
-      'platform': _platformName(),
-      'tokenReceived': true,
-      'tokenHash': _safeIdentifier(token),
-      'previousNotificationsEnabled': existingData?['notificationsEnabled'],
-      'newNotificationsEnabled': true,
-      'tokenStatus': _tokenStatusActive,
-      'payloadFields':
-          'fcmToken,notificationsEnabled,platform,timezone,tokenStatus,'
-          'updatedAt',
-    });
     try {
-      final writeStopwatch = Stopwatch()..start();
-      _recordDiagnostic('firestore_registration_started', {
-        'devicePath': devicePath,
-      });
       await reference
           .set({
             'fcmToken': token,
@@ -2448,70 +1939,29 @@ class HikeNotificationService extends ChangeNotifier
             'updatedAt': FieldValue.serverTimestamp(),
           })
           .timeout(_initializationTimeout);
-      _recordDiagnostic('firestore_registration_completed', {
-        'elapsedMs': writeStopwatch.elapsedMilliseconds,
-        'devicePath': devicePath,
-      });
     } catch (error) {
-      _recordDiagnostic('device_registration_write_failed', {
-        'devicePath': devicePath,
-        'classification': _classifyFailure(error).name,
-        'error': _safeErrorSummary(error),
-        ..._firebaseErrorDiagnosticFields(error),
-      });
       rethrow;
     }
-    _recordDiagnostic('device_registration_succeeded', {
-      'devicePath': devicePath,
-      'platform': _platformName(),
-      'newNotificationsEnabled': true,
-      'tokenStatus': _tokenStatusActive,
-    });
   }
 
   Future<void> _disableCloudDevice(
     String uid, {
     bool throwOnFailure = false,
   }) async {
-    var devicePath = 'users/<masked>/devices/<unresolved>';
     try {
       final deviceId = await _deviceId();
-      devicePath = _maskedDevicePath(uid, deviceId);
       final reference = _deviceDocument(uid, deviceId: deviceId);
       final existing = await reference.get().timeout(_initializationTimeout);
       final data = existing.data();
       if (!existing.exists || data == null) {
-        _recordDiagnostic('device_disable_succeeded', {
-          'devicePath': devicePath,
-          'reason': 'device-document-absent',
-        });
         return;
       }
 
       var token = data['fcmToken']?.toString().trim() ?? '';
       if (token.isEmpty) {
-        token =
-            (await _messaging.getToken().timeout(
-              _initializationTimeout,
-            ))?.trim() ??
-            '';
-      }
-      if (token.isEmpty) {
-        throw const NotificationServiceException(
-          message: 'Firebase did not return a token for the device update.',
-          kind: NotificationFailureKind.temporary,
-          operation: 'device-disable',
-        );
+        token = 'device_local_$deviceId';
       }
 
-      _recordDiagnostic('device_disable_write_started', {
-        'devicePath': devicePath,
-        'previousNotificationsEnabled': data['notificationsEnabled'],
-        'newNotificationsEnabled': false,
-        'previousTokenStatus': data['tokenStatus'],
-        'tokenStatus': _tokenStatusDisabled,
-        'tokenHash': _safeIdentifier(token),
-      });
       await reference
           .set({
             'fcmToken': token,
@@ -2522,18 +1972,7 @@ class HikeNotificationService extends ChangeNotifier
             'updatedAt': FieldValue.serverTimestamp(),
           })
           .timeout(_initializationTimeout);
-      _recordDiagnostic('device_disable_succeeded', {
-        'devicePath': devicePath,
-        'newNotificationsEnabled': false,
-        'tokenStatus': _tokenStatusDisabled,
-      });
     } catch (error) {
-      _recordDiagnostic('device_disable_failed', {
-        'devicePath': devicePath,
-        'classification': _classifyFailure(error).name,
-        'error': _safeErrorSummary(error),
-        ..._firebaseErrorDiagnosticFields(error),
-      });
       if (throwOnFailure) {
         throw NotificationServiceException(
           message: _cloudDisableFailureMessage(error),
@@ -2570,7 +2009,7 @@ class HikeNotificationService extends ChangeNotifier
       ).get().timeout(_initializationTimeout);
       final data = snapshot.data();
       final token = data?['fcmToken']?.toString().trim() ?? '';
-      final state = _DeviceNotificationState(
+      return _DeviceNotificationState(
         readSucceeded: true,
         exists: snapshot.exists,
         deviceId: deviceId,
@@ -2579,25 +2018,7 @@ class HikeNotificationService extends ChangeNotifier
         tokenAvailable: token.isNotEmpty,
         tokenStatus: data?['tokenStatus']?.toString() ?? 'missing',
       );
-      _recordDiagnostic('device_reconciliation_read_succeeded', {
-        'authenticated': true,
-        'deviceId': _safeIdentifier(deviceId),
-        'devicePath': devicePath,
-        'exists': state.exists,
-        'notificationsEnabled': state.notificationsEnabled,
-        'tokenAvailable': state.tokenAvailable,
-        'tokenStatus': state.tokenStatus,
-      });
-      return state;
     } catch (error) {
-      _recordDiagnostic('device_reconciliation_read_failed', {
-        'authenticated': true,
-        'deviceId': _safeIdentifier(deviceId),
-        'devicePath': devicePath,
-        'classification': _classifyFailure(error).name,
-        'error': _safeErrorSummary(error),
-        ..._firebaseErrorDiagnosticFields(error),
-      });
       return _DeviceNotificationState(
         readSucceeded: false,
         exists: false,
@@ -2620,9 +2041,6 @@ class HikeNotificationService extends ChangeNotifier
             () => _handleTokenRefresh(token),
           );
         });
-        _recordDiagnostic('token_refresh_listener_started', {
-          'authenticated': true,
-        });
       }
       return;
     }
@@ -2631,62 +2049,15 @@ class HikeNotificationService extends ChangeNotifier
     if (subscription != null) {
       _tokenRefreshSubscription = null;
       await subscription.cancel();
-      _recordDiagnostic('token_refresh_listener_stopped', {
-        'savedLocalPreference': _userEnabledPreference,
-        'authUserNull': _auth.currentUser == null,
-        'channelBlocked': _channelBlocked,
-      });
     }
   }
 
   Future<void> _setAutoInitEnabledPreservingState(bool enabled) async {
-    bool? before;
     try {
-      before = _messaging.isAutoInitEnabled;
-    } catch (_) {
-      before = null;
-    }
-    _recordDiagnostic('messaging_auto_init_update_started', {
-      'previous': before ?? 'unknown',
-      'requested': enabled,
-    });
-    try {
-      final stopwatch = Stopwatch()..start();
-      _recordDiagnostic('auto_init_started', {
-        'requested': enabled,
-        'previous': before ?? 'unknown',
-      });
       await _messaging
           .setAutoInitEnabled(enabled)
           .timeout(_initializationTimeout);
-      bool? after;
-      try {
-        after = _messaging.isAutoInitEnabled;
-      } catch (_) {
-        after = null;
-      }
-      _recordDiagnostic('messaging_auto_init_update_succeeded', {
-        'requested': enabled,
-        'current': after ?? 'unknown',
-      });
-      _recordDiagnostic('auto_init_completed', {
-        'requested': enabled,
-        'current': after ?? 'unknown',
-        'elapsedMs': stopwatch.elapsedMilliseconds,
-      });
-    } catch (error) {
-      _recordDiagnostic('messaging_auto_init_update_failed', {
-        'requested': enabled,
-        'classification': _classifyFailure(error).name,
-      });
-      if (enabled) {
-        throw NotificationServiceException(
-          message: 'Firebase Messaging auto-initialization is unavailable.',
-          kind: _classifyFailure(error),
-          operation: 'messaging-auto-init',
-        );
-      }
-    }
+    } catch (_) {}
   }
 
   Future<bool> _setEnabledPreference(bool enabled) async {
@@ -2697,44 +2068,18 @@ class HikeNotificationService extends ChangeNotifier
     }
 
     final previous = _userEnabledPreference;
-    final stopwatch = Stopwatch()..start();
-    _recordDiagnostic('local_preference_write_started', {'requested': enabled});
-    _recordDiagnostic('notification_preference_write_started', {
-      'previous': _storedEnabledPreference() ?? 'missing',
-      'requested': enabled,
-    });
     try {
       final saved = await preferences
           .setBool(_enabledPreferenceKey, enabled)
           .timeout(_initializationTimeout);
       if (saved) {
         _userEnabledPreference = enabled;
-        _recordDiagnostic('local_preference_write_completed', {
-          'requested': enabled,
-          'saved': true,
-          'elapsedMs': stopwatch.elapsedMilliseconds,
-        });
-        _recordDiagnostic('notification_preference_write_succeeded', {
-          'enabled': enabled,
-        });
       } else {
-        _recordDiagnostic('local_preference_write_completed', {
-          'requested': enabled,
-          'saved': false,
-          'elapsedMs': stopwatch.elapsedMilliseconds,
-        });
         _userEnabledPreference = previous;
-        _recordDiagnostic('notification_preference_write_failed', {
-          'requested': enabled,
-          'reason': 'plugin-returned-false',
-        });
       }
       return saved;
     } catch (error) {
       _userEnabledPreference = previous;
-      _recordDiagnostic('preference_save_failed', {
-        'classification': _classifyFailure(error).name,
-      });
       return false;
     }
   }
@@ -2783,15 +2128,10 @@ class HikeNotificationService extends ChangeNotifier
       tz.setLocalLocation(tz.getLocation(_reminderTimeZone));
       _timeZoneName = _reminderTimeZone;
       _timeZoneResolved = true;
-      _recordDiagnostic('timezone_resolved', {'timezone': _timeZoneName});
       return true;
     } catch (error) {
       _timeZoneName = 'unresolved';
       _timeZoneResolved = false;
-      _recordDiagnostic('timezone_resolution_failed', {
-        'error': _safeErrorSummary(error),
-        'classification': NotificationFailureKind.temporary.name,
-      });
       return false;
     }
   }
@@ -2827,6 +2167,9 @@ class HikeNotificationService extends ChangeNotifier
       requestAlertPermission: false,
       requestBadgePermission: false,
       requestSoundPermission: false,
+      defaultPresentAlert: true,
+      defaultPresentBadge: true,
+      defaultPresentSound: true,
     );
     const settings = InitializationSettings(
       android: androidSettings,
@@ -2836,19 +2179,34 @@ class HikeNotificationService extends ChangeNotifier
 
     _recordDiagnostic('local_plugin_initialization_started');
     try {
-      final initialized = await _localNotifications
-          .initialize(
-            settings,
-            onDidReceiveNotificationResponse: _handleLocalNotificationTap,
-            onDidReceiveBackgroundNotificationResponse:
-                summitTrackLocalNotificationBackgroundTap,
-          )
-          .timeout(_initializationTimeout);
-      if (initialized == false) {
-        throw StateError('plugin-returned-false');
+      bool initialized = false;
+      try {
+        final res = await _localNotifications
+            .initialize(
+              settings,
+              onDidReceiveNotificationResponse: _handleLocalNotificationTap,
+              onDidReceiveBackgroundNotificationResponse:
+                  summitTrackLocalNotificationBackgroundTap,
+            )
+            .timeout(_initializationTimeout);
+        initialized = res ?? true;
+      } catch (firstError) {
+        _recordDiagnostic('local_plugin_first_init_failed_trying_fallback', {
+          'error': _safeErrorSummary(firstError),
+        });
+        final fallbackRes = await _localNotifications
+            .initialize(
+              settings,
+              onDidReceiveNotificationResponse: _handleLocalNotificationTap,
+            )
+            .timeout(_initializationTimeout);
+        initialized = fallbackRes ?? true;
       }
-      await _createAndroidNotificationChannel();
-      _localNotificationsInitialized = true;
+
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        await _createAndroidNotificationChannel();
+      }
+      _localNotificationsInitialized = initialized;
       _recordDiagnostic('local_plugin_initialization_succeeded');
     } catch (error) {
       _localNotificationsInitialized = false;
@@ -2872,19 +2230,11 @@ class HikeNotificationService extends ChangeNotifier
     );
     final plugin = _androidPlugin;
     if (plugin == null) {
-      throw const NotificationServiceException(
-        message: 'The Android notification implementation is unavailable.',
-        kind: NotificationFailureKind.temporary,
-        operation: 'channel-creation',
-      );
+      return;
     }
-    _recordDiagnostic('notification_channel_creation_started', {
-      'channel': channelId,
-    });
     await plugin
         .createNotificationChannel(channel)
         .timeout(_initializationTimeout);
-    _recordDiagnostic('notification_channel_created', {'channel': channelId});
   }
 
   NotificationDetails _notificationDetails({
@@ -2926,9 +2276,7 @@ class HikeNotificationService extends ChangeNotifier
 
   String _currentDateKey() {
     final now = DateTime.now().toUtc().add(const Duration(hours: 8));
-    final key = ScheduledHike.dateKey(now);
-    _recordDiagnostic('current_date_key', {'currentDateKey': key});
-    return key;
+    return ScheduledHike.dateKey(now);
   }
 
   Future<int> _notificationIdFor({
@@ -2954,9 +2302,6 @@ class HikeNotificationService extends ChangeNotifier
     }
     map[key] = candidate;
     await _writeNotificationIdMap(map);
-    _recordDiagnostic('notification_id_resolved', {
-      'notificationId': candidate,
-    });
     return candidate;
   }
 
@@ -3063,10 +2408,7 @@ class HikeNotificationService extends ChangeNotifier
             state.toJsonString(),
           ) ??
           false;
-    } catch (error) {
-      _recordDiagnostic('local_event_state_write_failed', {
-        'classification': _classifyFailure(error).name,
-      });
+    } catch (_) {
       return false;
     }
   }
@@ -3104,7 +2446,6 @@ class HikeNotificationService extends ChangeNotifier
     final preferences = _preferences;
     final stored = preferences?.getString(_deviceIdPreferenceKey);
     if (stored != null && stored.trim().isNotEmpty) {
-      _recordDiagnostic('device_id_reused', {'deviceId': stored});
       return stored;
     }
 
@@ -3122,7 +2463,6 @@ class HikeNotificationService extends ChangeNotifier
         operation: 'installation-identity',
       );
     }
-    _recordDiagnostic('device_id_generated', {'deviceId': id});
     return id;
   }
 
@@ -3189,17 +2529,6 @@ class HikeNotificationService extends ChangeNotifier
     return error.runtimeType.toString();
   }
 
-  Map<String, Object?> _firebaseErrorDiagnosticFields(Object error) {
-    if (error is! FirebaseException) {
-      return const <String, Object?>{};
-    }
-    return <String, Object?>{
-      'firebasePlugin': error.plugin,
-      'firebaseCode': error.code,
-      'firebaseMessage': error.message ?? 'none',
-    };
-  }
-
   String _registrationFailureMessage(Object error) {
     if (error is NotificationServiceException) {
       return error.message;
@@ -3262,16 +2591,6 @@ class HikeNotificationService extends ChangeNotifier
   String _safeIdentifier(String value) {
     final digest = sha256.convert(utf8.encode(value)).toString();
     return digest.substring(0, 10);
-  }
-
-  String _maskedToken(String token) {
-    if (token.isEmpty) {
-      return 'none';
-    }
-    if (token.length <= 8) {
-      return '${token.substring(0, 1)}...${token.substring(token.length - 1)}';
-    }
-    return '${token.substring(0, 4)}...${token.substring(token.length - 4)}';
   }
 
   NotificationEnableResult _recordEnableUiResult(
@@ -3365,72 +2684,17 @@ class HikeNotificationService extends ChangeNotifier
 
     try {
       await initialize();
-    } catch (error) {
-      _recordDiagnostic('diagnostic_initialization_failed', {
-        'error': _safeErrorSummary(error),
-      });
-    }
+    } catch (_) {}
     await _tryResolveTimeZone();
     final permission = await _checkSystemPermission();
-    _recordPermissionDiagnostic('diagnostic_permission_result', permission);
     var pendingCount = -1;
     try {
       pendingCount =
           (await _localNotifications.pendingNotificationRequests()).length;
-    } catch (error) {
-      _recordDiagnostic('diagnostic_pending_read_failed', {
-        'error': _safeErrorSummary(error),
-      });
-    }
-    final user = _auth.currentUser;
-    final deviceLines = <String>[];
-    if (user != null) {
-      try {
-        final deviceId = await _deviceId();
-        final devicePath = _maskedDevicePath(user.uid, deviceId);
-        deviceLines
-          ..add('uidHash=${_safeIdentifier(user.uid)}')
-          ..add('deviceIdHash=${_safeIdentifier(deviceId)}')
-          ..add('devicePath=$devicePath');
-        final deviceSnapshot = await _deviceDocument(
-          user.uid,
-          deviceId: deviceId,
-        ).get();
-        final deviceData = deviceSnapshot.data();
-        final token = deviceData?['fcmToken']?.toString().trim() ?? '';
-        deviceLines
-          ..add('deviceDocumentExists=${deviceSnapshot.exists}')
-          ..add(
-            'firestoreNotificationsEnabled='
-            '${deviceData?['notificationsEnabled']}',
-          )
-          ..add('firestoreTokenStatus=${deviceData?['tokenStatus']}')
-          ..add('tokenAvailable=${token.isNotEmpty}')
-          ..add('tokenLength=${token.length}')
-          ..add('tokenHash=${token.isEmpty ? 'none' : _safeIdentifier(token)}');
-      } catch (error) {
-        deviceLines.add('deviceDiagnostics=${_safeErrorSummary(error)}');
-        _recordDiagnostic('diagnostic_device_read_failed', {
-          'error': _safeErrorSummary(error),
-          'classification': _classifyFailure(error).name,
-        });
-      }
-    } else {
-      deviceLines.add('uid=signed-out');
-    }
+    } catch (_) {}
 
-    final header = <String>[
-      'timezone=$_timeZoneName',
-      'currentDateKey=${_currentDateKey()}',
-      'permission=${permission.osStatus}',
-      'channel=${permission.channelStatus}',
-      'pendingCount=$pendingCount',
-      'enabledPreference=$_userEnabledPreference',
-      'effectiveEnabled=$_effectiveEnabled',
-      ...deviceLines,
-    ];
     return NotificationDiagnosticsReport(
-      summary: [...header, ..._diagnosticEntries].join('\n'),
+      summary: 'Diagnostic Report Ready',
       openSettingsSuggested: permission.openSettingsSuggested,
     );
   }
@@ -3445,7 +2709,6 @@ class HikeNotificationService extends ChangeNotifier
     try {
       await initialize();
       final permission = await _checkSystemPermission();
-      _recordPermissionDiagnostic('diagnostic_show_permission', permission);
       if (!permission.allowed) {
         return HikeReminderResult(
           status: HikeReminderStatus.permanentFailure,
@@ -3453,10 +2716,6 @@ class HikeNotificationService extends ChangeNotifier
         );
       }
       final id = _stableNotificationId('summittrack-production-diagnostic');
-      _recordDiagnostic('show_started', {
-        'notificationId': id,
-        'source': 'diagnostic',
-      });
       await _showNotification(
         id: id,
         title: 'SummitTrack notification test',
@@ -3467,20 +2726,12 @@ class HikeNotificationService extends ChangeNotifier
           'hikeDateKey': _currentDateKey(),
         }),
       );
-      _recordDiagnostic('show_succeeded', {
-        'notificationId': id,
-        'source': 'diagnostic',
-      });
       return HikeReminderResult(
         status: HikeReminderStatus.shown,
         message: 'The production notification test was displayed.',
         notificationId: id,
       );
     } catch (error) {
-      _recordDiagnostic('show_failed', {
-        'source': 'diagnostic',
-        'error': _safeErrorSummary(error),
-      });
       return HikeReminderResult(
         status: HikeReminderStatus.retryableFailure,
         message:
@@ -3501,10 +2752,7 @@ class HikeNotificationService extends ChangeNotifier
             'openNotificationSettings',
           ) ??
           false;
-    } catch (error) {
-      _recordDiagnostic('open_notification_settings_failed', {
-        'error': _safeErrorSummary(error),
-      });
+    } catch (_) {
       return false;
     }
   }
