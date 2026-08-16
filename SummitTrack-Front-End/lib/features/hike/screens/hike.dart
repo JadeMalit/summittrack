@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
-// 🟢 Import ng Live Tracking Service na ginawa natin
+// 🟢 Import ng Live Tracking Service
 import '../../../services/tracking/live_tracking_service.dart';
 import '../../../services/location/location_service.dart';
 import '../models/scheduled_hike.dart';
@@ -18,7 +18,7 @@ class HikeScreen extends StatefulWidget {
 class _HikeScreenState extends State<HikeScreen> {
   final HikeScheduleStore _scheduleStore = HikeScheduleStore.instance;
   final LocationService _locationService = const LocationService();
-  
+
   // 🛰️ Service para sa Live GPS Broadcasting
   final LiveTrackingSenderService _trackingService = LiveTrackingSenderService();
 
@@ -36,17 +36,21 @@ class _HikeScreenState extends State<HikeScreen> {
     _scheduleStore.load();
   }
 
-  /// 🟢 100% WORKING LIVE TRACKING SHARE LINK
+  /// 🟢 DIREKTA SA APP (Custom URL Scheme para sa iOS at Android)
   Future<void> _shareLiveLocationLink(ScheduledHike hike) async {
-    final String trackingUrl =
+    // Rekta sa SummitTrack app (Hindi na dadaan sa web landing page)
+    final String directAppLink = 'summittrack://track?hikeId=${hike.id}';
+    final String webFallbackLink =
         'https://summittrack-10481.web.app/track?hikeId=${hike.id}';
 
     final String message =
         '🚀 Sundan ang aking live hike sa SummitTrack!\n'
         'Bundok: ${hike.mountainName}\n'
         'Trail: ${hike.trailName}\n\n'
-        'I-tap ang link para buksan sa SummitTrack App:\n'
-        '$trackingUrl';
+        '📲 Buksan direkta sa SummitTrack App:\n'
+        '$directAppLink\n\n'
+        '🌐 O buksan sa browser kung walang app:\n'
+        '$webFallbackLink';
 
     try {
       await Share.share(
@@ -56,7 +60,7 @@ class _HikeScreenState extends State<HikeScreen> {
     } catch (e) {
       debugPrint('Share Sheet error: $e');
 
-      await Clipboard.setData(ClipboardData(text: trackingUrl));
+      await Clipboard.setData(ClipboardData(text: directAppLink));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -87,7 +91,6 @@ class _HikeScreenState extends State<HikeScreen> {
       });
 
       try {
-        // 🛑 STOP BROADCASTING
         await _trackingService.stopLiveBroadcasting(hike.id);
       } catch (e) {
         debugPrint('Error stopping broadcast: $e');
@@ -116,8 +119,7 @@ class _HikeScreenState extends State<HikeScreen> {
       final readiness = await _locationService.requestNavigationReadiness();
 
       if (readiness.status == LocationReadinessStatus.permissionDenied ||
-          readiness.status ==
-              LocationReadinessStatus.permissionDeniedForever ||
+          readiness.status == LocationReadinessStatus.permissionDeniedForever ||
           readiness.status == LocationReadinessStatus.serviceDisabled) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -132,10 +134,7 @@ class _HikeScreenState extends State<HikeScreen> {
       });
 
       try {
-        // 🚀 START REAL BROADCASTING (Kusa nitong kukunin ang totoong user name & GPS)
-        await _trackingService.startLiveBroadcasting(
-          hikeId: hike.id,
-        );
+        await _trackingService.startLiveBroadcasting(hikeId: hike.id);
       } catch (e) {
         debugPrint('Error starting broadcast: $e');
       }
