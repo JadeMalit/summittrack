@@ -66,7 +66,10 @@ class TrailPhotoModel {
     );
 
     return TrailPhotoModel(
-      id: _readString(data['id']) ?? document.id,
+      id:
+          _readString(data['mediaId']) ??
+          _readString(data['id']) ??
+          document.id,
       uid:
           _readString(data['uid']) ??
           _readString(data['ownerUid']) ??
@@ -92,7 +95,9 @@ class TrailPhotoModel {
   Map<String, dynamic> toFirestore() {
     return {
       'id': id,
+      'mediaId': id,
       'uid': uid,
+      'userId': uid,
       'trailId': trailId,
       'downloadUrl': downloadUrl,
       'storagePath': storagePath,
@@ -100,6 +105,7 @@ class TrailPhotoModel {
       'updatedAt': Timestamp.fromDate(updatedAt),
       'fileName': fileName,
       'mediaType': mediaType,
+      'type': mediaType,
       'mediaUrl': downloadUrl,
       if (isVideo) 'videoUrl': downloadUrl,
       if (!isVideo) 'photoUrl': downloadUrl,

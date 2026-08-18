@@ -10,14 +10,41 @@ service firebase.storage {
       return signedIn() && request.auth.uid == uid;
     }
 
-    function isValidTrailPhotoUpload(uid, trailId) {
+    function isSupportedMediaUpload() {
       return request.resource != null
+        && request.resource.size <= 150 * 1024 * 1024
         && (
           request.resource.contentType.matches('image/.*')
           || request.resource.contentType.matches('video/.*')
+        );
+    }
+
+    function isValidUserMediaUpload(uid, mediaFile) {
+      return isSupportedMediaUpload()
+        && request.resource.metadata.uid == uid
+        && request.resource.metadata.userId == uid
+        && request.resource.metadata.mediaId is string
+        && request.resource.metadata.mediaId.size() > 0
+        && request.resource.metadata.trailId is string
+        && request.resource.metadata.trailId.size() > 0
+        && (
+          request.resource.metadata.mediaType == 'image'
+          || request.resource.metadata.mediaType == 'video'
         )
+        && request.resource.metadata.storagePath == 'users/' + uid + '/media/' + mediaFile;
+    }
+
+    function isValidTrailPhotoUpload(uid, trailId) {
+      return isSupportedMediaUpload()
         && request.resource.metadata.uid == uid
         && request.resource.metadata.trailId == trailId;
+    }
+
+    match /users/{uid}/media/{mediaFile} {
+      allow read: if ownsTrailPhotoFolder(uid);
+      allow create, update: if ownsTrailPhotoFolder(uid)
+        && isValidUserMediaUpload(uid, mediaFile);
+      allow delete: if ownsTrailPhotoFolder(uid);
     }
 
     match /trail_photos/{uid}/{trailId}/{photoFile} {

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 import '../../core/config/app_config.dart';
+import '../../features/hike/screens/hike.dart';
 import '../../models/hike_navigation_start_request.dart';
 import '../../models/hiking_route.dart';
 import '../../models/route_coordinate.dart';
@@ -313,9 +314,54 @@ class _HikeNavigationScreenState extends State<HikeNavigationScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                backgroundColor: const Color(
+                  0xFF3FA65B,
+                ).withValues(alpha: 0.12),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                side: BorderSide(
+                  color: const Color(0xFF3FA65B).withValues(alpha: 0.72),
+                  width: 1.2,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              icon: const Icon(
+                Icons.hiking_rounded,
+                color: Color(0xFF8DEB6B),
+                size: 19,
+              ),
+              label: Text(
+                'View Live Hike Dashboard',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              onPressed: _openLiveHikeDashboard,
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _openLiveHikeDashboard() async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const HikeScreen()));
   }
 
   LatLng _initialMapTarget() {

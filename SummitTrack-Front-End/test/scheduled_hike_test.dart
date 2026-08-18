@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:summittrack/core/routing/app_routes.dart';
 import 'package:summittrack/features/hike/models/scheduled_hike.dart';
 import 'package:summittrack/features/hike/services/hike_schedule_store.dart';
 import 'package:summittrack/features/hike/utils/mountain_schedule_identity.dart';
+import 'package:summittrack/features/mountains/screens/trail_detail_screen.dart';
 
 void main() {
   group('ScheduledHike', () {
@@ -304,6 +306,37 @@ void main() {
       );
 
       expect(match?.id, hike.id);
+    });
+  });
+
+  group('Trail detail navigation control visibility scope', () {
+    test('gates only Mt. Apo Sta. Cruz/Sibulan behind a valid schedule', () {
+      expect(
+        shouldGateTrailNavigationBehindScheduledHike(
+          mountainId: AppRoutes.mtApoMountainId,
+          trailPhotoId: 'sta_cruz_sibulan',
+          navigationTrailId: AppRoutes.staCruzTrailId,
+        ),
+        isTrue,
+      );
+
+      expect(
+        shouldGateTrailNavigationBehindScheduledHike(
+          mountainId: AppRoutes.mtApoMountainId,
+          trailPhotoId: 'kapatagan',
+          navigationTrailId: AppRoutes.kapataganTrailId,
+        ),
+        isFalse,
+      );
+
+      expect(
+        shouldGateTrailNavigationBehindScheduledHike(
+          mountainId: AppRoutes.mtPulagMountainId,
+          trailPhotoId: 'sta_cruz_sibulan',
+          navigationTrailId: AppRoutes.staCruzTrailId,
+        ),
+        isFalse,
+      );
     });
   });
 }

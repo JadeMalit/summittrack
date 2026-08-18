@@ -19,6 +19,8 @@ class TrailPhotoException implements Exception {
 class TrailPhotoService {
   static const staCruzSibulanTrailId = 'sta_cruz_sibulan';
   static const kapataganTrailId = 'kapatagan';
+  static const _mediaCollectionName = 'media';
+  static const _legacyTrailPhotosCollectionName = 'trail_photos';
   static const _permissionMessage =
       'You do not have permission to access this media.';
 
@@ -67,7 +69,7 @@ class TrailPhotoService {
     final user = _requireUser();
     final normalizedTrailId = _safeTrailId(trailId);
     final normalizedMediaType = TrailPhotoModel.normalizeMediaType(mediaType);
-    final photoDocument = _photoCollection(user.uid, normalizedTrailId).doc();
+    final photoDocument = _mediaCollection(user.uid).doc();
     final safeFileName = _safeFileName(
       fileName,
       photoDocument.id,
@@ -75,7 +77,7 @@ class TrailPhotoService {
     );
     final fileExtension = _extensionFor(safeFileName, normalizedMediaType);
     final storagePath =
-        'trail_photos/${user.uid}/$normalizedTrailId/${photoDocument.id}.$fileExtension';
+        'users/${user.uid}/media/${photoDocument.id}.$fileExtension';
     final storageRef = _storage.ref(storagePath);
     final resolvedContentType = _contentTypeFor(
       contentType,
@@ -85,7 +87,7 @@ class TrailPhotoService {
     _debugLog(
       'uploadMedia',
       'uid=${user.uid}, email=${user.email}, trailId=$normalizedTrailId, '
-          'firestorePath=${_photoCollectionPath(user.uid, normalizedTrailId)}/${photoDocument.id}, '
+          'firestorePath=${_mediaCollectionPath(user.uid)}/${photoDocument.id}, '
           'storagePath=$storagePath, mediaType=$normalizedMediaType',
     );
 
@@ -96,8 +98,11 @@ class TrailPhotoService {
           contentType: resolvedContentType,
           customMetadata: {
             'uid': user.uid,
+            'userId': user.uid,
+            'mediaId': photoDocument.id,
             if (user.email != null) 'ownerEmail': user.email!,
             'trailId': normalizedTrailId,
+            'storagePath': storagePath,
             'originalFileName': safeFileName,
             'mediaType': normalizedMediaType,
             if (duration != null) 'durationSeconds': '${duration.inSeconds}',
@@ -162,7 +167,7 @@ class TrailPhotoService {
     _debugLog(
       'savePhotoMetadata',
       'uid=$uid, trailId=$normalizedTrailId, '
-          'firestorePath=${_photoCollectionPath(uid, normalizedTrailId)}/${photo.id}, '
+          'firestorePath=${_mediaCollectionPath(uid)}/${photo.id}, '
           'storagePath=${photo.storagePath}',
     );
     if (photo.uid.isNotEmpty && photo.uid != uid) {
@@ -174,7 +179,7 @@ class TrailPhotoService {
       throw const TrailPhotoException(_permissionMessage);
     }
 
-    await _photoCollection(uid, normalizedTrailId)
+    await _mediaCollection(uid)
         .doc(photo.id)
         .set(
           photo
@@ -218,42 +223,56 @@ class TrailPhotoService {
     }
 
     final normalizedTrailId = _safeTrailId(trailId);
-    final firestorePath = _photoCollectionPath(uid, normalizedTrailId);
+    final firestorePath = _mediaCollectionPath(uid);
+    final legacyFirestorePath = _photoCollectionPath(uid, normalizedTrailId);
     _debugLog(
       'fetchUserPhotos',
       'query start uid=$uid, email=${_auth.currentUser?.email}, trailId=$normalizedTrailId, '
-          'firestorePath=$firestorePath',
+          'firestorePath=$firestorePath, legacyFirestorePath=$legacyFirestorePath',
     );
 
     try {
-      final snapshot = await _photoCollection(uid, normalizedTrailId).get();
+      final mediaSnapshot = await _mediaCollection(
+        uid,
+      ).where('trailId', isEqualTo: normalizedTrailId).get();
+      final legacySnapshot = await _photoCollection(
+        uid,
+        normalizedTrailId,
+      ).get();
 
-      final photos = snapshot.docs
-          .map(TrailPhotoModel.fromFirestore)
-          .map(
-            (photo) => photo.copyWith(
-              uid: photo.uid.isEmpty ? uid : photo.uid,
-              trailId: photo.trailId.isEmpty
-                  ? normalizedTrailId
-                  : photo.trailId,
-              storagePath: _normalizeStoragePath(photo.storagePath),
-              mediaType: TrailPhotoModel.normalizeMediaType(photo.mediaType),
-            ),
-          )
-          .where(
-            (photo) =>
-                photo.downloadUrl.isNotEmpty &&
-                photo.uid == uid &&
-                photo.trailId == normalizedTrailId &&
-                (photo.storagePath.isEmpty ||
-                    _storagePathBelongsToUser(photo.storagePath, uid)),
-          )
-          .toList();
+      final photos =
+          <QueryDocumentSnapshot<Map<String, dynamic>>>[
+                ...mediaSnapshot.docs,
+                ...legacySnapshot.docs,
+              ]
+              .map(TrailPhotoModel.fromFirestore)
+              .map(
+                (photo) => photo.copyWith(
+                  uid: photo.uid.isEmpty ? uid : photo.uid,
+                  trailId: photo.trailId.isEmpty
+                      ? normalizedTrailId
+                      : photo.trailId,
+                  storagePath: _normalizeStoragePath(photo.storagePath),
+                  mediaType: TrailPhotoModel.normalizeMediaType(
+                    photo.mediaType,
+                  ),
+                ),
+              )
+              .where(
+                (photo) =>
+                    photo.downloadUrl.isNotEmpty &&
+                    photo.uid == uid &&
+                    photo.trailId == normalizedTrailId &&
+                    (photo.storagePath.isEmpty ||
+                        _storagePathBelongsToUser(photo.storagePath, uid)),
+              )
+              .toList();
       photos.sort((a, b) => a.createdAt.compareTo(b.createdAt));
       _debugLog(
         'fetchUserPhotos',
         'query complete uid=$uid, trailId=$normalizedTrailId, '
-            'rawCount=${snapshot.docs.length}, resultCount=${photos.length}',
+            'rawCount=${mediaSnapshot.docs.length}, legacyRawCount=${legacySnapshot.docs.length}, '
+            'resultCount=${photos.length}',
       );
 
       return photos;
@@ -278,7 +297,7 @@ class TrailPhotoService {
     _debugLog(
       'deletePhoto',
       'uid=$uid, trailId=$normalizedTrailId, '
-          'firestorePath=${_photoCollectionPath(uid, normalizedTrailId)}/${photo.id}, '
+          'firestorePath=${_usesLegacyTrailPhotoCollection(photo.storagePath) ? _photoCollectionPath(uid, normalizedTrailId) : _mediaCollectionPath(uid)}/${photo.id}, '
           'storagePath=${photo.storagePath}',
     );
     if (photo.uid.isNotEmpty && photo.uid != uid) {
@@ -293,6 +312,7 @@ class TrailPhotoService {
       photo.id,
       userId: uid,
       trailId: normalizedTrailId,
+      storagePath: photo.storagePath,
     );
   }
 
@@ -338,17 +358,28 @@ class TrailPhotoService {
     String photoId, {
     String? userId,
     String trailId = staCruzSibulanTrailId,
+    String storagePath = '',
   }) async {
     final uid = _requireOwnedUserId(userId);
     final normalizedTrailId = _safeTrailId(trailId);
+    final normalizedStoragePath = _normalizeStoragePath(storagePath);
+    final isLegacyPhoto = _usesLegacyTrailPhotoCollection(
+      normalizedStoragePath,
+    );
+    final collection = isLegacyPhoto
+        ? _photoCollection(uid, normalizedTrailId)
+        : _mediaCollection(uid);
+    final collectionPath = isLegacyPhoto
+        ? _photoCollectionPath(uid, normalizedTrailId)
+        : _mediaCollectionPath(uid);
     _debugLog(
       'deletePhotoFromFirestore',
       'delete start uid=$uid, trailId=$normalizedTrailId, '
-          'firestorePath=${_photoCollectionPath(uid, normalizedTrailId)}/$photoId',
+          'firestorePath=$collectionPath/$photoId',
     );
 
     try {
-      await _photoCollection(uid, normalizedTrailId).doc(photoId).delete();
+      await collection.doc(photoId).delete();
     } catch (error) {
       _logFirebaseError('deletePhotoFromFirestore', error);
       throw TrailPhotoException(
@@ -367,13 +398,24 @@ class TrailPhotoService {
     return _firestore
         .collection('users')
         .doc(userId)
-        .collection('trail_photos')
+        .collection(_legacyTrailPhotosCollectionName)
         .doc(trailId)
         .collection('photos');
   }
 
   String _photoCollectionPath(String userId, String trailId) {
-    return 'users/$userId/trail_photos/$trailId/photos';
+    return 'users/$userId/$_legacyTrailPhotosCollectionName/$trailId/photos';
+  }
+
+  CollectionReference<Map<String, dynamic>> _mediaCollection(String userId) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection(_mediaCollectionName);
+  }
+
+  String _mediaCollectionPath(String userId) {
+    return 'users/$userId/$_mediaCollectionName';
   }
 
   User _requireUser() {
@@ -431,22 +473,32 @@ class TrailPhotoService {
 
   bool _storagePathBelongsToUser(String storagePath, String userId) {
     final normalizedStoragePath = _normalizeStoragePath(storagePath);
-    return normalizedStoragePath == 'trail_photos/$userId' ||
+    return normalizedStoragePath == 'users/$userId/media' ||
+        normalizedStoragePath.startsWith('users/$userId/media/') ||
+        normalizedStoragePath == 'trail_photos/$userId' ||
         normalizedStoragePath.startsWith('trail_photos/$userId/');
   }
 
   String _normalizeStoragePath(String storagePath) {
-    final trimmedPath = _decodePath(storagePath.trim().replaceAll(r'\', '/'));
+    final trimmedPath = _decodePath(
+      storagePath.trim().replaceAll(r'\', '/'),
+    ).split('?').first;
     if (trimmedPath.isEmpty) {
       return '';
     }
 
-    final storageRootIndex = trimmedPath.indexOf('trail_photos/');
-    if (storageRootIndex != -1) {
-      return trimmedPath.substring(storageRootIndex);
+    for (final storageRoot in ['users/', 'trail_photos/']) {
+      final storageRootIndex = trimmedPath.indexOf(storageRoot);
+      if (storageRootIndex != -1) {
+        return trimmedPath.substring(storageRootIndex);
+      }
     }
 
     return trimmedPath.replaceFirst(RegExp(r'^/+'), '');
+  }
+
+  bool _usesLegacyTrailPhotoCollection(String storagePath) {
+    return _normalizeStoragePath(storagePath).startsWith('trail_photos/');
   }
 
   String _decodePath(String path) {
@@ -519,7 +571,7 @@ class TrailPhotoService {
           'Network connection is unavailable. Please try again.',
         'deadline-exceeded' =>
           'Network connection is unavailable. Please try again.',
-        'unauthenticated' => 'Please sign in first before saving photos.',
+        'unauthenticated' => 'Please sign in first before saving media.',
         _ => fallback,
       };
     }

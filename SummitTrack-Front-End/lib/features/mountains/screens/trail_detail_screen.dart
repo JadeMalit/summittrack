@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -10,9 +12,7 @@ import '../../../data/trail_data/trail_gps_helper.dart';
 import '../../../data/trail_data/trail_waypoint_helper.dart';
 import '../../../models/hike_navigation_metadata.dart';
 import '../../../screens/navigation/hike_navigation_confirmation.dart';
-import '../../../services/tracking/hike_tracking_service.dart';
 import '../../hike/models/scheduled_hike.dart';
-import '../../hike/screens/hike.dart';
 import '../../hike/screens/lets_hike_calendar_weather_modal.dart';
 import '../../hike/services/hike_schedule_store.dart';
 import '../../hike/utils/mountain_schedule_identity.dart';
@@ -52,6 +52,25 @@ bool _isSameManilaDate(DateTime hikeDate, DateTime? now) {
   return hikeDateKey == todayKey;
 }
 
+const _staCruzSibulanTrailPhotoId = 'sta_cruz_sibulan';
+
+@visibleForTesting
+bool shouldGateTrailNavigationBehindScheduledHike({
+  required String mountainId,
+  required String trailPhotoId,
+  String? navigationTrailId,
+}) {
+  final normalizedMountainId = MountainScheduleIdentity.normalizeMountainId(
+    mountainId,
+  );
+  final isStaCruzSibulanTrail =
+      trailPhotoId == _staCruzSibulanTrailPhotoId ||
+      navigationTrailId == AppRoutes.staCruzTrailId;
+
+  return normalizedMountainId == AppRoutes.mtApoMountainId &&
+      isStaCruzSibulanTrail;
+}
+
 class TrailDetailScreen extends StatelessWidget {
   const TrailDetailScreen({
     super.key,
@@ -76,7 +95,7 @@ class TrailDetailScreen extends StatelessWidget {
     final mountainName = MountainScheduleIdentity.displayNameForMountainId(
       mountainId,
     );
-  final navigationMetadata = NavigationTrails.forTrailId(trailPhotoId);
+    final navigationMetadata = NavigationTrails.forTrailId(trailPhotoId);
 
     // 🏔️ Waypoints, Peak Elevation & Distance
     final waypoints = TrailWaypointHelper.getWaypointsForTrail(
@@ -185,14 +204,13 @@ class TrailDetailScreen extends StatelessWidget {
                       const SizedBox(height: 10),
                       const _OfflineTrailAccessCard(),
                     ] else ...[
-                      if (navigationMetadata?.isNavigationEnabled == true) ...[
-                        const SizedBox(height: 18),
-                        const _SectionHeading(title: 'Navigation'),
-                        const SizedBox(height: 10),
-                        _StartNavigationButton(metadata: navigationMetadata!),
-                        const SizedBox(height: 10),
-                        const _ViewLiveHikeDashboardButton(),
-                      ],
+                      _TrailNavigationSection(
+                        navigationMetadata: navigationMetadata,
+                        mountainId: mountainId,
+                        trailPhotoId: trailPhotoId,
+                        navigationTrailId: navigationTrailId,
+                        trailName: trail.name,
+                      ),
                       const SizedBox(height: 18),
                       const _SectionHeading(title: 'Add Photo or Video'),
                       const SizedBox(height: 10),
@@ -230,7 +248,7 @@ Future<void> _handleStartNavigation(
   BuildContext context,
   HikeNavigationMetadata metadata,
 ) async {
- // if (HikeTrackingService.instance.hasActiveSession) {
+  // if (HikeTrackingService.instance.hasActiveSession) {
   //  Navigator.of(context).pushNamed(AppRoutes.hikeNavigation);
   //  return;
   //}
@@ -418,7 +436,9 @@ class __LetsHikeAnimatedButtonState extends State<_LetsHikeAnimatedButton>
                               fontSize: 23,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.6,
-                              color: isDark ? Colors.white : const Color(0xFF1E261A),
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF1E261A),
                             ),
                           ),
                         ],
@@ -469,7 +489,9 @@ class __LetsHikeAnimatedButtonState extends State<_LetsHikeAnimatedButton>
       return;
     } on HikeScheduleException catch (error) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
       return;
     } catch (_) {
       if (!context.mounted) return;
@@ -524,8 +546,18 @@ class __LetsHikeAnimatedButtonState extends State<_LetsHikeAnimatedButton>
 
   String _formatHikeDate(DateTime date) {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
@@ -570,38 +602,100 @@ class GestureDetectingWrapper extends StatelessWidget {
   }
 }
 
-class _ViewLiveHikeDashboardButton extends StatelessWidget {
-  const _ViewLiveHikeDashboardButton();
+class _TrailNavigationSection extends StatefulWidget {
+  const _TrailNavigationSection({
+    required this.navigationMetadata,
+    required this.mountainId,
+    required this.trailPhotoId,
+    required this.trailName,
+    this.navigationTrailId,
+  });
+
+  final HikeNavigationMetadata? navigationMetadata;
+  final String mountainId;
+  final String trailPhotoId;
+  final String trailName;
+  final String? navigationTrailId;
+
+  @override
+  State<_TrailNavigationSection> createState() =>
+      _TrailNavigationSectionState();
+}
+
+class _TrailNavigationSectionState extends State<_TrailNavigationSection> {
+  final HikeScheduleStore _scheduleStore = HikeScheduleStore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadScheduleIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(covariant _TrailNavigationSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _loadScheduleIfNeeded();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          side: const BorderSide(color: Color(0xFF3FA65B), width: 2),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-        ),
-        icon: const Icon(Icons.hiking_rounded, color: Color(0xFF3FA65B)),
-        label: Text(
-          'View Live Hike Dashboard',
-          style: GoogleFonts.fredoka(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: context.isDarkMode ? Colors.white : const Color(0xFF1E261A),
-          ),
-        ),
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const HikeScreen(),
-            ),
-          );
-        },
-      ),
+    final metadata = widget.navigationMetadata;
+    if (metadata?.isNavigationEnabled != true) {
+      return const SizedBox.shrink();
+    }
+
+    if (!_requiresScheduledHike) {
+      return _NavigationControls(metadata: metadata!);
+    }
+
+    return ListenableBuilder(
+      listenable: _scheduleStore,
+      builder: (context, _) {
+        final activeHike = _scheduleStore.activeHikeForTrailToday(
+          widget.mountainId,
+          widget.trailPhotoId,
+          trailName: widget.trailName,
+        );
+
+        if (activeHike == null) {
+          return const SizedBox.shrink();
+        }
+
+        return _NavigationControls(metadata: metadata!);
+      },
+    );
+  }
+
+  bool get _requiresScheduledHike {
+    return shouldGateTrailNavigationBehindScheduledHike(
+      mountainId: widget.mountainId,
+      trailPhotoId: widget.trailPhotoId,
+      navigationTrailId: widget.navigationTrailId,
+    );
+  }
+
+  void _loadScheduleIfNeeded() {
+    if (_requiresScheduledHike) {
+      unawaited(_scheduleStore.load());
+    }
+  }
+}
+
+class _NavigationControls extends StatelessWidget {
+  const _NavigationControls({required this.metadata});
+
+  final HikeNavigationMetadata metadata;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 18),
+        const _SectionHeading(title: 'Navigation'),
+        const SizedBox(height: 10),
+        _StartNavigationButton(metadata: metadata),
+      ],
     );
   }
 }

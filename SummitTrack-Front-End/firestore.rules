@@ -17,6 +17,24 @@ service cloud.firestore {
         && request.resource.data.storagePath.matches('^trail_photos/' + uid + '/' + trailId + '/[^/]+$');
     }
 
+    function ownsMediaData(uid, mediaId) {
+      return request.resource.data.uid == uid
+        && request.resource.data.userId == uid
+        && request.resource.data.id == mediaId
+        && request.resource.data.mediaId == mediaId
+        && request.resource.data.trailId is string
+        && request.resource.data.trailId.size() > 0
+        && request.resource.data.storagePath is string
+        && request.resource.data.storagePath.matches('^users/' + uid + '/media/' + mediaId + '\\.[^/]+$')
+        && request.resource.data.downloadUrl is string
+        && request.resource.data.downloadUrl.size() > 0
+        && request.resource.data.mediaUrl == request.resource.data.downloadUrl
+        && request.resource.data.mediaType in ['image', 'video']
+        && request.resource.data.type == request.resource.data.mediaType
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+    }
+
     function ownsScheduledHikeData(uid) {
       return request.resource.data.ownerUid == uid
         && request.resource.data.userId == uid
@@ -97,6 +115,12 @@ service cloud.firestore {
           && ownsDeviceData()
           && request.resource.data.updatedAt == request.time;
         allow delete: if false;
+      }
+
+      match /media/{mediaId} {
+        allow read: if ownsUserDocument(uid);
+        allow create, update: if ownsUserDocument(uid) && ownsMediaData(uid, mediaId);
+        allow delete: if ownsUserDocument(uid);
       }
 
       match /trail_photos/{trailId}/photos/{photoId} {
