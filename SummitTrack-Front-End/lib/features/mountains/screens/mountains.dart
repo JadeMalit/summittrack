@@ -66,6 +66,7 @@ class MountainsScreen extends StatelessWidget {
               child: ListView.builder(
                 shrinkWrap:
                     true, // Ensures that the ListView takes only the space it needs
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: mountains.length,
                 itemBuilder: (context, index) {
                   final mountain = mountains[index];

@@ -10,9 +10,30 @@ admin.initializeApp();
 
 const graphHopperApiKey =
   defineSecret("GRAPHHOPPER_API_KEY");
+const openWeatherApiKey =
+  defineSecret("OPENWEATHER_API_KEY");
 
 const allowedGraphHopperProfiles = new Set(["foot", "hike"]);
 const defaultGraphHopperProfile = "hike";
+const weatherServiceUnavailableMessage =
+  "Weather service is currently unavailable.";
+
+const redactSensitiveText = (value) => {
+  return String(value)
+      .replace(
+          /([?&](?:appid|key|api_key|token|secret)=)[^&\s]+/gi,
+          "$1[REDACTED]",
+      )
+      .replace(/\bBearer\s+[A-Za-z0-9._~+/=-]+/gi, "Bearer [REDACTED]");
+};
+
+const safeExternalErrorMessage = (error) => {
+  if (error instanceof Error && typeof error.message === "string") {
+    return redactSensitiveText(error.message);
+  }
+
+  return "Unknown external service error.";
+};
 
 const buildOpenWeatherUrl = (lat, lon, apiKey) => {
   const url = new URL("https://api.openweathermap.org/data/2.5/weather");
@@ -64,55 +85,97 @@ const {
 exports.sendImmediateSameDayScheduledHikeNotification =
   sendImmediateSameDayScheduledHikeNotification;
 exports.sendScheduledHikeNotifications = sendScheduledHikeNotifications;
-exports.getSummitTrackWeather = onRequest((req, res) => {
-  cors(req, res, async () => {
-    try {
-      const {lat, lon} = req.query;
+exports.getSummitTrackWeather = onRequest(
+    {
+      secrets: [openWeatherApiKey],
+      timeoutSeconds: 20,
+      memory: "256MiB",
+      maxInstances: 10,
+    },
+    (req, res) => {
+      cors(req, res, async () => {
+        try {
+          const {lat, lon} = req.query;
 
-      if (!lat || !lon) {
-        return res.status(400).json({
-          error: "Missing lat or lon parameters.",
-        });
-      }
+          if (!lat || !lon) {
+            return res.status(400).json({
+              error: "Missing lat or lon parameters.",
+            });
+          }
 
-      const openWeatherApiKey = process.env.OPENWEATHER_API_KEY;
+          const latitude = Number(lat);
+          const longitude = Number(lon);
 
-      if (!openWeatherApiKey) {
-        return res.status(500).json({
-          error: "Server configuration error: OpenWeather API Key is missing.",
-        });
-      }
+          if (!isValidLatitude(latitude) || !isValidLongitude(longitude)) {
+            return res.status(400).json({
+              error: "Valid lat and lon parameters are required.",
+            });
+          }
 
-      const openWeatherResponse = await fetch(
-          buildOpenWeatherUrl(lat, lon, openWeatherApiKey),
-      );
-      const currentData = await openWeatherResponse.json();
+          const weatherApiKey = openWeatherApiKey.value();
 
-      const openMeteoResponse = await fetch(buildOpenMeteoUrl(lat, lon));
-      const forecastData = await openMeteoResponse.json();
+          if (!weatherApiKey) {
+            logger.error("OpenWeather secret is unavailable.");
+            return res.status(500).json({
+              error: weatherServiceUnavailableMessage,
+            });
+          }
 
-      const combinedResponse = {
-        current: {
-          temp: Math.round(currentData.main?.temp || 0),
-          condition: currentData.weather?.[0]?.main || "Unknown",
-          description: currentData.weather?.[0]?.description || "",
-          humidity: currentData.main?.humidity || 0,
-          wind_speed: currentData.wind?.speed || 0,
-          location_name: currentData.name || "Unknown Mountain",
-        },
-        forecast: buildForecast(forecastData.daily),
-      };
+          const openWeatherResponse = await fetch(
+              buildOpenWeatherUrl(latitude, longitude, weatherApiKey),
+              {signal: AbortSignal.timeout(15000)},
+          );
 
-      return res.status(200).json(combinedResponse);
-    } catch (error) {
-      logger.error("Weather Sync Error!", error);
-      return res.status(500).json({
-        error: "May sumabog sa server side, boss!",
-        details: error.message,
+          if (!openWeatherResponse.ok) {
+            logger.error("OpenWeather request failed.", {
+              status: openWeatherResponse.status,
+            });
+            return res.status(502).json({
+              error: weatherServiceUnavailableMessage,
+            });
+          }
+
+          const currentData = await openWeatherResponse.json();
+          const openMeteoResponse = await fetch(
+              buildOpenMeteoUrl(latitude, longitude),
+              {signal: AbortSignal.timeout(15000)},
+          );
+
+          if (!openMeteoResponse.ok) {
+            logger.error("Open-Meteo request failed.", {
+              status: openMeteoResponse.status,
+            });
+            return res.status(502).json({
+              error: weatherServiceUnavailableMessage,
+            });
+          }
+
+          const forecastData = await openMeteoResponse.json();
+
+          const combinedResponse = {
+            current: {
+              temp: Math.round(currentData.main?.temp || 0),
+              condition: currentData.weather?.[0]?.main || "Unknown",
+              description: currentData.weather?.[0]?.description || "",
+              humidity: currentData.main?.humidity || 0,
+              wind_speed: currentData.wind?.speed || 0,
+              location_name: currentData.name || "Unknown Mountain",
+            },
+            forecast: buildForecast(forecastData.daily),
+          };
+
+          return res.status(200).json(combinedResponse);
+        } catch (error) {
+          logger.error("Weather request failed.", {
+            message: safeExternalErrorMessage(error),
+          });
+          return res.status(500).json({
+            error: weatherServiceUnavailableMessage,
+          });
+        }
       });
-    }
-  });
-});
+    },
+);
 
 const isValidLatitude = (value) => {
   return Number.isFinite(value) &&
@@ -304,9 +367,7 @@ exports.getGraphHopperRoute = onCall(
         }
 
         logger.error("Unexpected routing error.", {
-          message: error instanceof Error ?
-            error.message :
-            "Unknown error",
+          message: safeExternalErrorMessage(error),
           uid: request.auth.uid,
         });
 

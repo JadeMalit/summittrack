@@ -6,52 +6,30 @@ service firebase.storage {
       return request.auth != null;
     }
 
-    function ownsTrailPhotoFolder(uid) {
-      return signedIn() && request.auth.uid == uid;
-    }
-
-    function isSupportedMediaUpload() {
+    function isImageUpload() {
       return request.resource != null
-        && request.resource.size <= 150 * 1024 * 1024
-        && (
-          request.resource.contentType.matches('image/.*')
-          || request.resource.contentType.matches('video/.*')
-        );
+        && request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
     }
 
-    function isValidUserMediaUpload(uid, mediaFile) {
-      return isSupportedMediaUpload()
-        && request.resource.metadata.uid == uid
-        && request.resource.metadata.userId == uid
-        && request.resource.metadata.mediaId is string
-        && request.resource.metadata.mediaId.size() > 0
-        && request.resource.metadata.trailId is string
-        && request.resource.metadata.trailId.size() > 0
-        && (
-          request.resource.metadata.mediaType == 'image'
-          || request.resource.metadata.mediaType == 'video'
-        )
-        && request.resource.metadata.storagePath == 'users/' + uid + '/media/' + mediaFile;
+    function isVideoUpload() {
+      return request.resource != null
+        && request.resource.size <= 100 * 1024 * 1024
+        && request.resource.contentType.matches('video/.*');
     }
 
-    function isValidTrailPhotoUpload(uid, trailId) {
-      return isSupportedMediaUpload()
-        && request.resource.metadata.uid == uid
-        && request.resource.metadata.trailId == trailId;
+    match /images/{fileName} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && isImageUpload();
+      allow delete: if signedIn()
+        && resource.metadata.uid == request.auth.uid;
     }
 
-    match /users/{uid}/media/{mediaFile} {
-      allow read: if ownsTrailPhotoFolder(uid);
-      allow create, update: if ownsTrailPhotoFolder(uid)
-        && isValidUserMediaUpload(uid, mediaFile);
-      allow delete: if ownsTrailPhotoFolder(uid);
-    }
-
-    match /trail_photos/{uid}/{trailId}/{photoFile} {
-      allow read: if ownsTrailPhotoFolder(uid);
-      allow create, update: if ownsTrailPhotoFolder(uid)
-        && isValidTrailPhotoUpload(uid, trailId);
-      allow delete: if ownsTrailPhotoFolder(uid);
+    match /videos/{fileName} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && isVideoUpload();
+      allow delete: if signedIn()
+        && resource.metadata.uid == request.auth.uid;
     }
   }
 }

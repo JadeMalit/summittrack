@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/layout/app_responsive.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/state/app_mode_provider.dart';
 import '../../../core/theme/app_colors.dart';
@@ -31,12 +32,23 @@ class MountainDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             /// HEADER IMAGE
-            SizedBox(
-              height: 220,
-              width: double.infinity,
-              child: mountain.imageAsset == null
-                  ? _MountainHeaderPlaceholder(colors: colors)
-                  : Image.asset(mountain.imageAsset!, fit: BoxFit.cover),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final headerHeight = AppResponsive.clampedWidthHeight(
+                  constraints.maxWidth,
+                  ratio: 0.58,
+                  min: 180,
+                  max: 240,
+                );
+
+                return SizedBox(
+                  height: headerHeight,
+                  width: double.infinity,
+                  child: mountain.imageAsset == null
+                      ? _MountainHeaderPlaceholder(colors: colors)
+                      : Image.asset(mountain.imageAsset!, fit: BoxFit.cover),
+                );
+              },
             ),
 
             Padding(

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/layout/app_responsive.dart';
 import '../../../core/routing/mountain_screen_resolver.dart';
 import '../../../core/state/app_mode_provider.dart';
 import '../../../core/theme/app_colors.dart';
@@ -86,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final resultCountLabel = mountains.length == 1
         ? '1 mountain'
         : '${mountains.length} mountains';
+    final bottomClearance = AppResponsive.floatingNavClearance(context);
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -167,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
               if (mountains.isEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                    padding: EdgeInsets.fromLTRB(20, 0, 20, bottomClearance),
                     child: _EmptyMountainState(
                       hasActiveSearch: hasActiveSearch,
                       darkGreen: darkGreen,
@@ -180,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                  padding: EdgeInsets.fromLTRB(20, 0, 20, bottomClearance),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       return Padding(

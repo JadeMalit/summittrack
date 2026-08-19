@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/layout/app_responsive.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../helpers/gmail_email_validator.dart';
 import '../../widgets/google_sign_in_button.dart';
@@ -562,6 +563,7 @@ class _SignUpScreenState extends State<SignUpScreen>
     final gradient = const LinearGradient(
       colors: [Colors.lightGreenAccent, Colors.green],
     );
+    final compact = AppResponsive.isCompactWidth(context);
 
     return PopScope(
       canPop: !_isBusy,
@@ -585,7 +587,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                             opacity: _fadeAnimation,
                             child: Image.asset(
                               "assets/images/logo.jpg",
-                              height: 110,
+                              height: compact ? 92 : 110,
                             ),
                           ),
                           const SizedBox(height: 5),
@@ -599,7 +601,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                               child: Text(
                                 "Pre-Hike",
                                 style: GoogleFonts.raleway(
-                                  fontSize: 34,
+                                  fontSize: compact ? 31 : 34,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 2,
                                   color: Colors.white,
@@ -607,7 +609,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                               ),
                             ),
                           ),
-                          const SizedBox(height: 25),
+                          SizedBox(height: compact ? 18 : 25),
 
                           /// FULL NAME
                           _labelStyle("Full Name"),
@@ -778,11 +780,14 @@ class _SignUpScreenState extends State<SignUpScreen>
                           const SizedBox(height: 20),
 
                           /// REGISTER LINK WITH LEFT-TO-RIGHT SLIDE
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 4,
+                            runSpacing: 2,
                             children: [
                               Text(
-                                "Already have an Account? ",
+                                "Already have an Account?",
                                 style: GoogleFonts.poppins(
                                   color: Colors.white,
                                   fontSize: 15,

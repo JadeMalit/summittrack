@@ -82,7 +82,8 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
         borderRadius: BorderRadius.circular(26),
         child: SafeArea(
           top: false,
-          child: Padding(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
             child: Form(
               key: _formKey,

@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../core/config/app_config.dart';
+
 class WeatherService {
   /// 🌐 LIVE PRODUCTION URL (Gumagana sa Web, Android, at iOS nang walang emulator)
-  static String get _baseUrl =>
-      'https://us-central1-summittrack-10481.cloudfunctions.net/getSummitTrackWeather';
+  static String get _baseUrl => AppConfig.weatherFunctionUrl;
 
   // 🗺️ Dictionary ng Coordinates para sa panloob na pag-map ng mga bundok kapag String ang ipinasa
   final Map<String, List<double>> _mountainCoordinates = {
@@ -25,7 +26,14 @@ class WeatherService {
   /// Kukuha ng 15-day forecast gamit ang lat/lon positional parameters
   Future<Map<String, dynamic>> fetch15DayWeather(double lat, double lon) async {
     try {
-      final url = Uri.parse('$_baseUrl?lat=$lat&lon=$lon');
+      final baseUri = Uri.parse(_baseUrl);
+      final url = baseUri.replace(
+        queryParameters: {
+          ...baseUri.queryParameters,
+          'lat': lat.toString(),
+          'lon': lon.toString(),
+        },
+      );
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -33,8 +41,8 @@ class WeatherService {
       } else {
         throw Exception('Server returned status code: ${response.statusCode}');
       }
-    } catch (e) {
-      throw Exception('Failed to fetch mountain weather: $e');
+    } catch (_) {
+      throw Exception('Failed to fetch mountain weather.');
     }
   }
 
@@ -57,14 +65,12 @@ class WeatherService {
       return {
         "current": {
           "temp_c": tempValue,
-          "condition": {
-            "text": conditionText,
-          }
+          "condition": {"text": conditionText},
         },
         "forecast": newData['forecast'] ?? [],
       };
-    } catch (e) {
-      throw Exception('Legacy getWeather failed: $e');
+    } catch (_) {
+      throw Exception('Legacy getWeather failed.');
     }
   }
 }

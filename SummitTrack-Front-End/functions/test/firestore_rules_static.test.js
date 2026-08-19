@@ -18,8 +18,11 @@ const scheduledHikesBlock = rules.match(
 const mediaBlock = rules.match(
     /match \/media\/\{mediaId\} {[\s\S]*?\n {6}}/,
 )?.[0] || "";
-const userMediaStorageBlock = storageRules.match(
-    /match \/users\/\{uid\}\/media\/\{mediaFile\} {[\s\S]*?\n {4}}/,
+const imageStorageBlock = storageRules.match(
+    /match \/images\/\{fileName\} {[\s\S]*?\n {4}}/,
+)?.[0] || "";
+const videoStorageBlock = storageRules.match(
+    /match \/videos\/\{fileName\} {[\s\S]*?\n {4}}/,
 )?.[0] || "";
 
 const ownerReadRuleTestName =
@@ -46,7 +49,11 @@ test("user media metadata is restricted to the authenticated UID", () => {
   );
   assert.match(
       rules,
-      /function ownsMediaData\(uid, mediaId\) \{[\s\S]*\^users\/' \+ uid \+ '\/media\/' \+ mediaId/,
+      /function ownsMediaData\(uid, mediaId\) \{[\s\S]*\^images\/' \+ mediaId/,
+  );
+  assert.match(
+      rules,
+      /function ownsMediaData\(uid, mediaId\) \{[\s\S]*\^videos\/' \+ mediaId/,
   );
   assert.match(mediaBlock, /allow read: if ownsUserDocument\(uid\);/);
   assert.match(
@@ -57,28 +64,39 @@ test("user media metadata is restricted to the authenticated UID", () => {
   assert.doesNotMatch(mediaBlock, /allow read: if true/);
 });
 
-test("storage media files are restricted to the authenticated UID", () => {
+test("storage media files require authentication and direct image/video paths", () => {
   assert.match(
       storageRules,
-      /function ownsTrailPhotoFolder\(uid\) \{[\s\S]*request\.auth\.uid == uid/,
-  );
-  assert.match(
-      storageRules,
-      /function isValidUserMediaUpload\(uid, mediaFile\) \{[\s\S]*request\.resource\.metadata\.uid == uid/,
+      /function signedIn\(\) \{[\s\S]*request\.auth != null/,
   );
   assert.match(
       storageRules,
-      /function isValidUserMediaUpload\(uid, mediaFile\) \{[\s\S]*request\.resource\.metadata\.userId == uid/,
+      /function isImageUpload\(\) \{[\s\S]*request\.resource\.size <= 10 \* 1024 \* 1024/,
   );
   assert.match(
       storageRules,
-      /request\.resource\.metadata\.storagePath == 'users\/' \+ uid \+ '\/media\/' \+ mediaFile/,
+      /function isImageUpload\(\) \{[\s\S]*request\.resource\.contentType\.matches\('image\/\.\*'\)/,
   );
-  assert.match(userMediaStorageBlock, /allow read: if ownsTrailPhotoFolder\(uid\);/);
   assert.match(
-      userMediaStorageBlock,
-      /allow create, update: if ownsTrailPhotoFolder\(uid\)\s*&& isValidUserMediaUpload\(uid, mediaFile\);/,
+      storageRules,
+      /function isVideoUpload\(\) \{[\s\S]*request\.resource\.size <= 100 \* 1024 \* 1024/,
   );
-  assert.doesNotMatch(userMediaStorageBlock, /allow read,\s*write: if true/);
-  assert.doesNotMatch(userMediaStorageBlock, /allow read: if true/);
+  assert.match(
+      storageRules,
+      /function isVideoUpload\(\) \{[\s\S]*request\.resource\.contentType\.matches\('video\/\.\*'\)/,
+  );
+  assert.match(imageStorageBlock, /allow read: if signedIn\(\);/);
+  assert.match(
+      imageStorageBlock,
+      /allow create, update: if signedIn\(\) && isImageUpload\(\);/,
+  );
+  assert.match(videoStorageBlock, /allow read: if signedIn\(\);/);
+  assert.match(
+      videoStorageBlock,
+      /allow create, update: if signedIn\(\) && isVideoUpload\(\);/,
+  );
+  assert.doesNotMatch(imageStorageBlock, /allow read,\s*write: if true/);
+  assert.doesNotMatch(imageStorageBlock, /allow read: if true/);
+  assert.doesNotMatch(videoStorageBlock, /allow read,\s*write: if true/);
+  assert.doesNotMatch(videoStorageBlock, /allow read: if true/);
 });

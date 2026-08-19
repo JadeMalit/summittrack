@@ -1,4 +1,4 @@
-﻿
+
 08-06 12:49:14.533  1705  1751 W NotificationHistory: Attempted to remove conversation for locked/gone/disabled user 0
 08-06 12:49:17.383  1705  2014 I SmartPower: com.openai.chatgpt/10317(11104): background->idle(3795ms) R(service end 
 com.openai.chatgpt/com.openai.feature.notification.impl.NotificationService) adj=905.
@@ -880,7 +880,7 @@ topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainAc
 realActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} numActivities=1 
 lastActiveTime=61901000 supportsSplitScreenMultiWindow=true mSoScDisplayMode=-1 supportsMultiWindow=true resizeMode=1 
 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=200 
-token=WCT{android.window.IWindowContainerToken$Stub$Proxy@e494d21} topActivityType=1 pictureInPictureParams=null 
+token=[REDACTED]} topActivityType=1 pictureInPictureParams=null 
 shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 
 121 - 0, 0) topActivityInfo=ActivityInfo{33c1546 com.example.summittrack.MainActivity} launchCookies=[] 
 positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false 
@@ -906,7 +906,7 @@ topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainAc
 realActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} numActivities=1 
 lastActiveTime=61901000 supportsSplitScreenMultiWindow=true mSoScDisplayMode=-1 supportsMultiWindow=true resizeMode=1 
 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=200 
-token=WCT{android.window.IWindowContainerToken$Stub$Proxy@e494d21} topActivityType=1 pictureInPictureParams=null 
+token=[REDACTED]} topActivityType=1 pictureInPictureParams=null 
 shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 
 121 - 0, 0) topActivityInfo=ActivityInfo{33c1546 com.example.summittrack.MainActivity} launchCookies=[] 
 positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false 
@@ -955,7 +955,7 @@ topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainAc
 realActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} numActivities=1 
 lastActiveTime=61901107 supportsSplitScreenMultiWindow=true mSoScDisplayMode=-1 supportsMultiWindow=true resizeMode=1 
 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=200 
-token=WCT{android.window.IWindowContainerToken$Stub$Proxy@40aaf1c} topActivityType=1 pictureInPictureParams=null 
+token=[REDACTED]} topActivityType=1 pictureInPictureParams=null 
 shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 
 - 0, 0) topActivityInfo=ActivityInfo{58f4725 com.example.summittrack.MainActivity} launchCookies=[] 
 positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=true 
@@ -1014,7 +1014,7 @@ topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainAc
 realActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} numActivities=1 
 lastActiveTime=61901204 supportsSplitScreenMultiWindow=true mSoScDisplayMode=-1 supportsMultiWindow=true resizeMode=1 
 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=200 
-token=WCT{android.window.IWindowContainerToken$Stub$Proxy@3218920} topActivityType=1 pictureInPictureParams=null 
+token=[REDACTED]} topActivityType=1 pictureInPictureParams=null 
 shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 
 - 0, 0) topActivityInfo=ActivityInfo{bcf52d9 com.example.summittrack.MainActivity} launchCookies=[] 
 positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=true 
@@ -1327,7 +1327,7 @@ d=0 taskParent=-1 v=falseMiuiChangeImpl {miuiEmbedding:false, scale:1.0}},{m=TO_
 leash=Surface(name=WallpaperWindowToken{452ca30 showWhenLocked=false}#61)/@0x1fae6a9 sb=Rect(0, 0 - 1080, 2460) 
 eb=Rect(0, 0 - 1080, 2460) epz=Point(1080, 2460) d=0 v=falseMiuiChangeImpl {miuiEmbedding:false, scale:1.0}}] 
 mk=[true] noAni=[false] df=[false] rsa=[false] oa=[false] nc=[0] ho=[false] hla=[false] iSync=[-1]}, 
-mToken=Token{a6b6447 TransitionRecord{a704cb0 id=191 type=OPEN flags=0x0 c=[
+mToken=[REDACTED] TransitionRecord{a704cb0 id=191 type=OPEN flags=0x0 c=[
 08-06 12:52:24.245  1705  1738 D WindowManager:    ChangeInfo{9757827 container=ActivityRecord{156137257 u0 
 com.example.summittrack/.MainActivity t9266} flags=0x0}
 08-06 12:52:24.245  1705  1738 D WindowManager:    ChangeInfo{5ffd47d container=Task{b154a47 #9266 type=standard 
@@ -1365,7 +1365,7 @@ topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainAc
 realActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} numActivities=1 
 lastActiveTime=61902178 supportsSplitScreenMultiWindow=true mSoScDisplayMode=-1 supportsMultiWindow=true resizeMode=1 
 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=200 
-token=WCT{android.window.IWindowContainerToken$Stub$Proxy@423614e} topActivityType=1 pictureInPictureParams=null 
+token=[REDACTED]} topActivityType=1 pictureInPictureParams=null 
 shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 
 - 0, 0) topActivityInfo=ActivityInfo{b0a626f com.example.summittrack.MainActivity} launchCookies=[] 
 positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true 
@@ -1413,7 +1413,7 @@ topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainAc
 realActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} numActivities=1 
 lastActiveTime=61902260 supportsSplitScreenMultiWindow=true mSoScDisplayMode=-1 supportsMultiWindow=true resizeMode=1 
 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=200 
-token=WCT{android.window.IWindowContainerToken$Stub$Proxy@1b31b9} topActivityType=1 pictureInPictureParams=null 
+token=[REDACTED]} topActivityType=1 pictureInPictureParams=null 
 shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 
 - 0, 0) topActivityInfo=ActivityInfo{2d0b9fe com.example.summittrack.MainActivity} launchCookies=[] 
 positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true 
@@ -1503,7 +1503,7 @@ topActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainAc
 realActivity=ComponentInfo{com.example.summittrack/com.example.summittrack.MainActivity} numActivities=1 
 lastActiveTime=61902178 supportsSplitScreenMultiWindow=true mSoScDisplayMode=-1 supportsMultiWindow=true resizeMode=1 
 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=200 
-token=WCT{android.window.IWindowContainerToken$Stub$Proxy@d026600} topActivityType=1 pictureInPictureParams=null 
+token=[REDACTED]} topActivityType=1 pictureInPictureParams=null 
 shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 
 - 0, 0) topActivityInfo=ActivityInfo{9199e39 com.example.summittrack.MainActivity} launchCookies=[] 
 positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true 
@@ -1976,7 +1976,7 @@ timestamp=2026-08-06T04:52:34.319147Z source=getToken
 08-06 12:52:34.320  5818  5818 I flutter : [HikeNotifications] fcm_token_request_started 
 timestamp=2026-08-06T04:52:34.319683Z uid=27d7941bd7 source=getToken
 08-06 12:52:34.351  5818  5818 I flutter : [HikeNotifications] token_request_completed 
-timestamp=2026-08-06T04:52:34.348974Z elapsedMs=29 token_available=true token_length=142 masked_token=d7hx..._vSI
+timestamp=2026-08-06T04:52:34.348974Z elapsedMs=29 token_available=true token_length=142 masked_token=[REDACTED]
 08-06 12:52:34.354  5818  5818 I flutter : [HikeNotifications] fcm_token_result timestamp=2026-08-06T04:52:34.354381Z 
 result=valid tokenReceived=true tokenHash=6633dc6641 tokenLength=142
 08-06 12:52:34.355  5818  5818 I flutter : [HikeNotifications] stable_device_id_started 

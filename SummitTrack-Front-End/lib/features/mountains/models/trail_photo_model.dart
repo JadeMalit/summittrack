@@ -220,7 +220,16 @@ class TrailPhotoModel {
     }
 
     final lowerFileName = fileName.toLowerCase();
-    const videoExtensions = ['.mp4', '.mov', '.m4v'];
+    const videoExtensions = [
+      '.mp4',
+      '.mov',
+      '.m4v',
+      '.webm',
+      '.ogg',
+      '.ogv',
+      '.3gp',
+      '.3gpp',
+    ];
     if (videoExtensions.any(lowerFileName.endsWith)) {
       return mediaTypeVideo;
     }

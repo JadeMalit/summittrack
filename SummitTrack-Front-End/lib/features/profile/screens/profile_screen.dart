@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/layout/app_responsive.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../notifications/services/hike_notification_service.dart';
@@ -325,12 +326,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     final colors = context.appColors;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final bottomNavClearance =
-        (bottomPadding > ProfileConstants.floatingNavReservedHeight
-            ? bottomPadding
-            : ProfileConstants.floatingNavReservedHeight) +
-        ProfileConstants.floatingNavTopGap;
+    final bottomNavClearance = AppResponsive.floatingNavClearance(context);
 
     return Scaffold(
       backgroundColor: colors.background,

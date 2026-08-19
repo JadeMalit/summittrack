@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/layout/app_responsive.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../services/weather_service.dart';
 import '../models/scheduled_hike.dart';
@@ -22,10 +23,6 @@ class WeatherScreen extends StatefulWidget {
 
 class _WeatherScreenState extends State<WeatherScreen>
     with SingleTickerProviderStateMixin {
-  static const double _floatingNavHeight = 56;
-  static const double _floatingNavBottomMargin = 10;
-  static const double _floatingNavTopGap = 18;
-
   final WeatherService weatherService = WeatherService();
   final HikeScheduleStore _scheduleStore = HikeScheduleStore.instance;
 
@@ -88,11 +85,11 @@ class _WeatherScreenState extends State<WeatherScreen>
     );
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: Curves.easeOutCubic,
-      ),
-    );
+          CurvedAnimation(
+            parent: _entranceController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
     loadWeather();
     _scheduleStore.addListener(_handleScheduleChanged);
@@ -131,7 +128,8 @@ class _WeatherScreenState extends State<WeatherScreen>
         isError = false;
       });
 
-      final coords = mountainCoordinates[selectedMountain] ?? [6.9872, 125.3708];
+      final coords =
+          mountainCoordinates[selectedMountain] ?? [6.9872, 125.3708];
       final data = await weatherService.fetch15DayWeather(coords[0], coords[1]);
 
       if (mounted) {
@@ -222,7 +220,8 @@ class _WeatherScreenState extends State<WeatherScreen>
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            final scheduledHikesByMountain = _scheduleStore.upcomingByMountain();
+            final scheduledHikesByMountain = _scheduleStore
+                .upcomingByMountain();
 
             return SafeArea(
               top: false,
@@ -237,7 +236,6 @@ class _WeatherScreenState extends State<WeatherScreen>
                   );
                 },
                 child: Container(
-                  height: MediaQuery.of(context).size.height * 0.5,
                   decoration: BoxDecoration(
                     color: isDark ? colors.surface : Colors.white,
                     borderRadius: const BorderRadius.only(
@@ -251,6 +249,12 @@ class _WeatherScreenState extends State<WeatherScreen>
                         offset: const Offset(0, -8),
                       ),
                     ],
+                  ),
+                  height: AppResponsive.clampedScreenHeight(
+                    context,
+                    ratio: 0.68,
+                    min: 340,
+                    max: 620,
                   ),
                   child: Column(
                     children: [
@@ -306,8 +310,8 @@ class _WeatherScreenState extends State<WeatherScreen>
                             final mountain = mountains[index];
                             final mountainId =
                                 MountainScheduleIdentity.idForWeatherName(
-                              mountain,
-                            );
+                                  mountain,
+                                );
                             final scheduledHikes =
                                 scheduledHikesByMountain[mountainId] ??
                                 const <ScheduledHike>[];
@@ -387,18 +391,18 @@ class _WeatherScreenState extends State<WeatherScreen>
             child: isError
                 ? _buildErrorScreen(key: const ValueKey("weather-error"))
                 : weatherData == null
-                    ? _buildLoadingScreen(
-                        colors,
-                        key: const ValueKey("weather-loading"),
-                      )
-                    : FadeTransition(
-                        key: ValueKey("weather-body-$selectedMountain"),
-                        opacity: _fadeAnimation,
-                        child: SlideTransition(
-                          position: _slideAnimation,
-                          child: _buildWeatherBody(),
-                        ),
-                      ),
+                ? _buildLoadingScreen(
+                    colors,
+                    key: const ValueKey("weather-loading"),
+                  )
+                : FadeTransition(
+                    key: ValueKey("weather-body-$selectedMountain"),
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: _buildWeatherBody(),
+                    ),
+                  ),
           ),
         ),
       ),
@@ -411,13 +415,18 @@ class _WeatherScreenState extends State<WeatherScreen>
     final rainChance = _rainChanceFromForecast();
     final safety = _safetyPresentation(rainChance);
     final accentColor = _conditionAccent(condition);
-    
+
     final locationName = "Region: ${current["location_name"] ?? "Unknown"}";
     final nextHike = _nextScheduledHikeForSelectedMountain();
 
+    final bottomPadding = AppResponsive.floatingNavClearance(
+      context,
+      extraGap: 34,
+    );
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
+      padding: EdgeInsets.fromLTRB(20, 12, 20, bottomPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -548,7 +557,7 @@ class _WeatherScreenState extends State<WeatherScreen>
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08), 
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
@@ -558,7 +567,11 @@ class _WeatherScreenState extends State<WeatherScreen>
         children: [
           Row(
             children: [
-              Icon(Icons.calendar_month_rounded, size: 14, color: Colors.white.withValues(alpha: 0.5)),
+              Icon(
+                Icons.calendar_month_rounded,
+                size: 14,
+                color: Colors.white.withValues(alpha: 0.5),
+              ),
               const SizedBox(width: 8),
               Text(
                 "15-DAY FORECAST",
@@ -576,18 +589,17 @@ class _WeatherScreenState extends State<WeatherScreen>
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: forecastList.length,
-            separatorBuilder: (context, index) => Divider(
-              color: Colors.white.withValues(alpha: 0.08),
-              height: 1,
-            ),
+            separatorBuilder: (context, index) =>
+                Divider(color: Colors.white.withValues(alpha: 0.08), height: 1),
             itemBuilder: (context, index) {
               final dayData = forecastList[index];
               final int wmoCode = dayData["weather_code"] ?? 0;
               final condition = _interpretWmoCode(wmoCode);
-              
+
               final int minTemp = (dayData["temp_min"] as num?)?.round() ?? 24;
               final int maxTemp = (dayData["temp_max"] as num?)?.round() ?? 32;
-              final int rainChance = (dayData["rain_chance"] as num?)?.round() ?? 0;
+              final int rainChance =
+                  (dayData["rain_chance"] as num?)?.round() ?? 0;
 
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -646,11 +658,14 @@ class _WeatherScreenState extends State<WeatherScreen>
                         child: LayoutBuilder(
                           builder: (context, constraints) {
                             final double totalWidth = constraints.maxWidth;
-                            final double startPct = (minTemp - globalMin) / (globalMax - globalMin);
-                            final double endPct = (maxTemp - globalMin) / (globalMax - globalMin);
-                            
+                            final double startPct =
+                                (minTemp - globalMin) / (globalMax - globalMin);
+                            final double endPct =
+                                (maxTemp - globalMin) / (globalMax - globalMin);
+
                             final double leftPadding = startPct * totalWidth;
-                            final double barWidth = (endPct - startPct) * totalWidth;
+                            final double barWidth =
+                                (endPct - startPct) * totalWidth;
 
                             return Stack(
                               alignment: Alignment.centerLeft,
@@ -710,11 +725,17 @@ class _WeatherScreenState extends State<WeatherScreen>
   IconData _iconForPreviewCondition(String condition) {
     final lower = condition.toLowerCase();
     if (lower.contains('thunderstorm')) return Icons.thunderstorm_rounded;
-    if (lower.contains('rain') || lower.contains('drizzle') || lower.contains('showers')) {
+    if (lower.contains('rain') ||
+        lower.contains('drizzle') ||
+        lower.contains('showers')) {
       return Icons.umbrella_rounded;
     }
-    if (lower.contains('clear') || lower.contains('sun')) return Icons.wb_sunny_rounded;
-    if (lower.contains('cloud') || lower.contains('overcast')) return Icons.wb_cloudy_rounded;
+    if (lower.contains('clear') || lower.contains('sun')) {
+      return Icons.wb_sunny_rounded;
+    }
+    if (lower.contains('cloud') || lower.contains('overcast')) {
+      return Icons.wb_cloudy_rounded;
+    }
     return Icons.cloud_rounded;
   }
 
@@ -777,7 +798,7 @@ class _WeatherScreenState extends State<WeatherScreen>
 
   String _forecastDayLabel(dynamic dayData, int index) {
     if (index == 0) return "Today";
-    
+
     final dateValue = dayData is Map ? dayData["date"] : null;
     final parsedDate = DateTime.tryParse(dateValue?.toString() ?? "");
     if (parsedDate == null) {
@@ -1384,16 +1405,36 @@ bool _isSameDate(DateTime d1, DateTime d2) {
 
 String _formatFullHikeDate(DateTime date) {
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
   return "${months[date.month - 1]} ${date.day}, ${date.year}";
 }
 
 String _formatShortHikeDate(DateTime date) {
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
   return "${months[date.month - 1]} ${date.day}";
 }

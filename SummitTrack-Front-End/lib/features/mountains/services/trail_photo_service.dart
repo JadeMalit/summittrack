@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:typed_data';
 
@@ -43,6 +44,7 @@ class TrailPhotoService {
     required String fileName,
     String? contentType,
     String trailId = staCruzSibulanTrailId,
+    void Function(double progress)? onProgress,
   }) {
     return uploadMedia(
       bytes: bytes,
@@ -50,6 +52,7 @@ class TrailPhotoService {
       contentType: contentType,
       trailId: trailId,
       mediaType: TrailPhotoModel.mediaTypeImage,
+      onProgress: onProgress,
     );
   }
 
@@ -61,6 +64,7 @@ class TrailPhotoService {
     String mediaType = TrailPhotoModel.mediaTypeImage,
     int? sizeBytes,
     Duration? duration,
+    void Function(double progress)? onProgress,
   }) async {
     if (bytes.isEmpty) {
       throw const TrailPhotoException('The selected media file is empty.');
@@ -76,8 +80,9 @@ class TrailPhotoService {
       normalizedMediaType,
     );
     final fileExtension = _extensionFor(safeFileName, normalizedMediaType);
+    final storageFileName = '${photoDocument.id}.$fileExtension';
     final storagePath =
-        'users/${user.uid}/media/${photoDocument.id}.$fileExtension';
+        '${_storageFolderFor(normalizedMediaType)}/$storageFileName';
     final storageRef = _storage.ref(storagePath);
     final resolvedContentType = _contentTypeFor(
       contentType,
@@ -91,8 +96,11 @@ class TrailPhotoService {
           'storagePath=$storagePath, mediaType=$normalizedMediaType',
     );
 
+    StreamSubscription<TaskSnapshot>? uploadProgressSubscription;
+
     try {
-      await storageRef.putData(
+      onProgress?.call(0);
+      final uploadTask = storageRef.putData(
         bytes,
         SettableMetadata(
           contentType: resolvedContentType,
@@ -110,7 +118,24 @@ class TrailPhotoService {
         ),
       );
 
-      final photoUrl = await storageRef.getDownloadURL();
+      uploadProgressSubscription = uploadTask.snapshotEvents.listen((snapshot) {
+        final totalBytes = snapshot.totalBytes;
+        if (totalBytes <= 0) {
+          return;
+        }
+
+        final progress = (snapshot.bytesTransferred / totalBytes)
+            .clamp(0.0, 1.0)
+            .toDouble();
+        onProgress?.call(progress);
+      });
+
+      final uploadSnapshot = await uploadTask;
+      await uploadProgressSubscription.cancel();
+      uploadProgressSubscription = null;
+      onProgress?.call(1);
+
+      final photoUrl = await uploadSnapshot.ref.getDownloadURL();
       _debugLog(
         'uploadMedia',
         'upload complete uid=${user.uid}, trailId=$normalizedTrailId, '
@@ -154,6 +179,8 @@ class TrailPhotoService {
           fallback: 'Unable to save media right now. Please try again.',
         ),
       );
+    } finally {
+      await uploadProgressSubscription?.cancel();
     }
   }
 
@@ -175,7 +202,11 @@ class TrailPhotoService {
     }
     final normalizedStoragePath = _normalizeStoragePath(photo.storagePath);
     if (normalizedStoragePath.isNotEmpty &&
-        !_storagePathBelongsToUser(normalizedStoragePath, uid)) {
+        !_storagePathBelongsToUser(
+          normalizedStoragePath,
+          uid,
+          allowDirectMediaPath: true,
+        )) {
       throw const TrailPhotoException(_permissionMessage);
     }
 
@@ -264,7 +295,11 @@ class TrailPhotoService {
                     photo.uid == uid &&
                     photo.trailId == normalizedTrailId &&
                     (photo.storagePath.isEmpty ||
-                        _storagePathBelongsToUser(photo.storagePath, uid)),
+                        _storagePathBelongsToUser(
+                          photo.storagePath,
+                          uid,
+                          allowDirectMediaPath: true,
+                        )),
               )
               .toList();
       photos.sort((a, b) => a.createdAt.compareTo(b.createdAt));
@@ -307,6 +342,7 @@ class TrailPhotoService {
     await deletePhotoFromStorage(
       _normalizeStoragePath(photo.storagePath),
       userId: uid,
+      allowDirectMediaPath: true,
     );
     await deletePhotoFromFirestore(
       photo.id,
@@ -319,13 +355,19 @@ class TrailPhotoService {
   Future<void> deletePhotoFromStorage(
     String storagePath, {
     String? userId,
+    bool allowDirectMediaPath = false,
   }) async {
     final normalizedStoragePath = _normalizeStoragePath(storagePath);
     if (normalizedStoragePath.isEmpty) {
       return;
     }
     final uid = userId ?? currentUserId;
-    if (uid != null && !_storagePathBelongsToUser(normalizedStoragePath, uid)) {
+    if (uid != null &&
+        !_storagePathBelongsToUser(
+          normalizedStoragePath,
+          uid,
+          allowDirectMediaPath: allowDirectMediaPath,
+        )) {
       _debugLog(
         'deletePhotoFromStorage',
         'blocked mismatched storage path uid=$uid, storagePath=$normalizedStoragePath',
@@ -471,9 +513,15 @@ class TrailPhotoService {
     return normalized.isEmpty ? staCruzSibulanTrailId : normalized;
   }
 
-  bool _storagePathBelongsToUser(String storagePath, String userId) {
+  bool _storagePathBelongsToUser(
+    String storagePath,
+    String userId, {
+    bool allowDirectMediaPath = false,
+  }) {
     final normalizedStoragePath = _normalizeStoragePath(storagePath);
-    return normalizedStoragePath == 'users/$userId/media' ||
+    return (allowDirectMediaPath &&
+            _isDirectMediaStoragePath(normalizedStoragePath)) ||
+        normalizedStoragePath == 'users/$userId/media' ||
         normalizedStoragePath.startsWith('users/$userId/media/') ||
         normalizedStoragePath == 'trail_photos/$userId' ||
         normalizedStoragePath.startsWith('trail_photos/$userId/');
@@ -487,7 +535,12 @@ class TrailPhotoService {
       return '';
     }
 
-    for (final storageRoot in ['users/', 'trail_photos/']) {
+    for (final storageRoot in [
+      'images/',
+      'videos/',
+      'users/',
+      'trail_photos/',
+    ]) {
       final storageRootIndex = trimmedPath.indexOf(storageRoot);
       if (storageRootIndex != -1) {
         return trimmedPath.substring(storageRootIndex);
@@ -499,6 +552,16 @@ class TrailPhotoService {
 
   bool _usesLegacyTrailPhotoCollection(String storagePath) {
     return _normalizeStoragePath(storagePath).startsWith('trail_photos/');
+  }
+
+  bool _isDirectMediaStoragePath(String storagePath) {
+    final normalizedStoragePath = _normalizeStoragePath(storagePath);
+    return normalizedStoragePath.startsWith('images/') ||
+        normalizedStoragePath.startsWith('videos/');
+  }
+
+  String _storageFolderFor(String mediaType) {
+    return mediaType == TrailPhotoModel.mediaTypeVideo ? 'videos' : 'images';
   }
 
   String _decodePath(String path) {
@@ -518,11 +581,28 @@ class TrailPhotoService {
 
     final extension = lowerName.substring(dotIndex + 1);
     if (mediaType == TrailPhotoModel.mediaTypeVideo) {
-      const supportedVideoExtensions = {'mp4', 'mov', 'm4v'};
+      const supportedVideoExtensions = {
+        'mp4',
+        'mov',
+        'm4v',
+        'webm',
+        'ogg',
+        'ogv',
+        '3gp',
+        '3gpp',
+      };
       return supportedVideoExtensions.contains(extension) ? extension : 'mp4';
     }
 
-    const supportedExtensions = {'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'};
+    const supportedExtensions = {
+      'jpg',
+      'jpeg',
+      'png',
+      'webp',
+      'heic',
+      'heif',
+      'gif',
+    };
 
     return supportedExtensions.contains(extension) ? extension : 'jpg';
   }
@@ -543,6 +623,9 @@ class TrailPhotoService {
       return switch (extension) {
         'mov' => 'video/quicktime',
         'm4v' => 'video/x-m4v',
+        'webm' => 'video/webm',
+        'ogg' || 'ogv' => 'video/ogg',
+        '3gp' || '3gpp' => 'video/3gpp',
         _ => 'video/mp4',
       };
     }
@@ -552,6 +635,7 @@ class TrailPhotoService {
       'webp' => 'image/webp',
       'heic' => 'image/heic',
       'heif' => 'image/heif',
+      'gif' => 'image/gif',
       _ => 'image/jpeg',
     };
   }
@@ -572,6 +656,12 @@ class TrailPhotoService {
         'deadline-exceeded' =>
           'Network connection is unavailable. Please try again.',
         'unauthenticated' => 'Please sign in first before saving media.',
+        'canceled' => 'The media upload was canceled.',
+        'retry-limit-exceeded' =>
+          'The upload could not finish because the connection was interrupted.',
+        'object-not-found' => 'That media file could not be found.',
+        'quota-exceeded' =>
+          'Storage is temporarily unavailable because the project quota was exceeded.',
         _ => fallback,
       };
     }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/layout/app_responsive.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/state/app_mode_provider.dart';
@@ -596,6 +597,7 @@ class _SignInScreenState extends State<SignInScreen>
       colors: [Colors.lightGreenAccent, Colors.green],
     );
     final isOfflineMode = _appModeProvider.isOfflineMode;
+    final compact = AppResponsive.isCompactWidth(context);
 
     return Scaffold(
       backgroundColor: VideoBackground.fallbackBackgroundColor,
@@ -624,7 +626,7 @@ class _SignInScreenState extends State<SignInScreen>
                                 opacity: _fadeAnimation,
                                 child: Image.asset(
                                   "assets/images/logo.jpg",
-                                  height: 150,
+                                  height: compact ? 124 : 150,
                                 ),
                               ),
                               const SizedBox(height: 10),
@@ -638,7 +640,7 @@ class _SignInScreenState extends State<SignInScreen>
                                   child: Text(
                                     "Pre-Hike",
                                     style: GoogleFonts.raleway(
-                                      fontSize: 38,
+                                      fontSize: compact ? 34 : 38,
                                       fontWeight: FontWeight.w900,
                                       letterSpacing: 2,
                                       color: Colors.white,
@@ -647,7 +649,7 @@ class _SignInScreenState extends State<SignInScreen>
                                 ),
                               ),
 
-                              const SizedBox(height: 40),
+                              SizedBox(height: compact ? 28 : 40),
 
                               if (isOfflineMode)
                                 FadeTransition(
@@ -759,11 +761,14 @@ class _SignInScreenState extends State<SignInScreen>
                                 const SizedBox(height: 10),
 
                                 /// REGISTER WITH CUSTOM SLIDE & FADE ANIMATION
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                Wrap(
+                                  alignment: WrapAlignment.center,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  spacing: 4,
+                                  runSpacing: 2,
                                   children: [
                                     Text(
-                                      "Don't have an Account? ",
+                                      "Don't have an Account?",
                                       style: GoogleFonts.poppins(
                                         color: Colors.white,
                                         fontSize: 16,

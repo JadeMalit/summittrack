@@ -25,12 +25,21 @@ service cloud.firestore {
         && request.resource.data.trailId is string
         && request.resource.data.trailId.size() > 0
         && request.resource.data.storagePath is string
-        && request.resource.data.storagePath.matches('^users/' + uid + '/media/' + mediaId + '\\.[^/]+$')
         && request.resource.data.downloadUrl is string
         && request.resource.data.downloadUrl.size() > 0
         && request.resource.data.mediaUrl == request.resource.data.downloadUrl
         && request.resource.data.mediaType in ['image', 'video']
         && request.resource.data.type == request.resource.data.mediaType
+        && (
+          (
+            request.resource.data.mediaType == 'image'
+            && request.resource.data.storagePath.matches('^images/' + mediaId + '\\.[^/]+$')
+          )
+          || (
+            request.resource.data.mediaType == 'video'
+            && request.resource.data.storagePath.matches('^videos/' + mediaId + '\\.[^/]+$')
+          )
+        )
         && request.resource.data.createdAt is timestamp
         && request.resource.data.updatedAt is timestamp;
     }

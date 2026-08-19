@@ -146,7 +146,8 @@ class _LiveHikeViewerScreenState extends State<LiveHikeViewerScreen> {
                   ),
                   color: isLive ? const Color(0xFF1B4D2E) : Colors.red.shade800,
                   child: SafeArea(
-                    bottom: false, // Ensures it doesn't get hidden behind notches
+                    top: false,
+                    bottom: false,
                     child: Row(
                       children: [
                         Icon(
@@ -177,15 +178,19 @@ class _LiveHikeViewerScreenState extends State<LiveHikeViewerScreen> {
 
               // 🎯 3. RE-CENTER BUTTON (Messenger-style Float Button sa Baba)
               Positioned(
-                bottom: 24,
+                bottom: 16,
                 right: 16,
-                child: FloatingActionButton(
-                  backgroundColor: const Color(0xFF1B4D2E),
-                  foregroundColor: Colors.white,
-                  child: const Icon(Icons.my_location_rounded),
-                  onPressed: () {
-                    _updateCameraPosition(latitude, longitude);
-                  },
+                child: SafeArea(
+                  top: false,
+                  left: false,
+                  child: FloatingActionButton(
+                    backgroundColor: const Color(0xFF1B4D2E),
+                    foregroundColor: Colors.white,
+                    child: const Icon(Icons.my_location_rounded),
+                    onPressed: () {
+                      _updateCameraPosition(latitude, longitude);
+                    },
+                  ),
                 ),
               ),
             ],

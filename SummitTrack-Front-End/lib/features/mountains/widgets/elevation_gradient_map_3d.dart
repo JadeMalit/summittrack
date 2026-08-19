@@ -2,13 +2,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/layout/app_responsive.dart';
 import '../../../core/theme/app_colors.dart';
 
 class TrailWaypoint {
   final String name;
   final double elevation; // meters (m ASL)
-  final double distance;  // kilometers (km)
-  final double slope;     // steepness percentage (%)
+  final double distance; // kilometers (km)
+  final double slope; // steepness percentage (%)
   final Color color;
 
   const TrailWaypoint({
@@ -41,6 +42,7 @@ class _ElevationGradientMap3DState extends State<ElevationGradientMap3D> {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
+    final compact = AppResponsive.isCompactWidth(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -101,7 +103,9 @@ class _ElevationGradientMap3DState extends State<ElevationGradientMap3D> {
                 decoration: BoxDecoration(
                   color: colors.accent.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: colors.accent.withValues(alpha: 0.4)),
+                  border: Border.all(
+                    color: colors.accent.withValues(alpha: 0.4),
+                  ),
                 ),
                 child: Text(
                   '3D GIS MAP',
@@ -120,7 +124,7 @@ class _ElevationGradientMap3DState extends State<ElevationGradientMap3D> {
 
           if (widget.waypoints.isEmpty)
             Container(
-              height: 150,
+              height: compact ? 130 : 150,
               alignment: Alignment.center,
               child: Text(
                 'Elevation gradient data coming soon for this trail.',
@@ -145,19 +149,22 @@ class _ElevationGradientMap3DState extends State<ElevationGradientMap3D> {
                   _selectedWaypoint = null;
                 });
               },
-              child: CustomPaint(
-                size: const Size(double.infinity, 210),
-                painter: _TopographicTerrain3DPainter(
-                  waypoints: widget.waypoints,
-                  touchX: _touchX,
-                  isDarkMode: context.isDarkMode,
-                  onHoverWaypoint: (wp) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (_selectedWaypoint != wp && mounted) {
-                        setState(() => _selectedWaypoint = wp);
-                      }
-                    });
-                  },
+              child: SizedBox(
+                height: compact ? 178 : 210,
+                width: double.infinity,
+                child: CustomPaint(
+                  painter: _TopographicTerrain3DPainter(
+                    waypoints: widget.waypoints,
+                    touchX: _touchX,
+                    isDarkMode: context.isDarkMode,
+                    onHoverWaypoint: (wp) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (_selectedWaypoint != wp && mounted) {
+                          setState(() => _selectedWaypoint = wp);
+                        }
+                      });
+                    },
+                  ),
                 ),
               ),
             ),
@@ -176,54 +183,70 @@ class _ElevationGradientMap3DState extends State<ElevationGradientMap3D> {
                   color: _selectedWaypoint != null
                       ? _getSlopeColor(_selectedWaypoint!.slope)
                       : (context.isDarkMode
-                          ? colors.border
-                          : const Color(0xFFD0C8BC)),
+                            ? colors.border
+                            : const Color(0xFFD0C8BC)),
                   width: 1.5,
                 ),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: _buildStatItem(
-                      context,
-                      label: 'Landmark Segment',
-                      value: _selectedWaypoint?.name ?? 'Drag across profile',
-                      icon: Icons.place_rounded,
-                      color: _selectedWaypoint != null
-                          ? _getSlopeColor(_selectedWaypoint!.slope)
-                          : colors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    flex: 3,
-                    child: _buildStatItem(
-                      context,
-                      label: 'Altitude',
-                      value: _selectedWaypoint != null
-                          ? '${_selectedWaypoint!.elevation.toInt()} m ASL'
-                          : '-- m',
-                      icon: Icons.terrain_rounded,
-                      color: colors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    flex: 3,
-                    child: _buildStatItem(
-                      context,
-                      label: 'Grade / Slope',
-                      value: _selectedWaypoint != null
-                          ? '${_selectedWaypoint!.slope.toInt()}%'
-                          : '-- %',
-                      icon: Icons.trending_up_rounded,
-                      color: _selectedWaypoint != null
-                          ? _getSlopeColor(_selectedWaypoint!.slope)
-                          : colors.textPrimary,
-                    ),
-                  ),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final useStackedStats = constraints.maxWidth < 330;
+                  final landmark = _buildStatItem(
+                    context,
+                    label: 'Landmark Segment',
+                    value: _selectedWaypoint?.name ?? 'Drag across profile',
+                    icon: Icons.place_rounded,
+                    color: _selectedWaypoint != null
+                        ? _getSlopeColor(_selectedWaypoint!.slope)
+                        : colors.textPrimary,
+                  );
+                  final altitude = _buildStatItem(
+                    context,
+                    label: 'Altitude',
+                    value: _selectedWaypoint != null
+                        ? '${_selectedWaypoint!.elevation.toInt()} m ASL'
+                        : '-- m',
+                    icon: Icons.terrain_rounded,
+                    color: colors.textPrimary,
+                  );
+                  final slope = _buildStatItem(
+                    context,
+                    label: 'Grade / Slope',
+                    value: _selectedWaypoint != null
+                        ? '${_selectedWaypoint!.slope.toInt()}%'
+                        : '-- %',
+                    icon: Icons.trending_up_rounded,
+                    color: _selectedWaypoint != null
+                        ? _getSlopeColor(_selectedWaypoint!.slope)
+                        : colors.textPrimary,
+                  );
+
+                  if (useStackedStats) {
+                    return Column(
+                      children: [
+                        landmark,
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(child: altitude),
+                            const SizedBox(width: 8),
+                            Expanded(child: slope),
+                          ],
+                        ),
+                      ],
+                    );
+                  }
+
+                  return Row(
+                    children: [
+                      Expanded(flex: 4, child: landmark),
+                      const SizedBox(width: 4),
+                      Expanded(flex: 3, child: altitude),
+                      const SizedBox(width: 4),
+                      Expanded(flex: 3, child: slope),
+                    ],
+                  );
+                },
               ),
             ),
 
@@ -236,11 +259,17 @@ class _ElevationGradientMap3DState extends State<ElevationGradientMap3D> {
               children: widget.waypoints.map((wp) {
                 final badgeColor = _getSlopeColor(wp.slope);
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: badgeColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: badgeColor.withValues(alpha: 0.8), width: 1),
+                    border: Border.all(
+                      color: badgeColor.withValues(alpha: 0.8),
+                      width: 1,
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -362,11 +391,17 @@ class _TopographicTerrain3DPainter extends CustomPainter {
     final double minDist = waypoints.first.distance;
     final double maxDist = waypoints.last.distance;
 
-    final double distRange = (maxDist - minDist) == 0 ? 1.0 : (maxDist - minDist);
-    final double elevRange = (maxElev - minElev) == 0 ? 1.0 : (maxElev - minElev);
+    final double distRange = (maxDist - minDist) == 0
+        ? 1.0
+        : (maxDist - minDist);
+    final double elevRange = (maxElev - minElev) == 0
+        ? 1.0
+        : (maxElev - minElev);
 
     // 1. DRAW Y-AXIS ELEVATION GRID & LABELS
-    final TextPainter textPainter = TextPainter(textDirection: TextDirection.ltr);
+    final TextPainter textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
     final Paint gridLinePaint = Paint()
       ..color = (isDarkMode ? Colors.white12 : Colors.black12)
       ..strokeWidth = 0.8;
@@ -394,7 +429,10 @@ class _TopographicTerrain3DPainter extends CustomPainter {
       textPainter.layout();
       textPainter.paint(
         canvas,
-        Offset(leftPadding - textPainter.width - 5, y - (textPainter.height / 2)),
+        Offset(
+          leftPadding - textPainter.width - 5,
+          y - (textPainter.height / 2),
+        ),
       );
     }
 
@@ -453,7 +491,8 @@ class _TopographicTerrain3DPainter extends CustomPainter {
         double currentY = p0.dy + (p1.dy - p0.dy) * t;
 
         if (step > 0 && step < steps) {
-          final double sineBump = math.sin(t * math.pi * 2) * 2.5 * (i % 2 == 0 ? 1 : -1);
+          final double sineBump =
+              math.sin(t * math.pi * 2) * 2.5 * (i % 2 == 0 ? 1 : -1);
           currentY += sineBump;
         }
 
@@ -464,7 +503,9 @@ class _TopographicTerrain3DPainter extends CustomPainter {
 
     // 4. VERTICAL ALTITUDE MESH LINES
     final Paint meshLinePaint = Paint()
-      ..color = (isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05))
+      ..color = (isDarkMode
+          ? Colors.white10
+          : Colors.black.withValues(alpha: 0.05))
       ..strokeWidth = 1.0;
 
     for (int i = 0; i < detailedTerrainPoints.length; i += 3) {
@@ -478,7 +519,10 @@ class _TopographicTerrain3DPainter extends CustomPainter {
 
     // 5. VOLUMETRIC TERRAIN AREA FILL (DYNAMIC BASED ON MAX TRAIL SLOPE)
     final Path fullPath = Path();
-    fullPath.moveTo(detailedTerrainPoints.first.dx, detailedTerrainPoints.first.dy);
+    fullPath.moveTo(
+      detailedTerrainPoints.first.dx,
+      detailedTerrainPoints.first.dy,
+    );
     for (int i = 0; i < detailedTerrainPoints.length - 1; i++) {
       final p0 = detailedTerrainPoints[i];
       final p1 = detailedTerrainPoints[i + 1];
@@ -498,10 +542,7 @@ class _TopographicTerrain3DPainter extends CustomPainter {
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [
-          topFillColor,
-          const Color(0xFF4CAF50).withValues(alpha: 0.03),
-        ],
+        colors: [topFillColor, const Color(0xFF4CAF50).withValues(alpha: 0.03)],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
     canvas.drawPath(fillPath, volumetricFill);
@@ -562,7 +603,11 @@ class _TopographicTerrain3DPainter extends CustomPainter {
           ..strokeWidth = 1.0,
       );
 
-      canvas.drawCircle(p, 6.5, Paint()..color = pinColor.withValues(alpha: 0.22));
+      canvas.drawCircle(
+        p,
+        6.5,
+        Paint()..color = pinColor.withValues(alpha: 0.22),
+      );
       canvas.drawCircle(p, 4.0, Paint()..color = pinColor);
       canvas.drawCircle(p, 1.8, Paint()..color = Colors.white);
 

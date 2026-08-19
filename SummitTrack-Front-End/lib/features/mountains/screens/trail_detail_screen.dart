@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/layout/app_responsive.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/state/app_mode_provider.dart';
 import '../../../core/theme/app_colors.dart';
@@ -86,6 +87,7 @@ class TrailDetailScreen extends StatelessWidget {
   final String? navigationTrailId;
 
   static const _backgroundColor = Color(0xFFE3DDCF);
+  static const double _letsHikeDockHeight = 64;
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +111,14 @@ class TrailDetailScreen extends StatelessWidget {
 
     final isDark = context.isDarkMode;
     final bgColor = isDark ? colors.background : _backgroundColor;
+    final bottomContentPadding = isOfflineMode
+        ? 24.0
+        : AppResponsive.bottomDockClearance(
+            context,
+            dockHeight: _letsHikeDockHeight,
+            bottomMargin: 16,
+            extraGap: 28,
+          );
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -131,8 +141,7 @@ class TrailDetailScreen extends StatelessWidget {
                 },
               ),
               Padding(
-                // 100 bottom padding para hindi matakpan ng floating button ang huling item sa scroll view
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                padding: EdgeInsets.fromLTRB(16, 16, 16, bottomContentPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -353,7 +362,7 @@ class __LetsHikeAnimatedButtonState extends State<_LetsHikeAnimatedButton>
               duration: const Duration(milliseconds: 100),
               curve: Curves.easeOut,
               child: Container(
-                height: 64,
+                height: TrailDetailScreen._letsHikeDockHeight,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(22),
@@ -370,19 +379,19 @@ class __LetsHikeAnimatedButtonState extends State<_LetsHikeAnimatedButton>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF38C812).withOpacity(0.50),
+                      color: const Color(0xFF38C812).withValues(alpha: 0.50),
                       blurRadius: _glowRadiusAnimation.value,
                       spreadRadius: 2,
                       offset: const Offset(0, 6),
                     ),
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
+                      color: Colors.black.withValues(alpha: 0.15),
                       blurRadius: 6,
                       offset: const Offset(0, 3),
                     ),
                   ],
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.45),
+                    color: Colors.white.withValues(alpha: 0.45),
                     width: 1.5,
                   ),
                 ),
@@ -400,7 +409,7 @@ class __LetsHikeAnimatedButtonState extends State<_LetsHikeAnimatedButton>
                               gradient: LinearGradient(
                                 colors: [
                                   Colors.transparent,
-                                  Colors.white.withOpacity(0.35),
+                                  Colors.white.withValues(alpha: 0.35),
                                   Colors.transparent,
                                 ],
                                 stops: const [0.35, 0.5, 0.65],
@@ -419,7 +428,7 @@ class __LetsHikeAnimatedButtonState extends State<_LetsHikeAnimatedButton>
                             child: Container(
                               padding: const EdgeInsets.all(7),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.12),
+                                color: Colors.black.withValues(alpha: 0.12),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -767,73 +776,91 @@ class _TrailBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.appColors;
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
-      child: Stack(
-        children: [
-          SizedBox(
-            height: 285,
-            width: double.infinity,
-            child: Image.asset(trail.imageAsset, fit: BoxFit.cover),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bannerHeight = AppResponsive.clampedWidthHeight(
+          constraints.maxWidth,
+          ratio: 0.72,
+          min: 220,
+          max: 285,
+        );
+
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(30),
           ),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.08),
-                    Colors.black.withValues(alpha: 0.28),
-                    Colors.black.withValues(alpha: 0.52),
-                  ],
+          child: Stack(
+            children: [
+              SizedBox(
+                height: bannerHeight,
+                width: double.infinity,
+                child: Image.asset(trail.imageAsset, fit: BoxFit.cover),
+              ),
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.08),
+                        Colors.black.withValues(alpha: 0.28),
+                        Colors.black.withValues(alpha: 0.52),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          Positioned(
-            top: 14,
-            left: 14,
-            child: Material(
-              color: Colors.black.withValues(alpha: 0.3),
-              shape: const CircleBorder(),
-              child: IconButton(
-                onPressed: onBack,
-                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-                tooltip: 'Back',
-              ),
-            ),
-          ),
-          Positioned(
-            left: 18,
-            right: 18,
-            bottom: 18,
-            child: Text(
-              trail.name,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.lilitaOne(
-                fontSize: 28,
-                color: context.isDarkMode
-                    ? colors.softHighlight
-                    : const Color(0xFF58FF42),
-                letterSpacing: 0.8,
-                shadows: const [
-                  Shadow(
-                    color: Color(0xFF103C0A),
-                    blurRadius: 14,
-                    offset: Offset(0, 2),
+              Positioned(
+                top: 14,
+                left: 14,
+                child: Material(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  shape: const CircleBorder(),
+                  child: IconButton(
+                    onPressed: onBack,
+                    icon: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: Colors.white,
+                    ),
+                    tooltip: 'Back',
                   ),
-                  Shadow(
-                    color: Colors.black87,
-                    blurRadius: 5,
-                    offset: Offset(1.4, 1.4),
-                  ),
-                ],
+                ),
               ),
-            ),
+              Positioned(
+                left: 18,
+                right: 18,
+                bottom: 18,
+                child: Text(
+                  trail.name,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.lilitaOne(
+                    fontSize: AppResponsive.isCompactWidth(context) ? 25 : 28,
+                    color: context.isDarkMode
+                        ? colors.softHighlight
+                        : const Color(0xFF58FF42),
+                    letterSpacing: 0.8,
+                    shadows: const [
+                      Shadow(
+                        color: Color(0xFF103C0A),
+                        blurRadius: 14,
+                        offset: Offset(0, 2),
+                      ),
+                      Shadow(
+                        color: Colors.black87,
+                        blurRadius: 5,
+                        offset: Offset(1.4, 1.4),
+                      ),
+                    ],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

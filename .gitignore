@@ -48,8 +48,13 @@ app.*.map.json
 Restore-Backups/
 
 # Environment files
+.env
+.env.*
+!.env.example
 **/.env
 **/.ENV
+**/.env.*
+**/.ENV.*
 !**/.env.example
 
 # Node dependencies

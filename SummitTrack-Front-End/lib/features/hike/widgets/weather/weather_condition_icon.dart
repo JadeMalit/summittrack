@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/layout/app_responsive.dart';
+
 IconData weatherIconForCondition(String condition) {
   final value = condition.toLowerCase();
 
@@ -38,28 +40,33 @@ class WeatherConditionIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = AppResponsive.isCompactWidth(context);
+    final size = compact ? 86.0 : 104.0;
+    final terrainIconSize = compact ? 38.0 : 46.0;
+    final weatherIconSize = compact ? 46.0 : 56.0;
+
     return Container(
-      width: 104,
-      height: 104,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: accentColor.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(compact ? 26 : 32),
         border: Border.all(color: foregroundColor.withValues(alpha: 0.18)),
       ),
       child: Stack(
         alignment: Alignment.center,
         children: [
           Positioned(
-            bottom: 14,
+            bottom: compact ? 12 : 14,
             child: Icon(
               Icons.terrain_rounded,
-              size: 46,
+              size: terrainIconSize,
               color: foregroundColor.withValues(alpha: 0.16),
             ),
           ),
           Icon(
             weatherIconForCondition(condition),
-            size: 56,
+            size: weatherIconSize,
             color: foregroundColor,
           ),
         ],

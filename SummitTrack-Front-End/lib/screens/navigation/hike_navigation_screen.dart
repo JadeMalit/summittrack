@@ -165,63 +165,79 @@ class _HikeNavigationScreenState extends State<HikeNavigationScreen> {
   Widget _buildTopBar() {
     final metadata = _trackingService.metadata ?? widget.startRequest?.metadata;
 
-    return Row(
-      children: [
-        _RoundMapButton(
-          icon: Icons.arrow_back_rounded,
-          tooltip: 'Leave map',
-          onPressed: () async {
-            final shouldLeave = await _confirmLeaveKeepSession();
-            if (shouldLeave && mounted) {
-              Navigator.of(context).pop();
-            }
-          },
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0B120D).withValues(alpha: 0.86),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 340;
+        final gap = compact ? 8.0 : 10.0;
+
+        return Row(
+          children: [
+            _RoundMapButton(
+              icon: Icons.arrow_back_rounded,
+              tooltip: 'Leave map',
+              compact: compact,
+              onPressed: () async {
+                final shouldLeave = await _confirmLeaveKeepSession();
+                if (!mounted || !shouldLeave) {
+                  return;
+                }
+
+                Navigator.of(this.context).pop();
+              },
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  metadata?.trailName ?? 'Hiking navigation',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.fredoka(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
+            SizedBox(width: gap),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: compact ? 12 : 14,
+                  vertical: compact ? 10 : 11,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0B120D).withValues(alpha: 0.86),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.10),
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  metadata?.destinationName ?? 'Preparing route',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(
-                    color: const Color(0xFFB8C7B7),
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w600,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      metadata?.trailName ?? 'Hiking navigation',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.fredoka(
+                        color: Colors.white,
+                        fontSize: compact ? 15.5 : 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      metadata?.destinationName ?? 'Preparing route',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        color: const Color(0xFFB8C7B7),
+                        fontSize: compact ? 10.8 : 11.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        _RoundMapButton(
-          icon: Icons.stop_rounded,
-          tooltip: 'End navigation',
-          onPressed: _confirmStopNavigation,
-        ),
-      ],
+            SizedBox(width: gap),
+            _RoundMapButton(
+              icon: Icons.stop_rounded,
+              tooltip: 'End navigation',
+              compact: compact,
+              onPressed: _confirmStopNavigation,
+            ),
+          ],
+        );
+      },
     );
   }
 

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/layout/app_responsive.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_controller.dart';
@@ -136,7 +137,7 @@ class _SettingsBodyState extends State<_SettingsBody> {
       color: colors.background,
       child: ListView(
         key: const PageStorageKey<String>('settings-list'),
-        padding: const EdgeInsets.all(20),
+        padding: AppResponsive.scrollPaddingWithFloatingNav(context, top: 20),
         children: [
           _ProfileSettingsHeader(
             userName: widget.userName,

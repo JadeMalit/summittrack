@@ -1,11 +1,6 @@
 class AppConfig {
   const AppConfig._();
 
-  static const String graphHopperApiKey = String.fromEnvironment(
-    'GRAPHHOPPER_API_KEY',
-    defaultValue: '',
-  );
-
   static const String graphHopperProfile = String.fromEnvironment(
     'GRAPHHOPPER_PROFILE',
     defaultValue: 'foot',
@@ -16,5 +11,9 @@ class AppConfig {
     defaultValue: 'https://tiles.openfreemap.org/styles/liberty',
   );
 
-  static bool get hasGraphHopperApiKey => graphHopperApiKey.trim().isNotEmpty;
+  static const String weatherFunctionUrl = String.fromEnvironment(
+    'WEATHER_FUNCTION_URL',
+    defaultValue:
+        'https://us-central1-summittrack-10481.cloudfunctions.net/getSummitTrackWeather',
+  );
 }

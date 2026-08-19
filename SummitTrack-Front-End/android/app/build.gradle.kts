@@ -1,8 +1,20 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
+}
+
+val googleMapsApiKey = providers.environmentVariable("GOOGLE_MAPS_API_KEY")
+    .orElse(localProperties.getProperty("GOOGLE_MAPS_API_KEY", ""))
 
 android {
     namespace = "com.example.summittrack"
@@ -27,6 +39,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = googleMapsApiKey.get()
 
         ndk {
             abiFilters.clear()

@@ -51,7 +51,7 @@ class _LetsHikeCalendarWeatherModalState
   final WeatherService _weatherService = WeatherService();
   late DateTime _selectedDate;
   late DateTime _visibleMonth;
-  
+
   Map<String, dynamic>? _fullResponseData;
   bool _isLoadingWeather = true;
 
@@ -70,7 +70,10 @@ class _LetsHikeCalendarWeatherModalState
       final coords = _mountainCoordinates[lookupName] ?? [6.9872, 125.3708];
 
       // 🚀 KONEKTADO NA: Ginamit na ang bagong method na may coordinates parameters
-      final weatherData = await _weatherService.fetch15DayWeather(coords[0], coords[1]);
+      final weatherData = await _weatherService.fetch15DayWeather(
+        coords[0],
+        coords[1],
+      );
 
       if (!mounted) return;
 
@@ -113,7 +116,8 @@ class _LetsHikeCalendarWeatherModalState
           ),
           child: SafeArea(
             top: false,
-            child: Container( // Pinalitan ng Container para iwas layout overflow issues
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -234,21 +238,20 @@ class _LetsHikeCalendarWeatherModalState
             mainAxisSpacing: 7,
             crossAxisSpacing: 7,
             physics: const NeverScrollableScrollPhysics(),
-            children: _calendarCells()
-                .map(
-                  (date) {
-                    final bool isPastDate = date != null && date.isBefore(_dateOnly(DateTime.now()));
-                    return _CalendarDateCell(
-                      date: date,
-                      isSelected: date != null && _isSameDate(date, _selectedDate),
-                      isToday: date != null && _isToday(date),
-                      isPast: isPastDate,
-                      // 🟢 UX UPGRADE: Hindi pwedeng i-click ang nakalipas na araw para iwas maling input
-                      onTap: (date == null || isPastDate) ? null : () => _selectDate(date),
-                    );
-                  },
-                )
-                .toList(),
+            children: _calendarCells().map((date) {
+              final bool isPastDate =
+                  date != null && date.isBefore(_dateOnly(DateTime.now()));
+              return _CalendarDateCell(
+                date: date,
+                isSelected: date != null && _isSameDate(date, _selectedDate),
+                isToday: date != null && _isToday(date),
+                isPast: isPastDate,
+                // 🟢 UX UPGRADE: Hindi pwedeng i-click ang nakalipas na araw para iwas maling input
+                onTap: (date == null || isPastDate)
+                    ? null
+                    : () => _selectDate(date),
+              );
+            }).toList(),
           ),
         ],
       ),
@@ -326,12 +329,15 @@ class _LetsHikeCalendarWeatherModalState
 
     final forecastList = _fullResponseData!['forecast'] as List?;
     if (forecastList != null) {
-      final String targetString = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-      
+      final String targetString =
+          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+
       // Ginamit natin ang simple for-in loop para sa un-typed JSON list array parsing na malinis
       for (var day in forecastList) {
         if (day is Map && day['date'] == targetString) {
-          return _WeatherPreviewData.fromForecastJson(day.cast<String, dynamic>());
+          return _WeatherPreviewData.fromForecastJson(
+            day.cast<String, dynamic>(),
+          );
         }
       }
     }
@@ -654,10 +660,13 @@ class _WeatherPreviewData {
 
   static IconData _iconForCondition(String condition) {
     final lowerCondition = condition.toLowerCase();
-    if (lowerCondition.contains('rain') || lowerCondition.contains('drizzle') || lowerCondition.contains('showers')) {
+    if (lowerCondition.contains('rain') ||
+        lowerCondition.contains('drizzle') ||
+        lowerCondition.contains('showers')) {
       return Icons.water_drop_rounded;
     }
-    if (lowerCondition.contains('storm') || lowerCondition.contains('thunder')) {
+    if (lowerCondition.contains('storm') ||
+        lowerCondition.contains('thunder')) {
       return Icons.thunderstorm_rounded;
     }
     if (lowerCondition.contains('clear') || lowerCondition.contains('sun')) {
@@ -668,7 +677,9 @@ class _WeatherPreviewData {
 
   static Color _themeForCondition(String condition) {
     final lowerCondition = condition.toLowerCase();
-    if (lowerCondition.contains('rain') || lowerCondition.contains('storm') || lowerCondition.contains('showers')) {
+    if (lowerCondition.contains('rain') ||
+        lowerCondition.contains('storm') ||
+        lowerCondition.contains('showers')) {
       return const Color(0xFF3C83A8);
     }
     if (lowerCondition.contains('clear') || lowerCondition.contains('sun')) {

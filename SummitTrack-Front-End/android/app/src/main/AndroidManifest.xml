@@ -62,10 +62,10 @@
             </intent-filter>
         </activity>
 
-        <!-- 📍 DITO MO ILALAGAY ANG GOOGLE MAPS API KEY MO 📍 -->
+        <!-- Google Maps Android client configuration is supplied by Gradle. -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyC51RwYcp8sJ1iH1DP-9l087fZQyzHCiQ0" />
+            android:value="${GOOGLE_MAPS_API_KEY}" />
         <!-- ================================================= -->
 
         <meta-data

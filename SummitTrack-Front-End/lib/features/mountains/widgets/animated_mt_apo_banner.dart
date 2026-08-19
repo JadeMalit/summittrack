@@ -3,14 +3,18 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/layout/app_responsive.dart';
+
 class AnimatedMtApoBanner extends StatefulWidget {
   const AnimatedMtApoBanner({
     super.key,
     required this.imageAsset,
     required this.title,
-    this.height = 245,
+    this.height = _defaultHeight,
     this.borderRadius = 30,
   });
+
+  static const double _defaultHeight = 245;
 
   final String imageAsset;
   final String title;
@@ -56,8 +60,9 @@ class _AnimatedMtApoBannerState extends State<AnimatedMtApoBanner>
             builder: (context, constraints) {
               final width = constraints.maxWidth;
               final loopT = _loopController.value;
-              final introT =
-                  Curves.easeOutCubic.transform(_introController.value);
+              final introT = Curves.easeOutCubic.transform(
+                _introController.value,
+              );
               final breathing = math.sin(loopT * math.pi * 2);
               final drift = math.sin(loopT * math.pi * 2 * 0.72 + 1.1);
               final sweep = (math.sin(loopT * math.pi * 2 - 0.4) + 1.0) / 2.0;
@@ -68,9 +73,20 @@ class _AnimatedMtApoBannerState extends State<AnimatedMtApoBanner>
               final titleOffsetDy = 18.0 * (1.0 - introT);
               final titleScale = 0.98 + (0.02 * introT);
               final pulse = 0.5 + (0.5 * math.sin(loopT * math.pi * 2 * 0.9));
-              final titleFontSize = (width * 0.102).clamp(30.0, 44.0).toDouble();
+              final titleFontSize = (width * 0.102)
+                  .clamp(30.0, 44.0)
+                  .toDouble();
               final glowBlur = 10.0 + (10.0 * pulse);
               final glowAlpha = 0.22 + (0.10 * pulse);
+              final bannerHeight =
+                  widget.height == AnimatedMtApoBanner._defaultHeight
+                  ? AppResponsive.clampedWidthHeight(
+                      width,
+                      ratio: 0.68,
+                      min: 205,
+                      max: AnimatedMtApoBanner._defaultHeight,
+                    )
+                  : widget.height;
 
               return ClipRRect(
                 borderRadius: BorderRadius.circular(widget.borderRadius),
@@ -78,7 +94,7 @@ class _AnimatedMtApoBannerState extends State<AnimatedMtApoBanner>
                   alignment: Alignment.center,
                   children: [
                     SizedBox(
-                      height: widget.height,
+                      height: bannerHeight,
                       width: double.infinity,
                       child: Transform.translate(
                         offset: Offset(imageDx, imageDy),
@@ -120,20 +136,21 @@ class _AnimatedMtApoBannerState extends State<AnimatedMtApoBanner>
                                 opacity: 0.16 + (0.04 * sweep),
                                 child: _MistCloud(
                                   width: width * 0.48,
-                                  height: widget.height * 0.18,
+                                  height: bannerHeight * 0.18,
                                   tint: const Color(0xFFF4FFF1),
                                 ),
                               ),
                             ),
                             Positioned(
                               right:
-                                  -55 + (14 * math.sin(loopT * math.pi * 2 * 0.64)),
+                                  -55 +
+                                  (14 * math.sin(loopT * math.pi * 2 * 0.64)),
                               bottom: 0,
                               child: Opacity(
                                 opacity: 0.13 + (0.03 * (1.0 - sweep)),
                                 child: _MistCloud(
                                   width: width * 0.42,
-                                  height: widget.height * 0.15,
+                                  height: bannerHeight * 0.15,
                                   tint: const Color(0xFFE8F6E1),
                                 ),
                               ),
@@ -161,17 +178,25 @@ class _AnimatedMtApoBannerState extends State<AnimatedMtApoBanner>
                                     angle: -0.33,
                                     child: Container(
                                       width: width * 0.48,
-                                      height: widget.height * 0.92,
+                                      height: bannerHeight * 0.92,
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
                                           colors: [
                                             Colors.transparent,
                                             const Color(0x30F3FFE7),
-                                            Colors.white.withValues(alpha: 0.16),
+                                            Colors.white.withValues(
+                                              alpha: 0.16,
+                                            ),
                                             const Color(0x1AF4FFF1),
                                             Colors.transparent,
                                           ],
-                                          stops: const [0.0, 0.38, 0.50, 0.62, 1.0],
+                                          stops: const [
+                                            0.0,
+                                            0.38,
+                                            0.50,
+                                            0.62,
+                                            1.0,
+                                          ],
                                         ),
                                       ),
                                     ),
@@ -207,13 +232,16 @@ class _AnimatedMtApoBannerState extends State<AnimatedMtApoBanner>
                                       letterSpacing: 1.1,
                                       shadows: [
                                         Shadow(
-                                          color: const Color(0xFF2E6B2A)
-                                              .withValues(alpha: glowAlpha),
+                                          color: const Color(
+                                            0xFF2E6B2A,
+                                          ).withValues(alpha: glowAlpha),
                                           blurRadius: glowBlur,
                                           offset: const Offset(0, 0),
                                         ),
                                         Shadow(
-                                          color: Colors.black.withValues(alpha: 0.55),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.55,
+                                          ),
                                           blurRadius: 8,
                                           offset: const Offset(0, 2),
                                         ),
@@ -230,12 +258,16 @@ class _AnimatedMtApoBannerState extends State<AnimatedMtApoBanner>
                                       shadows: [
                                         Shadow(
                                           color: const Color(0xFF11320E)
-                                              .withValues(alpha: 0.40 + (0.10 * pulse)),
+                                              .withValues(
+                                                alpha: 0.40 + (0.10 * pulse),
+                                              ),
                                           blurRadius: 14 + (4 * pulse),
                                           offset: const Offset(0, 2),
                                         ),
                                         Shadow(
-                                          color: Colors.black.withValues(alpha: 0.72),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.72,
+                                          ),
                                           blurRadius: 4,
                                           offset: const Offset(1.2, 1.2),
                                         ),
@@ -292,10 +324,7 @@ class _MistCloud extends StatelessWidget {
 }
 
 class _LightOrb extends StatelessWidget {
-  const _LightOrb({
-    required this.size,
-    required this.tint,
-  });
+  const _LightOrb({required this.size, required this.tint});
 
   final double size;
   final Color tint;
@@ -308,11 +337,7 @@ class _LightOrb extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
-          colors: [
-            tint,
-            tint.withValues(alpha: 0.14),
-            Colors.transparent,
-          ],
+          colors: [tint, tint.withValues(alpha: 0.14), Colors.transparent],
           stops: const [0.0, 0.42, 1.0],
         ),
       ),

@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
 // 🟢 Import ng Live Tracking Service
+
+// 🟢 Import ng Live Tracking Service na ginawa natin
+import '../../../core/layout/app_responsive.dart';
 import '../../../services/tracking/live_tracking_service.dart';
 import '../../../services/location/location_service.dart';
 import '../models/scheduled_hike.dart';
@@ -20,7 +23,8 @@ class _HikeScreenState extends State<HikeScreen> {
   final LocationService _locationService = const LocationService();
 
   // 🛰️ Service para sa Live GPS Broadcasting
-  final LiveTrackingSenderService _trackingService = LiveTrackingSenderService();
+  final LiveTrackingSenderService _trackingService =
+      LiveTrackingSenderService();
 
   bool _isLiveTrackingActive = false;
   bool _isTestModeActive = false;
@@ -122,9 +126,9 @@ class _HikeScreenState extends State<HikeScreen> {
           readiness.status == LocationReadinessStatus.permissionDeniedForever ||
           readiness.status == LocationReadinessStatus.serviceDisabled) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(readiness.message)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(readiness.message)));
         }
         return;
       }
@@ -134,6 +138,7 @@ class _HikeScreenState extends State<HikeScreen> {
       });
 
       try {
+        // 🚀 START REAL BROADCASTING (Kusa nitong kukunin ang totoong user name & GPS)
         await _trackingService.startLiveBroadcasting(hikeId: hike.id);
       } catch (e) {
         debugPrint('Error starting broadcast: $e');
@@ -184,9 +189,7 @@ class _HikeScreenState extends State<HikeScreen> {
         actions: [
           IconButton(
             icon: Icon(
-              _isTestModeActive
-                  ? Icons.bug_report
-                  : Icons.bug_report_outlined,
+              _isTestModeActive ? Icons.bug_report : Icons.bug_report_outlined,
               color: _isTestModeActive
                   ? Colors.amber.shade800
                   : Colors.grey.shade600,
@@ -265,9 +268,11 @@ class _HikeScreenState extends State<HikeScreen> {
 
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
+            padding: EdgeInsets.fromLTRB(
+              16,
+              8,
+              16,
+              AppResponsive.floatingNavClearance(context),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -312,7 +317,7 @@ class _HikeScreenState extends State<HikeScreen> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -343,7 +348,7 @@ class _HikeScreenState extends State<HikeScreen> {
                               ),
                               decoration: BoxDecoration(
                                 color: hasHikeToday
-                                    ? accentGreen.withOpacity(0.12)
+                                    ? accentGreen.withValues(alpha: 0.12)
                                     : Colors.orange.shade50,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
@@ -469,10 +474,7 @@ class _HikeScreenState extends State<HikeScreen> {
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
-                              icon: const Icon(
-                                Icons.share_rounded,
-                                size: 18,
-                              ),
+                              icon: const Icon(Icons.share_rounded, size: 18),
                               label: const Text(
                                 'Share Live Location Link',
                                 style: TextStyle(
@@ -593,7 +595,7 @@ class _HikeScreenState extends State<HikeScreen> {
                         ),
                         leading: CircleAvatar(
                           backgroundColor: item.isHikeToday
-                              ? primaryGreen.withOpacity(0.1)
+                              ? primaryGreen.withValues(alpha: 0.1)
                               : Colors.blue.shade50,
                           child: Icon(
                             item.isHikeToday

@@ -11,7 +11,7 @@ void main() {
       uid: 'uid123',
       trailId: 'sta_cruz_sibulan',
       downloadUrl: 'https://example.com/media.jpg',
-      storagePath: 'users/uid123/media/media123.jpg',
+      storagePath: 'images/media123.jpg',
       createdAt: createdAt,
       updatedAt: updatedAt,
       fileName: 'trail-photo.jpg',
@@ -28,12 +28,36 @@ void main() {
     expect(data['uid'], 'uid123');
     expect(data['userId'], 'uid123');
     expect(data['trailId'], 'sta_cruz_sibulan');
-    expect(data['storagePath'], 'users/uid123/media/media123.jpg');
+    expect(data['storagePath'], 'images/media123.jpg');
     expect(data['downloadUrl'], 'https://example.com/media.jpg');
     expect(data['mediaUrl'], 'https://example.com/media.jpg');
     expect(data['mediaType'], TrailPhotoModel.mediaTypeImage);
     expect(data['type'], TrailPhotoModel.mediaTypeImage);
     expect(data['createdAt'], isA<Timestamp>());
     expect(data['updatedAt'], isA<Timestamp>());
+  });
+
+  test('serializes video metadata with videoUrl and direct video path', () {
+    final createdAt = DateTime.utc(2026, 8, 17, 9, 30);
+    final media = TrailPhotoModel(
+      id: 'video123',
+      uid: 'uid123',
+      trailId: 'sta_cruz_sibulan',
+      downloadUrl: 'https://example.com/media.mp4',
+      storagePath: 'videos/video123.mp4',
+      createdAt: createdAt,
+      updatedAt: createdAt,
+      fileName: 'trail-video.mp4',
+      mediaType: TrailPhotoModel.mediaTypeVideo,
+      contentType: 'video/mp4',
+      sizeBytes: 42,
+    );
+
+    final data = media.toFirestore();
+
+    expect(data['storagePath'], 'videos/video123.mp4');
+    expect(data['mediaType'], TrailPhotoModel.mediaTypeVideo);
+    expect(data['mediaUrl'], 'https://example.com/media.mp4');
+    expect(data['videoUrl'], 'https://example.com/media.mp4');
   });
 }
