@@ -142,5 +142,25 @@ service cloud.firestore {
     match /notification_jobs/{jobId} {
       allow read, write: if false;
     }
+
+    // =========================================================
+    // 🛰️ LIVE TRACKING
+    //
+    // Public read: anyone with the hikeId link can view.
+    // The hiker explicitly shared this link — no auth needed.
+    //
+    // Write: only signed-in users (the hiker's device).
+    // =========================================================
+    match /live_tracks/{hikeId} {
+      allow read: if true;
+
+      allow create, update: if signedIn()
+        && request.resource.data.isLive is bool
+        && request.resource.data.hikerName is string
+        && request.resource.data.hikerName.size() > 0
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if signedIn();
+    }
   }
 }

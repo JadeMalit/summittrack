@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
 class LiveTrackingSenderService {
@@ -51,10 +52,7 @@ class LiveTrackingSenderService {
     final String activeHikerName = hikerName ?? await _fetchCurrentHikerName();
 
     // 3. I-set muna bilang Active sa Firestore
-    await FirebaseFirestore.instance
-        .collection('live_tracks')
-        .doc(hikeId)
-        .set({
+    await FirebaseFirestore.instance.collection('live_tracks').doc(hikeId).set({
       'isLive': true,
       'hikerName': activeHikerName,
       'updatedAt': FieldValue.serverTimestamp(),
@@ -66,21 +64,30 @@ class LiveTrackingSenderService {
       distanceFilter: 5, // Mag-u-update bawat galaw ng 5 meters
     );
 
-    _positionSubscription = Geolocator.getPositionStream(
-      locationSettings: locationSettings,
-    ).listen((Position position) {
-      // 🛰️ I-UPDATE ANG TOTOONG COORDINATES SA FIRESTORE
-      FirebaseFirestore.instance
-          .collection('live_tracks')
-          .doc(hikeId)
-          .set({
-        'latitude': position.latitude,
-        'longitude': position.longitude,
-        'isLive': true,
-        'hikerName': activeHikerName,
-        'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-    });
+    _positionSubscription =
+        Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+          (Position position) {
+            // 🛰️ I-UPDATE ANG TOTOONG COORDINATES SA FIRESTORE
+            FirebaseFirestore.instance
+                .collection('live_tracks')
+                .doc(hikeId)
+                .set({
+                  'latitude': position.latitude,
+                  'longitude': position.longitude,
+                  'isLive': true,
+                  'hikerName': activeHikerName,
+                  'updatedAt': FieldValue.serverTimestamp(),
+                }, SetOptions(merge: true))
+                .catchError((e) {
+                  debugPrint(
+                    '[TRACK DEBUG] Error updating position in stream: $e',
+                  );
+                });
+          },
+          onError: (e) {
+            debugPrint('[TRACK DEBUG] Position stream error: $e');
+          },
+        );
   }
 
   // 🛑 Tawagin ito kapag pinindot ang "Stop Live Broadcast"
@@ -91,6 +98,6 @@ class LiveTrackingSenderService {
     await FirebaseFirestore.instance
         .collection('live_tracks')
         .doc(hikeId)
-        .update({'isLive': false});
+        .update({'isLive': false, 'updatedAt': FieldValue.serverTimestamp()});
   }
 }

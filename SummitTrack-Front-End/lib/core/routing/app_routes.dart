@@ -7,7 +7,7 @@ class AppRoutes {
   static const settings = '/settings';
   static const hikeNavigation = '/navigation/hike';
   static const graphHopperConnectionTest = '/debug/graphhopper';
-
+  static const liveTrack = '/track';
   static const mtApoMountainId = 'mt-apo';
   static const mtPulagMountainId = 'mt-pulag';
   static const staCruzTrailId = 'sta-cruz-sibulan';

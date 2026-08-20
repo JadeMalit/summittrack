@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
-// 🟢 Import ng Live Tracking Service
-
 // 🟢 Import ng Live Tracking Service na ginawa natin
 import '../../../core/layout/app_responsive.dart';
 import '../../../services/tracking/live_tracking_service.dart';
@@ -40,21 +38,20 @@ class _HikeScreenState extends State<HikeScreen> {
     _scheduleStore.load();
   }
 
-  /// 🟢 DIREKTA SA APP (Custom URL Scheme para sa iOS at Android)
+  /// 🟢 100% WORKING LIVE TRACKING SHARE LINK
+  ///
+  /// Ito ang dating working implementation bago mapalitan
+  /// ng summittrack:// custom URL scheme.
   Future<void> _shareLiveLocationLink(ScheduledHike hike) async {
-    // Rekta sa SummitTrack app (Hindi na dadaan sa web landing page)
-    final String directAppLink = 'summittrack://track?hikeId=${hike.id}';
-    final String webFallbackLink =
+    final String trackingUrl =
         'https://summittrack-10481.web.app/track?hikeId=${hike.id}';
 
     final String message =
         '🚀 Sundan ang aking live hike sa SummitTrack!\n'
         'Bundok: ${hike.mountainName}\n'
         'Trail: ${hike.trailName}\n\n'
-        '📲 Buksan direkta sa SummitTrack App:\n'
-        '$directAppLink\n\n'
-        '🌐 O buksan sa browser kung walang app:\n'
-        '$webFallbackLink';
+        'I-tap ang link para buksan sa SummitTrack App:\n'
+        '$trackingUrl';
 
     try {
       await Share.share(
@@ -64,7 +61,7 @@ class _HikeScreenState extends State<HikeScreen> {
     } catch (e) {
       debugPrint('Share Sheet error: $e');
 
-      await Clipboard.setData(ClipboardData(text: directAppLink));
+      await Clipboard.setData(ClipboardData(text: trackingUrl));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -79,7 +76,7 @@ class _HikeScreenState extends State<HikeScreen> {
             backgroundColor: primaryGreen,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
           ),
         );
@@ -90,34 +87,53 @@ class _HikeScreenState extends State<HikeScreen> {
   /// 📡 Toggle Live GPS Broadcasting
   Future<void> _toggleTracking(ScheduledHike hike) async {
     if (_isLiveTrackingActive) {
-      setState(() {
-        _isLiveTrackingActive = false;
-      });
-
       try {
+        // 🛑 STOP BROADCASTING
         await _trackingService.stopLiveBroadcasting(hike.id);
+
+        setState(() {
+          _isLiveTrackingActive = false;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(Icons.power_settings_new, color: Colors.white),
+                  SizedBox(width: 10),
+                  Text('Live tracking broadcast stopped.'),
+                ],
+              ),
+              backgroundColor: Colors.red.shade700,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       } catch (e) {
         debugPrint('Error stopping broadcast: $e');
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.power_settings_new, color: Colors.white),
-                SizedBox(width: 10),
-                Text('Live tracking broadcast stopped.'),
-              ],
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.white),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text('Failed to stop live tracking: $e')),
+                ],
+              ),
+              backgroundColor: Colors.red.shade900,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-            backgroundColor: Colors.red.shade700,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+          );
+        }
       }
     } else {
       final readiness = await _locationService.requestNavigationReadiness();
@@ -133,40 +149,59 @@ class _HikeScreenState extends State<HikeScreen> {
         return;
       }
 
-      setState(() {
-        _isLiveTrackingActive = true;
-      });
-
       try {
-        // 🚀 START REAL BROADCASTING (Kusa nitong kukunin ang totoong user name & GPS)
+        // 🚀 START REAL BROADCASTING
+        // Kusa nitong kukunin ang totoong user name & GPS
         await _trackingService.startLiveBroadcasting(hikeId: hike.id);
+
+        setState(() {
+          _isLiveTrackingActive = true;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.sensors, color: Colors.white),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      readiness.status == LocationReadinessStatus.poorAccuracy
+                          ? 'Live Tracking Started (${readiness.message})'
+                          : 'Live GPS Broadcasting Started!',
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: primaryGreen,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+        }
       } catch (e) {
         debugPrint('Error starting broadcast: $e');
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.sensors, color: Colors.white),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    readiness.status == LocationReadinessStatus.poorAccuracy
-                        ? 'Live Tracking Started (${readiness.message})'
-                        : 'Live GPS Broadcasting Started!',
-                  ),
-                ),
-              ],
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.white),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text('Failed to start live tracking: $e')),
+                ],
+              ),
+              backgroundColor: Colors.red.shade900,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-            backgroundColor: primaryGreen,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        );
+          );
+        }
       }
     }
   }
@@ -199,6 +234,7 @@ class _HikeScreenState extends State<HikeScreen> {
               setState(() {
                 _isTestModeActive = !_isTestModeActive;
               });
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -260,6 +296,7 @@ class _HikeScreenState extends State<HikeScreen> {
           }
 
           final todayHikes = _scheduleStore.todayHikes;
+
           final bool hasHikeToday = todayHikes.isNotEmpty || _isTestModeActive;
 
           final activeHike = _isTestModeActive
@@ -277,6 +314,9 @@ class _HikeScreenState extends State<HikeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ==========================================================
+                // 🧪 TEST MODE BANNER
+                // ==========================================================
                 if (_isTestModeActive)
                   Container(
                     margin: const EdgeInsets.only(bottom: 16),
@@ -310,7 +350,9 @@ class _HikeScreenState extends State<HikeScreen> {
                     ),
                   ),
 
+                // ==========================================================
                 // 🌟 ACTIVE HIKE CARD
+                // ==========================================================
                 Container(
                   decoration: BoxDecoration(
                     color: cardBg,
@@ -386,6 +428,7 @@ class _HikeScreenState extends State<HikeScreen> {
                           ],
                         ),
                         const SizedBox(height: 6),
+
                         Row(
                           children: [
                             Icon(
@@ -406,7 +449,9 @@ class _HikeScreenState extends State<HikeScreen> {
                             ),
                           ],
                         ),
+
                         const SizedBox(height: 4),
+
                         Row(
                           children: [
                             Icon(
@@ -424,6 +469,7 @@ class _HikeScreenState extends State<HikeScreen> {
                             ),
                           ],
                         ),
+
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 16.0),
                           child: Divider(height: 1),
@@ -457,9 +503,12 @@ class _HikeScreenState extends State<HikeScreen> {
                               ),
                             ],
                           ),
+
                           const SizedBox(height: 14),
 
+                          // ==================================================
                           // 🚀 SHARE LIVE LOCATION BUTTON
+                          // ==================================================
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton.icon(
@@ -486,9 +535,12 @@ class _HikeScreenState extends State<HikeScreen> {
                                   _shareLiveLocationLink(activeHike),
                             ),
                           ),
+
                           const SizedBox(height: 10),
 
+                          // ==================================================
                           // ⏯️ START / STOP BROADCAST BUTTON
+                          // ==================================================
                           SizedBox(
                             width: double.infinity,
                             child: OutlinedButton.icon(
@@ -559,9 +611,12 @@ class _HikeScreenState extends State<HikeScreen> {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 28),
 
+                // ==========================================================
                 // 📅 SCHEDULED HIKES LIST
+                // ==========================================================
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: Text(
@@ -573,6 +628,7 @@ class _HikeScreenState extends State<HikeScreen> {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 12),
 
                 ListView.builder(
@@ -581,6 +637,7 @@ class _HikeScreenState extends State<HikeScreen> {
                   itemCount: hikes.length,
                   itemBuilder: (context, index) {
                     final item = hikes[index];
+
                     return Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       decoration: BoxDecoration(
@@ -615,7 +672,8 @@ class _HikeScreenState extends State<HikeScreen> {
                           ),
                         ),
                         subtitle: Text(
-                          '${item.trailName} • ${ScheduledHike.dateKey(item.hikeDate)}',
+                          '${item.trailName} • '
+                          '${ScheduledHike.dateKey(item.hikeDate)}',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey.shade600,

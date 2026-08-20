@@ -1,3 +1,4 @@
+import '../../features/mountains/screens/live_hike_viewer_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -19,15 +20,15 @@ import '../../features/mountains/screens/mt_apo.dart';
 import '../../features/mountains/screens/mt_pulag.dart';
 import '../../features/mountains/screens/mt_mayon.dart';
 import '../../features/mountains/screens/mt_batulao.dart';
-import '../../features/mountains/screens/mt_ulap.dart'; 
-import '../../features/mountains/screens/mt_daraitan.dart'; 
-import '../../features/mountains/screens/mt_maculot.dart'; 
-import '../../features/mountains/screens/mt_pico_de_loro.dart'; 
-import '../../features/mountains/screens/mt_pinatubo.dart'; 
-import '../../features/mountains/screens/mt_guiting_guiting.dart'; 
-import '../../features/mountains/screens/mt_manabu.dart'; 
-import '../../features/mountains/screens/mt_gulugod_baboy.dart'; 
-import '../../features/mountains/screens/mt_maynoba.dart'; 
+import '../../features/mountains/screens/mt_ulap.dart';
+import '../../features/mountains/screens/mt_daraitan.dart';
+import '../../features/mountains/screens/mt_maculot.dart';
+import '../../features/mountains/screens/mt_pico_de_loro.dart';
+import '../../features/mountains/screens/mt_pinatubo.dart';
+import '../../features/mountains/screens/mt_guiting_guiting.dart';
+import '../../features/mountains/screens/mt_manabu.dart';
+import '../../features/mountains/screens/mt_gulugod_baboy.dart';
+import '../../features/mountains/screens/mt_maynoba.dart';
 import '../../features/mountains/screens/trail_detail_screen.dart';
 import '../../data/trail_data/ambangeg_trail_data.dart';
 import '../../data/trail_data/akiki_trail_data.dart';
@@ -38,50 +39,50 @@ import '../../data/trail_data/anoling_trail_data.dart';
 import '../../data/trail_data/miisi_trail_data.dart';
 import '../../data/trail_data/old_trail_data.dart';
 import '../../data/trail_data/new_trail_data.dart';
-import '../../data/trail_data/ambanao_paoay_data.dart'; 
+import '../../data/trail_data/ambanao_paoay_data.dart';
 import '../../data/trail_data/gungal_rock_data.dart';
 import '../../data/trail_data/sta_fe_trail_data.dart';
-import '../../data/trail_data/daraitan_summit_data.dart'; 
+import '../../data/trail_data/daraitan_summit_data.dart';
 import '../../data/trail_data/tinipak_river_data.dart';
 import '../../data/trail_data/daraitan_traverse_data.dart';
-import '../../data/trail_data/maculot_rockies_data.dart'; 
+import '../../data/trail_data/maculot_rockies_data.dart';
 import '../../data/trail_data/maculot_summit_data.dart';
 import '../../data/trail_data/maculot_traverse_data.dart';
 import '../../data/trail_data/maculot_airforce_data.dart';
-import '../../data/trail_data/pico_main_data.dart'; 
+import '../../data/trail_data/pico_main_data.dart';
 import '../../data/trail_data/pico_monolith_data.dart';
 import '../../data/trail_data/pico_traverse_data.dart';
-import '../../data/trail_data/pinatubo_capas_data.dart'; 
+import '../../data/trail_data/pinatubo_capas_data.dart';
 import '../../data/trail_data/pinatubo_sapangbato_data.dart';
 import '../../data/trail_data/pinatubo_porac_data.dart';
-import '../../data/trail_data/g2_tampayan_data.dart'; 
+import '../../data/trail_data/g2_tampayan_data.dart';
 import '../../data/trail_data/g2_olango_data.dart';
 import '../../data/trail_data/g2_traverse_data.dart';
-import '../../data/trail_data/manabu_main_data.dart'; 
+import '../../data/trail_data/manabu_main_data.dart';
 import '../../data/trail_data/manabu_grotto_data.dart';
 import '../../data/trail_data/manabu_traverse_data.dart';
-import '../../data/trail_data/gulugod_anilao_data.dart'; 
+import '../../data/trail_data/gulugod_anilao_data.dart';
 import '../../data/trail_data/gulugod_laurel_data.dart';
 import '../../data/trail_data/gulugod_san_teodoro_data.dart';
 import '../../data/trail_data/gulugod_campsite_data.dart';
-import '../../data/trail_data/maynoba_circuit_data.dart'; 
+import '../../data/trail_data/maynoba_circuit_data.dart';
 import '../../data/trail_data/maynoba_waterfalls_data.dart';
 import '../../data/trail_data/maynoba_campsite_data.dart';
 import '../../data/trail_data/maynoba_traverse_data.dart';
-import '../../data/trail_data/lingguhob_trails.dart'; 
-import '../../features/mountains/screens/mt_lingguhob.dart'; 
-import '../../data/trail_data/arayat_trails.dart'; 
-import '../../features/mountains/screens/mt_arayat.dart'; 
-import '../../data/trail_data/makiling_trails.dart'; 
-import '../../features/mountains/screens/mt_makiling.dart'; 
-import '../../data/trail_data/damas_trails.dart'; 
-import '../../features/mountains/screens/mt_damas.dart'; 
-import '../../data/trail_data/tugew_trails.dart'; 
-import '../../features/mountains/screens/mt_tugew.dart'; 
-import '../../data/trail_data/mariglem_trails.dart'; 
-import '../../features/mountains/screens/mt_mariglem.dart'; 
-import '../../data/trail_data/cutuno_trails.dart'; 
-import '../../features/mountains/screens/mt_cutuno.dart'; 
+import '../../data/trail_data/lingguhob_trails.dart';
+import '../../features/mountains/screens/mt_lingguhob.dart';
+import '../../data/trail_data/arayat_trails.dart';
+import '../../features/mountains/screens/mt_arayat.dart';
+import '../../data/trail_data/makiling_trails.dart';
+import '../../features/mountains/screens/mt_makiling.dart';
+import '../../data/trail_data/damas_trails.dart';
+import '../../features/mountains/screens/mt_damas.dart';
+import '../../data/trail_data/tugew_trails.dart';
+import '../../features/mountains/screens/mt_tugew.dart';
+import '../../data/trail_data/mariglem_trails.dart';
+import '../../features/mountains/screens/mt_mariglem.dart';
+import '../../data/trail_data/cutuno_trails.dart';
+import '../../features/mountains/screens/mt_cutuno.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -316,7 +317,8 @@ class AppRouter {
         );
       }
 
-      if (mountainId.toLowerCase().contains('gulugod') || mountainId.toLowerCase().contains('baboy')) {
+      if (mountainId.toLowerCase().contains('gulugod') ||
+          mountainId.toLowerCase().contains('baboy')) {
         return _route(
           settings,
           _AuthGuard(
@@ -423,55 +425,458 @@ class AppRouter {
       final trailId = segments[3];
 
       if (mountainId.toLowerCase().contains('lingguhob')) {
-        if (trailId == 'bonbon') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: lingguhobBonbonTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'lingguhob_bonbon', navigationTrailId: trailId)));
-        if (trailId == 'itisan') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: lingguhobItisanTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'lingguhob_itisan', navigationTrailId: trailId)));
-        if (trailId == 'tuasan') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: lingguhobTuasanTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'lingguhob_tuasan', navigationTrailId: trailId)));
+        if (trailId == 'bonbon')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: lingguhobBonbonTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'lingguhob_bonbon',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'itisan')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: lingguhobItisanTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'lingguhob_itisan',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'tuasan')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: lingguhobTuasanTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'lingguhob_tuasan',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
       }
 
       if (mountainId.toLowerCase().contains('arayat')) {
-        if (trailId == 'sanjuan') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: arayatSanJuanTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'arayat_sanjuan', navigationTrailId: trailId)));
-        if (trailId == 'magalang') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: arayatMagalangTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'arayat_magalang', navigationTrailId: trailId)));
-        if (trailId == 'traverse') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: arayatTraverseTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'arayat_traverse', navigationTrailId: trailId)));
-        if (trailId == 'pinnacle') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: arayatPinnacleTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'arayat_pinnacle', navigationTrailId: trailId)));
+        if (trailId == 'sanjuan')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: arayatSanJuanTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'arayat_sanjuan',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'magalang')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: arayatMagalangTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'arayat_magalang',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'traverse')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: arayatTraverseTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'arayat_traverse',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'pinnacle')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: arayatPinnacleTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'arayat_pinnacle',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
       }
 
       if (mountainId.toLowerCase().contains('makiling')) {
-        if (trailId == 'uplb') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: makilingUplbTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'makiling_uplb', navigationTrailId: trailId)));
-        if (trailId == 'traverse') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: makilingTraverseTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'makiling_traverse', navigationTrailId: trailId)));
-        if (trailId == 'mudsprings') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: makilingMudspringsTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'makiling_mudsprings', navigationTrailId: trailId)));
-        if (trailId == 'flatrocks') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: makilingFlatrocksTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'makiling_flatrocks', navigationTrailId: trailId)));
+        if (trailId == 'uplb')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: makilingUplbTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'makiling_uplb',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'traverse')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: makilingTraverseTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'makiling_traverse',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'mudsprings')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: makilingMudspringsTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'makiling_mudsprings',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'flatrocks')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: makilingFlatrocksTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'makiling_flatrocks',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
       }
 
       if (mountainId.toLowerCase().contains('damas')) {
-        if (trailId == 'papaac') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: damasPapaacTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'damas_papaac', navigationTrailId: trailId)));
-        if (trailId == 'ubod') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: damasUbodTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'damas_ubod', navigationTrailId: trailId)));
-        if (trailId == 'dueg') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: damasDuegTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'damas_dueg', navigationTrailId: trailId)));
-        if (trailId == 'canding') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: damasCandingTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'damas_canding', navigationTrailId: trailId)));
-        if (trailId == 'siwsiw') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: damasSiwsiwTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'damas_siwsiw', navigationTrailId: trailId)));
+        if (trailId == 'papaac')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: damasPapaacTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'damas_papaac',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'ubod')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: damasUbodTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'damas_ubod',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'dueg')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: damasDuegTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'damas_dueg',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'canding')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: damasCandingTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'damas_canding',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'siwsiw')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: damasSiwsiwTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'damas_siwsiw',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
       }
 
       if (mountainId.toLowerCase().contains('tugew')) {
-        if (trailId == 'poblacion') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: tugewPoblacionTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'tugew_poblacion', navigationTrailId: trailId)));
-        if (trailId == 'amburayan') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: tugewAmburayanTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'tugew_amburayan', navigationTrailId: trailId)));
-        if (trailId == 'longog') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: tugewLongogTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'tugew_longog', navigationTrailId: trailId)));
-        if (trailId == 'gaddani') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: tugewGaddaniTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'tugew_gaddani', navigationTrailId: trailId)));
-        if (trailId == 'badi') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: tugewBadiTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'tugew_badi', navigationTrailId: trailId)));
+        if (trailId == 'poblacion')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: tugewPoblacionTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'tugew_poblacion',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'amburayan')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: tugewAmburayanTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'tugew_amburayan',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'longog')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: tugewLongogTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'tugew_longog',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'gaddani')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: tugewGaddaniTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'tugew_gaddani',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'badi')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: tugewBadiTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'tugew_badi',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
       }
 
       if (mountainId.toLowerCase().contains('mariglem')) {
-        if (trailId == 'classic') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: mariglemClassicTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'mariglem_classic', navigationTrailId: trailId)));
-        if (trailId == 'mapanuepe') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: mariglemMapanuepeTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'mariglem_mapanuepe', navigationTrailId: trailId)));
-        if (trailId == 'marella') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: mariglemMarellaTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'mariglem_marella', navigationTrailId: trailId)));
-        if (trailId == 'aglao') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: mariglemAglaoTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'mariglem_aglao', navigationTrailId: trailId)));
-        if (trailId == 'consuelo') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: mariglemConsueloTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'mariglem_consuelo', navigationTrailId: trailId)));
+        if (trailId == 'classic')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: mariglemClassicTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'mariglem_classic',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'mapanuepe')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: mariglemMapanuepeTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'mariglem_mapanuepe',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'marella')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: mariglemMarellaTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'mariglem_marella',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'aglao')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: mariglemAglaoTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'mariglem_aglao',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'consuelo')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: mariglemConsueloTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'mariglem_consuelo',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
       }
 
       if (mountainId.toLowerCase().contains('cutuno')) {
-        if (trailId == 'summit') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: cutunoSummitTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'cutuno_summit', navigationTrailId: trailId)));
-        if (trailId == 'lubog') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: cutunoLubogTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'cutuno_lubog', navigationTrailId: trailId)));
-        if (trailId == 'explorer') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: cutunoExplorerTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'cutuno_explorer', navigationTrailId: trailId)));
-        if (trailId == 'river') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: cutunoRiverTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'cutuno_river', navigationTrailId: trailId)));
-        if (trailId == 'cave') return _route(settings, _AuthGuard(currentLocation: location, requireAuth: true, child: TrailDetailScreen(trail: cutunoCaveTrail, parentRoute: AppRoutes.mountain(mountainId), trailPhotoId: 'cutuno_cave', navigationTrailId: trailId)));
+        if (trailId == 'summit')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: cutunoSummitTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'cutuno_summit',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'lubog')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: cutunoLubogTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'cutuno_lubog',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'explorer')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: cutunoExplorerTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'cutuno_explorer',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'river')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: cutunoRiverTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'cutuno_river',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
+        if (trailId == 'cave')
+          return _route(
+            settings,
+            _AuthGuard(
+              currentLocation: location,
+              requireAuth: true,
+              child: TrailDetailScreen(
+                trail: cutunoCaveTrail,
+                parentRoute: AppRoutes.mountain(mountainId),
+                trailPhotoId: 'cutuno_cave',
+                navigationTrailId: trailId,
+              ),
+            ),
+          );
       }
 
       if (mountainId == AppRoutes.mtApoMountainId &&
@@ -1033,7 +1438,8 @@ class AppRouter {
         }
       }
 
-      if (mountainId.toLowerCase().contains('gulugod') || mountainId.toLowerCase().contains('baboy')) {
+      if (mountainId.toLowerCase().contains('gulugod') ||
+          mountainId.toLowerCase().contains('baboy')) {
         if (trailId == 'anilao') {
           return _route(
             settings,
@@ -1164,6 +1570,31 @@ class AppRouter {
           );
         }
       }
+    }
+
+    // ============================================================
+    // 🛰️ PUBLIC LIVE HIKE TRACKING
+    // ============================================================
+    //
+    // Example:
+    // /track?hikeId=mt_apo_sta-cruz-sibulan_2026-08-20
+    //
+    // This route intentionally does not use _AuthGuard because
+    // recipients of a shared tracking link may not be logged in.
+    if (uri.path == AppRoutes.liveTrack) {
+      final String hikeId = uri.queryParameters['hikeId']?.trim() ?? '';
+
+      debugPrint(
+        '[TRACK DEBUG] /track matched | '
+        'location="$location" | '
+        'hikeId="$hikeId"',
+      );
+
+      if (hikeId.isNotEmpty) {
+        return _route(settings, LiveHikeViewerScreen(hikeId: hikeId));
+      }
+
+      debugPrint('[TRACK DEBUG] /track rejected: missing hikeId');
     }
 
     return onUnknownRoute(settings);
