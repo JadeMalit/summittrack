@@ -9,6 +9,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../data/trail_data/mountain.dart';
 import '../../offline/data/offline_mountains_data.dart';
 import '../../../services/data_service.dart';
+import '../../hike/screens/hike_history_screen.dart';
+import '../../hike/services/hike_stats_service.dart';
 import '../widgets/pre_hike_header_card.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -112,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
             physics: const BouncingScrollPhysics(),
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              SliverToBoxAdapter(child: PreHikeHeaderCard()),
+              const SliverToBoxAdapter(child: PreHikeHeaderCard()),
               if (isOfflineMode)
                 SliverToBoxAdapter(
                   child: Padding(
@@ -323,76 +325,81 @@ class _StatsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final compact = constraints.maxWidth < 360;
-        final achievementAccent = context.isDarkMode
-            ? colors.softHighlight
-            : const Color(0xFF7E8A55);
-        final achievementTint = context.isDarkMode
-            ? colors.surfaceMuted
-            : const Color(0xFFF3F6EA);
+    final statsService = HikeStatsService.instance;
 
-        if (compact) {
-          return Column(
-            children: [
-              _StatCard(
-                label: 'Climb',
-                value: '0',
-                icon: Icons.hiking_rounded,
-                animationDelay: Duration.zero,
-                darkGreen: darkGreen,
-                accentColor: mediumGreen,
-                accentTint: lightGreen,
-                textPrimary: textPrimary,
-                textSecondary: textSecondary,
-              ),
-              const SizedBox(height: 12),
-              _StatCard(
-                label: 'Achievements',
-                value: '0',
-                icon: Icons.workspace_premium_rounded,
-                animationDelay: const Duration(milliseconds: 110),
-                darkGreen: darkGreen,
-                accentColor: achievementAccent,
-                accentTint: achievementTint,
-                textPrimary: textPrimary,
-                textSecondary: textSecondary,
-              ),
-            ],
-          );
-        }
+    return ListenableBuilder(
+      listenable: statsService,
+      builder: (context, _) {
+        final totalClimbs = statsService.totalCompletedClimbs.toString();
+        final totalAchievements =
+            statsService.unlockedAchievementsCount.toString();
 
-        return Row(
-          children: [
-            Expanded(
-              child: _StatCard(
-                label: 'Climb',
-                value: '0',
-                icon: Icons.hiking_rounded,
-                animationDelay: Duration.zero,
-                darkGreen: darkGreen,
-                accentColor: mediumGreen,
-                accentTint: lightGreen,
-                textPrimary: textPrimary,
-                textSecondary: textSecondary,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _StatCard(
-                label: 'Achievements',
-                value: '0',
-                icon: Icons.workspace_premium_rounded,
-                animationDelay: const Duration(milliseconds: 110),
-                darkGreen: darkGreen,
-                accentColor: achievementAccent,
-                accentTint: achievementTint,
-                textPrimary: textPrimary,
-                textSecondary: textSecondary,
-              ),
-            ),
-          ],
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 360;
+            final achievementAccent = context.isDarkMode
+                ? colors.softHighlight
+                : const Color(0xFF7E8A55);
+            final achievementTint = context.isDarkMode
+                ? colors.surfaceMuted
+                : const Color(0xFFF3F6EA);
+
+            final climbCard = _StatCard(
+              label: 'Climb',
+              value: totalClimbs,
+              icon: Icons.hiking_rounded,
+              animationDelay: Duration.zero,
+              darkGreen: darkGreen,
+              accentColor: mediumGreen,
+              accentTint: lightGreen,
+              textPrimary: textPrimary,
+              textSecondary: textSecondary,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const HikeHistoryScreen(),
+                  ),
+                );
+              },
+            );
+
+            final achievementCard = _StatCard(
+              label: 'Achievements',
+              value: totalAchievements,
+              icon: Icons.workspace_premium_rounded,
+              animationDelay: const Duration(milliseconds: 110),
+              darkGreen: darkGreen,
+              accentColor: achievementAccent,
+              accentTint: achievementTint,
+              textPrimary: textPrimary,
+              textSecondary: textSecondary,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const HikeHistoryScreen(),
+                  ),
+                );
+              },
+            );
+
+            if (compact) {
+              return Column(
+                children: [
+                  climbCard,
+                  const SizedBox(height: 12),
+                  achievementCard,
+                ],
+              );
+            }
+
+            return Row(
+              children: [
+                Expanded(child: climbCard),
+                const SizedBox(width: 12),
+                Expanded(child: achievementCard),
+              ],
+            );
+          },
         );
       },
     );
@@ -410,6 +417,7 @@ class _StatCard extends StatefulWidget {
     required this.accentTint,
     required this.textPrimary,
     required this.textSecondary,
+    required this.onTap,
   });
 
   final String label;
@@ -421,6 +429,7 @@ class _StatCard extends StatefulWidget {
   final Color accentTint;
   final Color textPrimary;
   final Color textSecondary;
+  final VoidCallback onTap;
 
   @override
   State<_StatCard> createState() => _StatCardState();
@@ -479,7 +488,7 @@ class _StatCardState extends State<_StatCard> {
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(22),
-              onTap: () {},
+              onTap: widget.onTap,
               onHover: (value) {
                 if (_isHovered == value) {
                   return;
@@ -501,7 +510,7 @@ class _StatCardState extends State<_StatCard> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 curve: Curves.easeOutCubic,
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
                 decoration: BoxDecoration(
                   color: colors.surface,
                   borderRadius: BorderRadius.circular(22),
@@ -519,11 +528,11 @@ class _StatCardState extends State<_StatCard> {
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
                       curve: Curves.easeOutCubic,
-                      width: 54,
-                      height: 54,
+                      width: 48,
+                      height: 48,
                       decoration: BoxDecoration(
                         color: widget.accentTint,
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: widget.accentColor.withValues(alpha: 0.14),
                         ),
@@ -531,46 +540,50 @@ class _StatCardState extends State<_StatCard> {
                       child: Icon(
                         widget.icon,
                         color: widget.accentColor,
-                        size: 28,
+                        size: 24,
                       ),
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: widget.accentColor,
-                                  shape: BoxShape.circle,
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: widget.accentColor,
+                                    shape: BoxShape.circle,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
+                                const SizedBox(width: 6),
+                                Text(
                                   widget.label,
                                   style: TextStyle(
                                     color: widget.textSecondary,
-                                    fontSize: 13.5,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 4),
                           Text(
                             widget.value,
                             style: TextStyle(
                               color: widget.textPrimary,
-                              fontSize: 28,
+                              fontSize: 26,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.4,
-                              height: 1,
+                              height: 1.1,
                             ),
                           ),
                         ],
