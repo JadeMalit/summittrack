@@ -361,7 +361,7 @@ class _HikeNavigationConfirmationDialogState
   }
 
   void _startNavigation() {
-    if (_debugTrailheadStartAvailable && _useDebugTrailheadStart) {
+    if (_useDebugTrailheadStart) {
       final debugPosition = DebugTrailheadStartSimulator.simulatedPositionFor(
         metadata: widget.metadata,
       );
@@ -418,7 +418,7 @@ class _HikeNavigationConfirmationDialogState
   }
 
   bool get _debugTrailheadStartAvailable {
-    return widget.metadata.trailhead != null;
+    return true;
   }
 
   String get _trailheadProximityMessage {
