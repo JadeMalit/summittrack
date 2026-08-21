@@ -367,23 +367,31 @@ Future<void> _handleStartNavigation(
   BuildContext context,
   HikeNavigationMetadata metadata,
 ) async {
-  // if (HikeTrackingService.instance.hasActiveSession) {
-  //  Navigator.of(context).pushNamed(AppRoutes.hikeNavigation);
-  //  return;
-  //}
+  try {
+    final startRequest = await showHikeNavigationConfirmation(
+      context: context,
+      metadata: metadata,
+    );
 
-  final startRequest = await showHikeNavigationConfirmation(
-    context: context,
-    metadata: metadata,
-  );
+    if (startRequest == null || !context.mounted) {
+      return;
+    }
 
-  if (startRequest == null || !context.mounted) {
-    return;
+    await Navigator.of(
+      context,
+    ).pushNamed(AppRoutes.hikeNavigation, arguments: startRequest);
+  } catch (e, stackTrace) {
+    debugPrint('Navigation launch failed: $e');
+    debugPrint('$stackTrace');
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to start navigation: $e'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
-
-  Navigator.of(
-    context,
-  ).pushNamed(AppRoutes.hikeNavigation, arguments: startRequest);
 }
 
 /// 🟢 TRIPLE-ANIMATED FLOATING "LET'S HIKE" BUTTON

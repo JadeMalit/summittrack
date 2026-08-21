@@ -2,6 +2,7 @@ import Flutter
 import UIKit
 import UserNotifications
 import flutter_local_notifications
+import GoogleMaps
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -9,6 +10,9 @@ import flutter_local_notifications
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // 🗺️ I-initialize ang Google Maps para sa iOS
+    GMSServices.provideAPIKey("AIzaSyC51RwYcp8sJ1iH1DP-9l087fZQyzHCiQ0")
+
     FlutterLocalNotificationsPlugin.setPluginRegistrantCallback { registry in
       GeneratedPluginRegistrant.register(with: registry)
     }
