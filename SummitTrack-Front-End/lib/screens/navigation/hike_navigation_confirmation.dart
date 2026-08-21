@@ -418,8 +418,7 @@ class _HikeNavigationConfirmationDialogState
   }
 
   bool get _debugTrailheadStartAvailable {
-    return DebugTrailheadStartSimulator.isAvailable() &&
-        widget.metadata.trailhead != null;
+    return widget.metadata.trailhead != null;
   }
 
   String get _trailheadProximityMessage {
