@@ -783,6 +783,10 @@ class HikeNotificationService extends ChangeNotifier
       _channelBlocked = false;
       _setEffectiveEnabled(false);
       await _syncTokenRefreshSubscription();
+      _recordDiagnostic('reconciliation_completed', {
+        'state': 'invalid-token-without-local-enable',
+        'devicePath': cloudState.devicePath,
+      });
       return;
     }
 
@@ -833,6 +837,11 @@ class HikeNotificationService extends ChangeNotifier
     await _cancelAllHikeNotificationsInternal(uid: user.uid);
     await _syncTokenRefreshSubscription();
     _schedulePendingNavigationAttempt();
+    _recordDiagnostic('reconciliation_completed', {
+      'state': recoveringInvalidToken
+          ? 'enabled-invalid-token-recovered'
+          : 'enabled',
+    });
   }
 
   Future<void> reconcileScheduledHikes(
@@ -1394,13 +1403,33 @@ class HikeNotificationService extends ChangeNotifier
     await _loadPreferences(reload: true);
     final user = _auth.currentUser;
     final localPreference = _storedEnabledPreference();
-    if (user == null || token.trim().isEmpty) {
+    _recordDiagnostic('token_refresh_received', {
+      'authenticated': user != null,
+      'localPreference': localPreference ?? 'missing',
+      'tokenHash': token.trim().isEmpty
+          ? 'none'
+          : _safeIdentifier(token.trim()),
+    });
+    if (user == null) {
+      _recordDiagnostic('token_refresh_skipped', {
+        'reason': 'no-authenticated-user',
+      });
+      return;
+    }
+
+    final trimmedToken = token.trim();
+    if (trimmedToken.isEmpty) {
+      _recordDiagnostic('token_refresh_skipped', {'reason': 'empty-token'});
       return;
     }
 
     try {
       final cloudState = await _readCurrentDeviceState(user.uid);
       if (!cloudState.readSucceeded) {
+        _recordDiagnostic('token_refresh_skipped', {
+          'reason': 'cloud-device-read-failed',
+          'devicePath': cloudState.devicePath,
+        });
         return;
       }
       if (!shouldPersistTokenRefresh(
@@ -1409,6 +1438,12 @@ class HikeNotificationService extends ChangeNotifier
         cloudNotificationsEnabled: cloudState.notificationsEnabled,
         cloudTokenStatus: cloudState.tokenStatus,
       )) {
+        _recordDiagnostic('token_refresh_skipped', {
+          'reason': 'cloud-device-not-active',
+          'devicePath': cloudState.devicePath,
+          'cloudStatus': cloudState.tokenStatus,
+          'localPreference': localPreference ?? 'missing',
+        });
         return;
       }
       await _registerCurrentDevice(tokenOverride: token.trim(), force: true);
@@ -1707,6 +1742,7 @@ class HikeNotificationService extends ChangeNotifier
     }
 
     await _setAutoInitEnabledPreservingState(true);
+    final tokenStopwatch = Stopwatch()..start();
     final override = tokenOverride?.trim();
     String? rawToken;
     if (override != null && override.isNotEmpty) {
@@ -1726,12 +1762,29 @@ class HikeNotificationService extends ChangeNotifier
       }
     }
     var token = rawToken?.trim() ?? '';
+    _recordDiagnostic('token_request_completed', {
+      'elapsedMs': tokenStopwatch.elapsedMilliseconds,
+      'token_available': token.isNotEmpty,
+      'token_length': token.length,
+      'masked_token': _maskedToken(token),
+    });
+    _recordDiagnostic('fcm_token_result', {
+      'result': rawToken == null
+          ? 'null'
+          : token.isEmpty
+          ? 'empty'
+          : 'valid',
+      'tokenReceived': token.isNotEmpty,
+      'tokenHash': token.isEmpty ? 'none' : _safeIdentifier(token),
+      'tokenLength': token.length,
+    });
     if (token.isEmpty) {
       token = 'device_local_${await _deviceId()}';
     }
 
     final deviceId = await _deviceId();
     final reference = _deviceDocument(user.uid, deviceId: deviceId);
+    final devicePath = _maskedDevicePath(user.uid, deviceId);
     Map<String, dynamic>? existingData;
     try {
       final existing = await reference.get().timeout(_initializationTimeout);
@@ -1743,6 +1796,10 @@ class HikeNotificationService extends ChangeNotifier
         existingData?['tokenStatus'] == _tokenStatusInvalid &&
         existingToken.isNotEmpty &&
         existingToken == token) {
+      _recordDiagnostic('known_invalid_token_renewal_started', {
+        'devicePath': devicePath,
+        'tokenHash': _safeIdentifier(token),
+      });
       try {
         await _messaging.deleteToken().timeout(_initializationTimeout);
         final renewedToken =
@@ -1750,10 +1807,48 @@ class HikeNotificationService extends ChangeNotifier
               _initializationTimeout,
             ))?.trim() ??
             '';
-        if (renewedToken.isNotEmpty && renewedToken != token) {
-          token = renewedToken;
+        _recordDiagnostic('known_invalid_token_renewal_completed', {
+          'devicePath': devicePath,
+          'tokenAvailable': renewedToken.isNotEmpty,
+          'tokenLength': renewedToken.length,
+          'previousTokenHash': _safeIdentifier(token),
+          'newTokenHash': renewedToken.isEmpty
+              ? 'none'
+              : _safeIdentifier(renewedToken),
+          'tokenChanged': renewedToken != token,
+        });
+        if (renewedToken.isEmpty) {
+          throw const NotificationServiceException(
+            message: 'Firebase did not return a replacement token yet.',
+            kind: NotificationFailureKind.temporary,
+            operation: 'device-registration',
+          );
         }
-      } catch (_) {}
+        if (renewedToken == token) {
+          throw const NotificationServiceException(
+            message:
+                'Firebase returned the same token that was already rejected.',
+            kind: NotificationFailureKind.temporary,
+            operation: 'device-registration',
+          );
+        }
+        token = renewedToken;
+      } catch (error) {
+        _recordDiagnostic('known_invalid_token_renewal_failed', {
+          'devicePath': devicePath,
+          'classification': _classifyFailure(error).name,
+          'error': _safeErrorSummary(error),
+          ..._firebaseErrorDiagnosticFields(error),
+        });
+        if (error is NotificationServiceException) {
+          rethrow;
+        }
+        throw NotificationServiceException(
+          message: _safeErrorSummary(error),
+          kind: _classifyFailure(error),
+          operation: 'device-registration',
+        );
+      }
     }
 
     if (!force && existingData != null) {
@@ -2399,6 +2494,27 @@ class HikeNotificationService extends ChangeNotifier
   String _safeIdentifier(String value) {
     final digest = sha256.convert(utf8.encode(value)).toString();
     return digest.substring(0, 10);
+  }
+
+  String _maskedToken(String token) {
+    if (token.isEmpty) {
+      return 'none';
+    }
+    if (token.length <= 8) {
+      return '...${token.substring(token.length.clamp(4, token.length) - 4)}';
+    }
+    return '${token.substring(0, 4)}...${token.substring(token.length - 4)}';
+  }
+
+  Map<String, Object?> _firebaseErrorDiagnosticFields(Object error) {
+    if (error is! FirebaseException) {
+      return const <String, Object?>{};
+    }
+    return <String, Object?>{
+      'firebasePlugin': error.plugin,
+      'firebaseCode': error.code,
+      'firebaseMessage': error.message ?? 'none',
+    };
   }
 
   void _recordDiagnostic(

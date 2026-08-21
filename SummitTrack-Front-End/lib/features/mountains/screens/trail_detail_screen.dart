@@ -14,6 +14,7 @@ import '../../../data/trail_data/trail_waypoint_helper.dart';
 import '../../../models/hike_navigation_metadata.dart';
 import '../../../screens/navigation/hike_navigation_confirmation.dart';
 import '../../hike/models/scheduled_hike.dart';
+import '../../hike/screens/hike.dart';
 import '../../hike/screens/lets_hike_calendar_weather_modal.dart';
 import '../../hike/services/hike_schedule_store.dart';
 import '../../hike/utils/mountain_schedule_identity.dart';
@@ -97,7 +98,11 @@ class TrailDetailScreen extends StatelessWidget {
     final mountainName = MountainScheduleIdentity.displayNameForMountainId(
       mountainId,
     );
-    final navigationMetadata = NavigationTrails.forTrailId(trailPhotoId);
+    final navigationMetadata = NavigationTrails.forTrail(
+      mountainId: mountainId,
+      trailId: navigationTrailId ?? trailPhotoId,
+      trail: trail,
+    );
 
     // 🏔️ Waypoints, Peak Elevation & Distance
     final waypoints = TrailWaypointHelper.getWaypointsForTrail(
@@ -249,6 +254,111 @@ class TrailDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
+    );
+  }
+}
+
+class _ScheduleAwareStartNavigationButton extends StatefulWidget {
+  const _ScheduleAwareStartNavigationButton({
+    required this.metadata,
+    required this.mountainId,
+    required this.trailId,
+    required this.trailName,
+  });
+
+  final HikeNavigationMetadata metadata;
+  final String mountainId;
+  final String trailId;
+  final String trailName;
+
+  @override
+  State<_ScheduleAwareStartNavigationButton> createState() =>
+      _ScheduleAwareStartNavigationButtonState();
+}
+
+class _ScheduleAwareStartNavigationButtonState
+    extends State<_ScheduleAwareStartNavigationButton> {
+  final HikeScheduleStore _scheduleStore = HikeScheduleStore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleStore.load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: _scheduleStore,
+      builder: (context, _) {
+        final activeScheduledHike = _scheduleStore.activeHikeForTrailToday(
+          widget.mountainId,
+          widget.trailId,
+          trailName: widget.trailName,
+        );
+
+        if (activeScheduledHike == null) {
+          return const SizedBox.shrink();
+        }
+
+        return _StartNavigationButton(metadata: widget.metadata);
+      },
+    );
+  }
+}
+
+class _ScheduleAwareLetsHikeButton extends StatefulWidget {
+  const _ScheduleAwareLetsHikeButton({
+    required this.mountainId,
+    required this.mountainName,
+    required this.trailId,
+    required this.trailName,
+    required this.canShowStartNavigation,
+  });
+
+  final String mountainId;
+  final String mountainName;
+  final String trailId;
+  final String trailName;
+  final bool canShowStartNavigation;
+
+  @override
+  State<_ScheduleAwareLetsHikeButton> createState() =>
+      _ScheduleAwareLetsHikeButtonState();
+}
+
+class _ScheduleAwareLetsHikeButtonState
+    extends State<_ScheduleAwareLetsHikeButton> {
+  final HikeScheduleStore _scheduleStore = HikeScheduleStore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleStore.load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: _scheduleStore,
+      builder: (context, _) {
+        final activeScheduledHike = _scheduleStore.activeHikeForTrailToday(
+          widget.mountainId,
+          widget.trailId,
+          trailName: widget.trailName,
+        );
+
+        if (widget.canShowStartNavigation && activeScheduledHike != null) {
+          return const SizedBox.shrink();
+        }
+
+        return _LetsHikeAnimatedButton(
+          mountainId: widget.mountainId,
+          mountainName: widget.mountainName,
+          trailId: widget.trailId,
+          trailName: widget.trailName,
+        );
+      },
     );
   }
 }
@@ -704,6 +814,8 @@ class _NavigationControls extends StatelessWidget {
         const _SectionHeading(title: 'Navigation'),
         const SizedBox(height: 10),
         _StartNavigationButton(metadata: metadata),
+        const SizedBox(height: 12),
+        const _ViewLiveHikeDashboardButton(),
       ],
     );
   }
@@ -1033,6 +1145,40 @@ class _StartNavigationButton extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ViewLiveHikeDashboardButton extends StatelessWidget {
+  const _ViewLiveHikeDashboardButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          side: const BorderSide(color: Color(0xFF3FA65B), width: 2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        icon: const Icon(Icons.hiking_rounded, color: Color(0xFF3FA65B)),
+        label: Text(
+          'View Live Hike Dashboard',
+          style: GoogleFonts.fredoka(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: context.isDarkMode ? Colors.white : const Color(0xFF1E261A),
+          ),
+        ),
+        onPressed: () {
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (context) => const HikeScreen()));
+        },
       ),
     );
   }
