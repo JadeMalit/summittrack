@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:app_links/app_links.dart'; // 🟢 Import para sa Deep Linking
+import 'package:app_links/app_links.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -93,7 +93,6 @@ void _logStartup(String message) {
   debugPrint('$_startupLogPrefix $message');
 }
 
-// 🟢 CONVERTED TO STATEFUL WIDGET FOR DEEP LINK LISTENING
 class SummitTrackApp extends StatefulWidget {
   const SummitTrackApp({super.key});
 
@@ -104,6 +103,7 @@ class SummitTrackApp extends StatefulWidget {
 class _SummitTrackAppState extends State<SummitTrackApp> {
   final _appLinks = AppLinks();
   StreamSubscription<Uri>? _linkSubscription;
+  String? _lastHandledHikeId;
 
   @override
   void initState() {
@@ -111,9 +111,7 @@ class _SummitTrackAppState extends State<SummitTrackApp> {
     _initDeepLinks();
   }
 
-  /// 🟢 Makikinig sa mga papasok na Deep Links (Cold Start & Background)
   Future<void> _initDeepLinks() async {
-    // 1. COLD START: Kapag sarado/patay ang app nung pinindot ang link
     try {
       final initialUri = await _appLinks.getInitialLink();
       if (initialUri != null) {
@@ -123,7 +121,6 @@ class _SummitTrackAppState extends State<SummitTrackApp> {
       _logStartup('Failed to get initial deep link: $e');
     }
 
-    // 2. WARM/BACKGROUND START: Kapag nakabukas o nakatago ang app sa background
     _linkSubscription = _appLinks.uriLinkStream.listen(
       (uri) {
         _handleDeepLink(uri);
@@ -134,25 +131,46 @@ class _SummitTrackAppState extends State<SummitTrackApp> {
     );
   }
 
-  /// 🚀 SALUHIN ANG LINK AT IDIREKTA AGAD SA LIVE VIEWER SCREEN
   void _handleDeepLink(Uri uri) {
     _logStartup('Deep link received: $uri');
 
-    // Kunin ang hikeId mula sa query parameters (?hikeId=XYZ)
-    final String? hikeId = uri.queryParameters['hikeId'];
+    String? hikeId = uri.queryParameters['hikeId'];
+
+    if (hikeId == null || hikeId.isEmpty) {
+      final rawUri = uri.toString();
+      if (rawUri.contains('hikeId=')) {
+        final split = rawUri.split('hikeId=');
+        if (split.length > 1) {
+          hikeId = Uri.decodeComponent(split[1].split('&').first);
+        }
+      }
+    }
 
     if (hikeId != null && hikeId.isNotEmpty) {
-      _logStartup('Navigating to LiveHikeViewerScreen with hikeId: $hikeId');
+      if (_lastHandledHikeId == hikeId) {
+        return;
+      }
+      _lastHandledHikeId = hikeId;
 
-      // Siguraduhing render na ang Navigator Context bago ibukas ang screen
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (appNavigatorKey.currentState != null) {
-          appNavigatorKey.currentState!.push(
+      _logStartup('Navigating to LiveHikeViewerScreen with hikeId: $hikeId');
+      final targetHikeId = hikeId;
+
+      void performNavigation() {
+        final navigator = appNavigatorKey.currentState;
+        if (navigator != null) {
+          navigator.push(
             MaterialPageRoute(
-              builder: (context) => LiveHikeViewerScreen(hikeId: hikeId),
+              settings: RouteSettings(name: '/track?hikeId=$targetHikeId'),
+              builder: (context) => LiveHikeViewerScreen(hikeId: targetHikeId),
             ),
           );
         }
+      }
+
+      WidgetsBinding.instance.addPostFrameCallback((_) => performNavigation());
+      Future.delayed(const Duration(milliseconds: 350), performNavigation);
+      Future.delayed(const Duration(seconds: 3), () {
+        _lastHandledHikeId = null;
       });
     }
   }

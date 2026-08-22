@@ -1568,11 +1568,28 @@ class AppRouter {
       }
     }
 
-    // ============================================================
+  // ============================================================
     // 🛰️ PUBLIC LIVE HIKE TRACKING
     // ============================================================
-    if (uri.path == AppRoutes.liveTrack) {
-      final String hikeId = uri.queryParameters['hikeId']?.trim() ?? '';
+    final bool isTrackingRoute = uri.path == AppRoutes.liveTrack ||
+        uri.path == '/track' ||
+        uri.path == 'track' ||
+        uri.host == 'track' ||
+        location.contains('/track') ||
+        location.contains('summittrack://track');
+
+    if (isTrackingRoute) {
+      String? hikeId = uri.queryParameters['hikeId']?.trim();
+
+      // Fallback parser kung sakaling hindi napuno ng standard Uri parser
+      if (hikeId == null || hikeId.isEmpty) {
+        if (location.contains('hikeId=')) {
+          final split = location.split('hikeId=');
+          if (split.length > 1) {
+            hikeId = Uri.decodeComponent(split[1].split('&').first);
+          }
+        }
+      }
 
       debugPrint(
         '[TRACK DEBUG] /track matched | '
@@ -1580,7 +1597,7 @@ class AppRouter {
         'hikeId="$hikeId"',
       );
 
-      if (hikeId.isNotEmpty) {
+      if (hikeId != null && hikeId.isNotEmpty) {
         return _route(settings, LiveHikeViewerScreen(hikeId: hikeId));
       }
 

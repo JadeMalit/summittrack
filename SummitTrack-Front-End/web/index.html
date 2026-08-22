@@ -69,9 +69,9 @@
     <h2>SummitTrack Live Hike</h2>
     <p>I-tap ang button sa ibaba para buksan ang live location sa SummitTrack App.</p>
 
-    <a id="appBtn" href="#" class="btn">🚀 BUKSAN SA SUMMITTRACK APP</a>
+    <button id="appBtn" class="btn">🚀 BUKSAN SA SUMMITTRACK APP</button>
 
-    <p class="note">Kapag ayaw magbukas, i-tap ang <b>3 dots (⋮)</b> sa taas at piliin ang <b>"Open in Browser" / "Open in Safari"</b>.</p>
+    <p class="note">Binubuksan ang live tracking sa app...</p>
   </div>
 
   <script>
@@ -81,18 +81,39 @@
     if (hikeId) {
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
       const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+      const isAndroid = /android/i.test(userAgent);
 
-      // iOS scheme vs Android intent
-      const deepLinkUrl = isIOS
-        ? "summittrack://track?hikeId=" + encodeURIComponent(hikeId)
-        : "intent://track?hikeId=" + encodeURIComponent(hikeId) + "#Intent;scheme=summittrack;package=com.example.summittrack;end;";
+      function launchApp() {
+        if (isIOS) {
+          const iosCustomUrl = "summittrack://track?hikeId=" + encodeURIComponent(hikeId);
+          
+          // Method 1: IFrame dispatch para sa Messenger In-App WebView
+          const iframe = document.createElement("iframe");
+          iframe.style.border = "none";
+          iframe.style.width = "1px";
+          iframe.style.height = "1px";
+          iframe.src = iosCustomUrl;
+          document.body.appendChild(iframe);
 
-      const btn = document.getElementById('appBtn');
-      btn.href = deepLinkUrl;
+          // Method 2: Direct top-level assign
+          setTimeout(() => {
+            window.location.assign(iosCustomUrl);
+          }, 50);
+        } else if (isAndroid) {
+          const androidIntent = "intent://track?hikeId=" + encodeURIComponent(hikeId) + "#Intent;scheme=summittrack;package=com.summittrack.app;end;";
+          window.location.href = androidIntent;
+        }
+      }
 
-      btn.onclick = function(e) {
+      // Auto-trigger kapag kakabukas lang mula sa Messenger
+      window.onload = function() {
+        setTimeout(launchApp, 300);
+      };
+
+      // Trigger kapag pinindot ang button
+      document.getElementById('appBtn').onclick = function(e) {
         e.preventDefault();
-        window.location.href = deepLinkUrl;
+        launchApp();
       };
     }
   </script>
