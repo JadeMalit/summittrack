@@ -71,7 +71,7 @@
 
     <a id="appBtn" href="#" class="btn">🚀 BUKSAN SA SUMMITTRACK APP</a>
 
-    <p class="note">Kapag ayaw magbukas, i-tap ang <b>3 dots (⋮)</b> sa taas at piliin ang <b>"Open in Browser"</b>.</p>
+    <p class="note">Kapag ayaw magbukas, i-tap ang <b>3 dots (⋮)</b> sa taas at piliin ang <b>"Open in Browser" / "Open in Safari"</b>.</p>
   </div>
 
   <script>
@@ -79,14 +79,20 @@
     const hikeId = urlParams.get('hikeId');
 
     if (hikeId) {
-      // Android Intent format na gumagana kahit sa Messenger WebView
-      const intentUrl = "intent://track?hikeId=" + hikeId + "#Intent;scheme=summittrack;package=com.example.summittrack;end;";
-      
-      const btn = document.getElementById('appBtn');
-      btn.href = intentUrl;
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
 
-      btn.onclick = function() {
-        window.location.href = intentUrl;
+      // iOS scheme vs Android intent
+      const deepLinkUrl = isIOS
+        ? "summittrack://track?hikeId=" + encodeURIComponent(hikeId)
+        : "intent://track?hikeId=" + encodeURIComponent(hikeId) + "#Intent;scheme=summittrack;package=com.example.summittrack;end;";
+
+      const btn = document.getElementById('appBtn');
+      btn.href = deepLinkUrl;
+
+      btn.onclick = function(e) {
+        e.preventDefault();
+        window.location.href = deepLinkUrl;
       };
     }
   </script>

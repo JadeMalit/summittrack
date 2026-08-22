@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../models/hike_navigation_metadata.dart';
@@ -43,7 +44,7 @@ class _HikeNavigationConfirmationDialogState
   TrailheadProximityResult? _trailheadProximity;
   bool _checkingGps = true;
   bool _loadingWeather = true;
-  bool _useDebugTrailheadStart = false;
+  bool _useDebugTrailheadStart = true;
   String? _weatherSummary;
 
   @override
@@ -73,9 +74,6 @@ class _HikeNavigationConfirmationDialogState
     setState(() {
       _readiness = readiness;
       _trailheadProximity = trailheadProximity;
-      if (!_debugTrailheadStartAvailable) {
-        _useDebugTrailheadStart = false;
-      }
       _checkingGps = false;
     });
   }
@@ -96,7 +94,7 @@ class _HikeNavigationConfirmationDialogState
 
       setState(() {
         if (text != null && temp != null) {
-          _weatherSummary = '$text, ${temp.toString()}C';
+          _weatherSummary = '$text, ${temp.toString()}°C';
         } else {
           _weatherSummary = 'Weather preview unavailable';
         }
@@ -362,11 +360,30 @@ class _HikeNavigationConfirmationDialogState
 
   void _startNavigation() {
     if (_useDebugTrailheadStart) {
-      final debugPosition = DebugTrailheadStartSimulator.simulatedPositionFor(
-        metadata: widget.metadata,
-      );
+      Position? debugPosition;
+      try {
+        debugPosition = DebugTrailheadStartSimulator.simulatedPositionFor(
+          metadata: widget.metadata,
+        );
+      } catch (_) {
+        debugPosition = null;
+      }
+
       if (debugPosition == null) {
-        return;
+        final fallbackCoord =
+            widget.metadata.trailhead ?? widget.metadata.destination;
+        debugPosition = Position(
+          latitude: fallbackCoord.latitude,
+          longitude: fallbackCoord.longitude,
+          timestamp: DateTime.now(),
+          accuracy: 5.0,
+          altitude: 0.0,
+          altitudeAccuracy: 0.0,
+          heading: 0.0,
+          headingAccuracy: 0.0,
+          speed: 0.0,
+          speedAccuracy: 0.0,
+        );
       }
 
       Navigator.of(context).pop(
@@ -380,6 +397,9 @@ class _HikeNavigationConfirmationDialogState
 
     final position = _readiness?.position;
     if (position == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Waiting for GPS signal...')),
+      );
       return;
     }
 
@@ -391,6 +411,14 @@ class _HikeNavigationConfirmationDialogState
       setState(() {
         _trailheadProximity = proximity;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            proximity.message ?? 'You are too far from the trailhead.',
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
       return;
     }
 
@@ -417,9 +445,7 @@ class _HikeNavigationConfirmationDialogState
     return trailName;
   }
 
-  bool get _debugTrailheadStartAvailable {
-    return true;
-  }
+  bool get _debugTrailheadStartAvailable => true;
 
   String get _trailheadProximityMessage {
     if (_debugTrailheadStartAvailable && _useDebugTrailheadStart) {
