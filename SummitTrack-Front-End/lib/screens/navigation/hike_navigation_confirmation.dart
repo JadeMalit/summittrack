@@ -366,6 +366,11 @@ class _HikeNavigationConfirmationDialogState
         metadata: widget.metadata,
       );
       if (debugPosition == null) {
+        // Defensive: simulator unavailable at execution time (e.g. release build).
+        // Reset the toggle so the dialog reflects the correct ineligible state.
+        setState(() {
+          _useDebugTrailheadStart = false;
+        });
         return;
       }
 
@@ -417,9 +422,8 @@ class _HikeNavigationConfirmationDialogState
     return trailName;
   }
 
-  bool get _debugTrailheadStartAvailable {
-    return true;
-  }
+  bool get _debugTrailheadStartAvailable =>
+      DebugTrailheadStartSimulator.isAvailable();
 
   String get _trailheadProximityMessage {
     if (_debugTrailheadStartAvailable && _useDebugTrailheadStart) {
