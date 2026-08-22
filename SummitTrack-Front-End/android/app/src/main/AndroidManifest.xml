@@ -42,11 +42,14 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="summittrack" />
+                
+                <data 
+                    android:scheme="summittrack" 
+                    android:host="track" />
             </intent-filter>
 
             <!-- 🟢 3. WEB HTTPS INTENT FILTER (Firebase Domain Links) -->
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -63,9 +66,9 @@
         </activity>
 
         <!-- Google Maps Android client configuration is supplied by Gradle. -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="${GOOGLE_MAPS_API_KEY}" />
+       <meta-data
+    android:name="com.google.android.geo.API_KEY"
+    android:value="AIzaSyC51RwYcp8sJ1iH1DP-9l087fZQyzHCiQ0" />
         <!-- ================================================= -->
 
         <meta-data

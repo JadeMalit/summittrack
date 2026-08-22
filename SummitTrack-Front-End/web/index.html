@@ -47,7 +47,7 @@
       width: 100%;
       padding: 16px;
       background-color: #1B4D2E;
-      color: white;
+      color: white !important;
       text-decoration: none;
       border-radius: 14px;
       font-size: 16px;
@@ -69,7 +69,7 @@
     <h2>SummitTrack Live Hike</h2>
     <p>I-tap ang button sa ibaba para buksan ang live location sa SummitTrack App.</p>
 
-    <button id="appBtn" class="btn">🚀 BUKSAN SA SUMMITTRACK APP</button>
+    <a id="appBtn" href="summittrack://track" class="btn">🚀 BUKSAN SA SUMMITTRACK APP</a>
 
     <p class="note">Binubuksan ang live tracking sa app...</p>
   </div>
@@ -79,41 +79,22 @@
     const hikeId = urlParams.get('hikeId');
 
     if (hikeId) {
-      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-      const isAndroid = /android/i.test(userAgent);
+      const schemeUrl = "summittrack://track?hikeId=" + encodeURIComponent(hikeId);
+      const btn = document.getElementById('appBtn');
 
-      function launchApp() {
-        if (isIOS) {
-          const iosCustomUrl = "summittrack://track?hikeId=" + encodeURIComponent(hikeId);
-          
-          // Method 1: IFrame dispatch para sa Messenger In-App WebView
-          const iframe = document.createElement("iframe");
-          iframe.style.border = "none";
-          iframe.style.width = "1px";
-          iframe.style.height = "1px";
-          iframe.src = iosCustomUrl;
-          document.body.appendChild(iframe);
+      btn.href = schemeUrl;
 
-          // Method 2: Direct top-level assign
-          setTimeout(() => {
-            window.location.assign(iosCustomUrl);
-          }, 50);
-        } else if (isAndroid) {
-          const androidIntent = "intent://track?hikeId=" + encodeURIComponent(hikeId) + "#Intent;scheme=summittrack;package=com.summittrack.app;end;";
-          window.location.href = androidIntent;
-        }
+      function openApp() {
+        // Direct custom scheme invocation
+        window.location.href = schemeUrl;
       }
 
-      // Auto-trigger kapag kakabukas lang mula sa Messenger
-      window.onload = function() {
-        setTimeout(launchApp, 300);
-      };
+      btn.addEventListener('click', function(e) {
+        openApp();
+      });
 
-      // Trigger kapag pinindot ang button
-      document.getElementById('appBtn').onclick = function(e) {
-        e.preventDefault();
-        launchApp();
+      window.onload = function() {
+        setTimeout(openApp, 200);
       };
     }
   </script>
