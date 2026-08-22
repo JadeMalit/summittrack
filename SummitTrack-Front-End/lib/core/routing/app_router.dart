@@ -180,11 +180,7 @@ class AppRouter {
 
       return _route(
         settings,
-        _AuthGuard(
-          currentLocation: location,
-          requireAuth: true,
-          child: HikeNavigationScreen(startRequest: startRequest),
-        ),
+        HikeNavigationScreen(startRequest: startRequest),
       );
     }
 
@@ -1575,12 +1571,6 @@ class AppRouter {
     // ============================================================
     // 🛰️ PUBLIC LIVE HIKE TRACKING
     // ============================================================
-    //
-    // Example:
-    // /track?hikeId=mt_apo_sta-cruz-sibulan_2026-08-20
-    //
-    // This route intentionally does not use _AuthGuard because
-    // recipients of a shared tracking link may not be logged in.
     if (uri.path == AppRoutes.liveTrack) {
       final String hikeId = uri.queryParameters['hikeId']?.trim() ?? '';
 

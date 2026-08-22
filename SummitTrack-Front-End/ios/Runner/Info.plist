@@ -51,6 +51,17 @@
         <string>location</string>
     </array>
 
+    <!-- Platform Views Support para sa MapLibre / OpenFreeMap rendering -->
+    <key>io.flutter.embedded_views_preview</key>
+    <true/>
+
+    <!-- Network Security para sa Map Tiles / Style JSON downloading -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
+
     <!-- Custom URL Scheme para sa Safari / Deep Linking -->
     <key>CFBundleURLTypes</key>
     <array>
@@ -72,7 +83,7 @@
     <key>NSPhotoLibraryUsageDescription</key>
     <string>SummitTrack lets you choose trail photos and videos from your library and save them to your account.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>SummitTrack uses your location while the app is open to show your hiking position and route guidance.</string>
+    <string>SummitTrack uses your location while the open to show your hiking position and route guidance.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>SummitTrack uses your location in the background to continuously track your live hike and update navigation.</string>
 </dict>
