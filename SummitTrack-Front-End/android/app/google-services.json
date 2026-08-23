@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "785993329168",
+    "firebase_url": "https://summittrack-10481-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "summittrack-10481",
     "storage_bucket": "summittrack-10481.firebasestorage.app"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "785993329168-9fmllhvqldchum8q3s6b5fcdphr9uoc4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.summittrack",
+            "certificate_hash": "b1dc42da8b5286260cf4348d8dbde7d15621ef62"
+          }
+        },
         {
           "client_id": "785993329168-d49gvei3u1ruhad4s3a25rb8di7gun3o.apps.googleusercontent.com",
           "client_type": 1,
