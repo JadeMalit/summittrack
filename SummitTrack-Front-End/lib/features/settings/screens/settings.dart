@@ -155,40 +155,40 @@ class _SettingsBodyState extends State<_SettingsBody> {
                       HikeNotificationService.instance.notificationsEnabled;
                   final ValueChanged<bool>? onNotificationChanged =
                       _isNotificationActionProcessing
-                      ? null
-                      : (requestedValue) {
-                          _recordNotificationUiDiagnostic(
-                            'diagnostic_build_marker',
-                            {
-                              'marker': notificationToggleDiagnosticBuildMarker,
-                              'location': 'settings_switch_tap',
-                            },
-                          );
-                          _recordNotificationUiDiagnostic(
-                            'settings_switch_tap_received',
-                            {
-                              'requested_value': requestedValue,
-                              'current_switch_value': notificationsEnabled,
-                              'processing_state_before':
-                                  _isNotificationActionProcessing,
-                              'widget_mounted': mounted,
-                            },
-                          );
-                          _recordNotificationUiDiagnostic(
-                            'toggle_tap_received',
-                            {
-                              'requestedEnabled': requestedValue,
-                              'visibleEnabled': notificationsEnabled,
-                              'processing': _isNotificationActionProcessing,
-                            },
-                          );
-                          unawaited(
-                            _handleNotificationSwitchChange(
-                              context,
-                              enabled: requestedValue,
-                            ),
-                          );
-                        };
+                          ? null
+                          : (requestedValue) {
+                              _recordNotificationUiDiagnostic(
+                                'diagnostic_build_marker',
+                                {
+                                  'marker': notificationToggleDiagnosticBuildMarker,
+                                  'location': 'settings_switch_tap',
+                                },
+                              );
+                              _recordNotificationUiDiagnostic(
+                                'settings_switch_tap_received',
+                                {
+                                  'requested_value': requestedValue,
+                                  'current_switch_value': notificationsEnabled,
+                                  'processing_state_before':
+                                      _isNotificationActionProcessing,
+                                  'widget_mounted': mounted,
+                                },
+                              );
+                              _recordNotificationUiDiagnostic(
+                                'toggle_tap_received',
+                                {
+                                  'requestedEnabled': requestedValue,
+                                  'visibleEnabled': notificationsEnabled,
+                                  'processing': _isNotificationActionProcessing,
+                                },
+                              );
+                              unawaited(
+                                _handleNotificationSwitchChange(
+                                  context,
+                                  enabled: requestedValue,
+                                ),
+                              );
+                            };
 
                   return _SettingsTileShell(
                     onTap: null,
@@ -212,10 +212,7 @@ class _SettingsBodyState extends State<_SettingsBody> {
                 icon: Icons.security_rounded,
                 title: 'Privacy and Security',
                 subtitle: 'Manage app access and safety options',
-                onTap: () => widget.onShowSnack(
-                  context,
-                  'Privacy settings are ready for hookup.',
-                ),
+                onTap: () => _showPrivacySecuritySheet(context),
               ),
             ],
           ),
@@ -226,26 +223,13 @@ class _SettingsBodyState extends State<_SettingsBody> {
                 icon: Icons.help_outline_rounded,
                 title: 'Help',
                 subtitle: 'Get support for SummitTrack',
-                onTap: () => widget.onShowSnack(
-                  context,
-                  'Help center is ready for hookup.',
-                ),
+                onTap: () => _showHelpSheet(context),
               ),
               _SettingsTile(
                 icon: Icons.info_outline_rounded,
                 title: 'About',
                 subtitle: 'App details and version information',
-                onTap: () {
-                  showAboutDialog(
-                    context: context,
-                    applicationName: 'SummitTrack',
-                    applicationVersion: '1.0.0',
-                    applicationIcon: Icon(
-                      Icons.terrain_rounded,
-                      color: colors.accent,
-                    ),
-                  );
-                },
+                onTap: () => _showAboutSheet(context),
               ),
             ],
           ),
@@ -264,6 +248,273 @@ class _SettingsBodyState extends State<_SettingsBody> {
               ],
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  void _showAboutSheet(BuildContext context) {
+    final colors = context.appColors;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: colors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 20,
+            bottom: MediaQuery.of(sheetContext).padding.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colors.divider,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: colors.iconBackground,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.terrain_rounded, size: 48, color: colors.accent),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'SummitTrack',
+                style: TextStyle(
+                  color: colors.textPrimary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Version 1.0.0',
+                style: TextStyle(color: colors.textSecondary, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'SummitTrack is a cross-platform mobile hiking guide and live navigation companion engineered for Philippine mountains. It provides real-time GPS telemetry, weather monitoring, trail exploration, and emergency broadcast safety features.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: colors.textPrimary, fontSize: 13.5, height: 1.4),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.accent,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () => Navigator.of(sheetContext).pop(),
+                  child: const Text('Close', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showHelpSheet(BuildContext context) {
+    final colors = context.appColors;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: colors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          minChildSize: 0.5,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return ListView(
+              controller: scrollController,
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 16,
+                bottom: MediaQuery.of(sheetContext).padding.bottom + 20,
+              ),
+              children: [
+                Center(
+                  child: Container(
+                    width: 42,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: colors.divider,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(Icons.help_outline_rounded, color: colors.accent, size: 28),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Help & Support',
+                      style: TextStyle(
+                        color: colors.textPrimary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildHelpItem(
+                  colors,
+                  '🗺️ How to use Trail Navigation',
+                  'Select a mountain from the explore list, tap "Start Hike", and follow the live route. Keep GPS enabled on your device for accurate tracking.',
+                ),
+                _buildHelpItem(
+                  colors,
+                  '☀️ Weather Forecasts',
+                  'Access real-time meteorological conditions and extended multi-day forecasts before beginning your climb to evaluate trail safety.',
+                ),
+                _buildHelpItem(
+                  colors,
+                  '🚨 Emergency SOS Feature',
+                  'In case of emergencies on the trail, trigger the SOS button to broadcast your last known coordinates and status to designated contacts.',
+                ),
+               
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showPrivacySecuritySheet(BuildContext context) {
+    final colors = context.appColors;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: colors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          minChildSize: 0.5,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return ListView(
+              controller: scrollController,
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 16,
+                bottom: MediaQuery.of(sheetContext).padding.bottom + 20,
+              ),
+              children: [
+                Center(
+                  child: Container(
+                    width: 42,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: colors.divider,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(Icons.security_rounded, color: colors.accent, size: 28),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Privacy & Security',
+                      style: TextStyle(
+                        color: colors.textPrimary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildHelpItem(
+                  colors,
+                  '📍 Location Telemetry',
+                  'SummitTrack requests precise location access solely to record your active hiking routes, calculate elevation gain, and update navigation checkpoints.',
+                ),
+                _buildHelpItem(
+                  colors,
+                  '🔒 Account & Data Security',
+                  'Your user profile and authenticated records are securely managed through Firebase Authentication and encrypted cloud databases.',
+                ),
+                _buildHelpItem(
+                  colors,
+                  '🛡️ Permission Controls',
+                  'You have full control over background location tracking, notifications, and camera/gallery access through your device system settings.',
+                ),
+                _buildHelpItem(
+                  colors,
+                  '📋 Data Sharing & Privacy',
+                  'We do not sell personal telemetry or location history to third-party ad networks. Live broadcast data is only visible to approved hike viewers.',
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildHelpItem(dynamic colors, String title, String body) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: colors.iconBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              color: colors.textPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            body,
+            style: TextStyle(
+              color: colors.textSecondary,
+              fontSize: 12.5,
+              height: 1.35,
+            ),
+          ),
         ],
       ),
     );
