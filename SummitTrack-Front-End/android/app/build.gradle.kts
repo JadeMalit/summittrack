@@ -1,4 +1,5 @@
 import java.util.Properties
+import java.io.FileInputStream
 
 plugins {
     id("com.android.application")
@@ -13,11 +14,18 @@ val localProperties = Properties().apply {
     }
 }
 
+val keystoreProperties = Properties().apply {
+    val keystorePropertiesFile = rootProject.file("key.properties")
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { load(it) }
+    }
+}
+
 val googleMapsApiKey = providers.environmentVariable("GOOGLE_MAPS_API_KEY")
     .orElse(localProperties.getProperty("GOOGLE_MAPS_API_KEY", ""))
 
 android {
-    namespace = "com.example.summittrack"
+    namespace = "com.dct.summittrack"
     compileSdk = flutter.compileSdkVersion
 
     ndkVersion = "28.1.13356709"
@@ -32,8 +40,17 @@ android {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+            storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
+            storePassword = keystoreProperties.getProperty("storePassword")
+        }
+    }
+
     defaultConfig {
-        applicationId = "com.example.summittrack"
+        applicationId = "com.dct.summittrack"
         
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
@@ -41,15 +58,14 @@ android {
         versionName = flutter.versionName
         manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = googleMapsApiKey.get()
 
-        ndk {
-            abiFilters.clear()
-            abiFilters.add("arm64-v8a")
-        }
+        // TINANGGAL ANG NDK ABI RESTRICTION PARA SA PLAY STORE BUNDLE (.AAB)
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }

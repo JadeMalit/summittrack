@@ -66,24 +66,19 @@ class GoogleAuthService {
     FirebaseAuth? auth,
     FirebaseFirestore? firestore,
     GoogleSignIn? googleSignIn,
-  }) : _auth = auth ?? FirebaseAuth.instance,
-       _firestore = firestore ?? FirebaseFirestore.instance,
-       _googleSignIn =
-           googleSignIn ??
-           GoogleSignIn(
-             scopes: const ['email', 'profile'],
-             serverClientId: _androidWebClientId,
-           );
+  })  : _auth = auth ?? FirebaseAuth.instance,
+        _firestore = firestore ?? FirebaseFirestore.instance,
+        _googleSignIn = googleSignIn ??
+            GoogleSignIn(
+              scopes: const ['email', 'profile'],
+              serverClientId:
+                  '785993329168-fo1qco92h2m364ge0qeoodaidvvqu6hv.apps.googleusercontent.com',
+            );
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
   final GoogleSignIn _googleSignIn;
-  static const String _googleWebClientId = String.fromEnvironment(
-    'GOOGLE_WEB_CLIENT_ID',
-  );
-  static const String? _androidWebClientId = _googleWebClientId == ''
-      ? null
-      : _googleWebClientId;
+
   static const _cancelledMessage =
       'Google sign-in was cancelled. Please try again.';
   static const _androidConfigMessage =
@@ -95,8 +90,7 @@ class GoogleAuthService {
     try {
       _logGoogleAuthStep(
         _stepFlow,
-        'start platform=${kIsWeb ? 'web' : defaultTargetPlatform.name}; '
-        'dartDefineServerClientId=${_androidWebClientId == null ? 'not-provided' : 'provided'}',
+        'start platform=${kIsWeb ? 'web' : defaultTargetPlatform.name}',
       );
 
       credential = kIsWeb
@@ -262,7 +256,6 @@ class GoogleAuthService {
   }
 
   Future<void> _guardAgainstPasswordOnlyAccount(String email) async {
-    // This prevents creating a Google account for an email/password-only user.
     // ignore: deprecated_member_use
     final methods = await _auth.fetchSignInMethodsForEmail(email);
     final hasPassword = methods.contains('password');

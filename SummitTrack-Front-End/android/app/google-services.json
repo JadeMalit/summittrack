@@ -8,6 +8,58 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:785993329168:android:a981b2fb571d856e1cf895",
+        "android_client_info": {
+          "package_name": "com.dct.summittrack"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "785993329168-iqv3g1ctl0k13u0ngj0ncsddtojmpkb2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dct.summittrack",
+            "certificate_hash": "26eed98f18bb2aa23e026d7f3c0bf1f761121abc"
+          }
+        },
+        {
+          "client_id": "785993329168-ujkm8gj0bcgk83lq7dea3gkv0jdumthi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dct.summittrack",
+            "certificate_hash": "ee2693e2ffb955e61257edcf5d75639b7c1225ba"
+          }
+        },
+        {
+          "client_id": "785993329168-fo1qco92h2m364ge0qeoodaidvvqu6hv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBobG-HXLwhvyXFQaczZY1vdU-Kas7ExNo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "785993329168-fo1qco92h2m364ge0qeoodaidvvqu6hv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "785993329168-eoavknahqfr5d56itcp24hg4jnegmdo8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.summittrack"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:785993329168:android:e62297fd24d49b3b1cf895",
         "android_client_info": {
           "package_name": "com.example.summittrack"
@@ -28,6 +80,14 @@
           "android_info": {
             "package_name": "com.example.summittrack",
             "certificate_hash": "b251d6853c06e611f19c5a7610ffa1919511394b"
+          }
+        },
+        {
+          "client_id": "785993329168-oj0qq7qujnaueifujr9fo4lv6a8657vn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.summittrack",
+            "certificate_hash": "26eed98f18bb2aa23e026d7f3c0bf1f761121abc"
           }
         },
         {
