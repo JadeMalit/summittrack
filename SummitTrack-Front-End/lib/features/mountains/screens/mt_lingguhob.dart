@@ -20,21 +20,21 @@ class MtLingguhobScreen extends StatelessWidget {
 
     final trailButtons = [
       _TrailButtonConfig(
-        title: 'Bonbon Eco-Cultural Trail',
+        title: 'Igtuble Jump-off Summit Trail',
         subtitle: 'Open Trail Details',
         onTap: () {
           Navigator.of(context).pushNamed('/mountain/lingguhob/trail/bonbon');
         },
       ),
       _TrailButtonConfig(
-        title: 'Itisan Ridge Technical Traverse',
+        title: 'Leon-Tubungan Ridge Traverse',
         subtitle: 'Open Trail Details',
         onTap: () {
           Navigator.of(context).pushNamed('/mountain/lingguhob/trail/itisan');
         },
       ),
       _TrailButtonConfig(
-        title: 'Tuasan Falls Eco Link',
+        title: 'Panay Upland Forest Circuit',
         subtitle: 'Open Trail Details',
         onTap: () {
           Navigator.of(context).pushNamed('/mountain/lingguhob/trail/tuasan');
@@ -75,19 +75,23 @@ class MtLingguhobScreen extends StatelessWidget {
                     const _InfoLine(label: 'Name:', value: 'Mt. Lingguhob'),
                     const _InfoLine(
                       label: 'Location:',
-                      value: 'Catarman and Mambajao, Camiguin Island, Philippines.',
+                      value: 'Leon and Tubungan, Iloilo, Panay Island, Western Visayas, Philippines.',
                     ),
                     const _InfoLine(
                       label: 'Elevation:',
-                      value: 'An eco-tourism volcanic wonder nestled in the heart of the island province of Camiguin.',
+                      value: '1,280 meters above sea level (MASL).',
+                    ),
+                    const _InfoLine(
+                      label: 'Jump-off Point:',
+                      value: 'Brgy. Igtuble, Tubungan, Iloilo.',
                     ),
                     const _InfoLine(
                       label: 'Description:',
-                      value: 'Mt. Lingguhob is one of the captivating peaks in Camiguin. Known for its rich biodiversity, dense primary rainforests, and technical ridge paths, this mountain offers an authentic tropical jungle mountaineering experience ranging from pristine river trekking to intense technical scrambles.',
+                      value: 'Part of the rugged Central Panay Mountain Range, Mt. Lingguhob is known for its scenic upland vistas, rolling agricultural landscapes, mossy forest patches, and challenging highland ridges bordering Leon and Tubungan.',
                     ),
                     const _InfoLine(
-                      label: 'Slope:',
-                      value: 'A dynamic mix of moderate forest floors, sharp volcanic knife-edge ridges, and vertical root-laden assaults. The base trail transitions smoothly into rock-strewn water streams and boulder canyon pathways.',
+                      label: 'Slope & Terrain:',
+                      value: 'Gradual to steep ascents through mountain farmlands transitioning into dense ridge crests, mossy forested paths, and open grassy viewpoints.',
                     ),
                     const SizedBox(height: 18),
                     for (
