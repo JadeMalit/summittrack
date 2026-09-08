@@ -42,10 +42,24 @@ target 'Runner' do
 end
 
 post_install do |installer|
+  # 1. Agad na i-patch ang lahat ng basic_seq.h sa loob ng Pods bago mag-compile
+  Dir.glob("#{installer.sandbox.root}/**/basic_seq.h").each do |file|
+    if File.exist?(file)
+      text = File.read(file)
+      # Inaayos ang linyang nagdudulot ng "template keyword" parse error
+      new_text = text.gsub('template Poll<', 'Poll<')
+                     .gsub('template <template <typename> class F>', 'template <template <typename...> class F>')
+      if text != new_text
+        File.chmod(0644, file)
+        File.open(file, "w") { |f| f.puts new_text }
+      end
+    end
+  end
+
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
 
-    # 1. BoringSSL-GRPC fix
+    # 2. BoringSSL-GRPC flag fix
     if target.name == 'BoringSSL-GRPC'
       target.source_build_phase.files.each do |file|
         if file.settings && file.settings['COMPILER_FLAGS']
@@ -62,6 +76,7 @@ post_install do |installer|
       config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
       config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
 
+      # C++ dialect at non-modular header fixes
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
       config.build_settings['CLANG_WARN_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'NO'
 
@@ -75,15 +90,6 @@ post_install do |installer|
         config.build_settings[setting] = "#{flags} -Wno-error=non-modular-include-in-framework-module -Wno-non-modular-include-in-framework-module"
       end
     end
-  end
-
-  # 2. Patch para sa sirang template syntax sa gRPC-Core basic_seq.h
-  basic_seq_path = File.join(installer.sandbox.root, 'gRPC-Core/src/core/lib/promise/detail/basic_seq.h')
-  if File.exist?(basic_seq_path)
-    content = File.read(basic_seq_path)
-    patched = content.gsub('template <template <typename> class F>', 'template <template <typename...> class F>')
-                     .gsub('template Poll<T>', 'Poll<T>')
-    File.write(basic_seq_path, patched)
   end
 
   installer.aggregate_targets.each do |aggregate_target|
