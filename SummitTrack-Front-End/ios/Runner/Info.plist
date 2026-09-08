@@ -51,6 +51,10 @@
 		<string>location</string>
 	</array>
 
+	<!-- App Store Export Compliance Bypass -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
 	<!-- Platform Views Support para sa MapLibre / OpenFreeMap rendering -->
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>

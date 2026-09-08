@@ -45,7 +45,7 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
 
-    # Tanggalin ang sirang -GCC_WARN_INHIBIT_ALL_WARNINGS / -G sa BoringSSL-GRPC source files para sa Xcode 16
+    # 1. Tanggalin ang sirang -GCC_WARN_INHIBIT_ALL_WARNINGS / -G sa BoringSSL-GRPC source files
     if target.name == 'BoringSSL-GRPC'
       target.source_build_phase.files.each do |file|
         if file.settings && file.settings['COMPILER_FLAGS']
@@ -62,7 +62,10 @@ post_install do |installer|
       config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
       config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
 
-      # Tanggalin ang -G flag kung may natira sa target compiler flags
+      # 2. Solusyon sa Lexical/Preprocessor issue (firebase_storage non-modular header)
+      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+
+      # Tanggalin ang anumang -G flag kung may natira sa compiler flags
       ['OTHER_CFLAGS', 'OTHER_CPLUSPLUSFLAGS'].each do |setting|
         val = config.build_settings[setting]
         if val.is_a?(String)
