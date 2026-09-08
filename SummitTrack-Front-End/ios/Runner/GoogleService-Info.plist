@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>785993329168-eoavknahqfr5d56itcp24hg4jnegmdo8.apps.googleusercontent.com</string>
+	<string>785993329168-tkpb1b04vtfhlpmneul0eibp3muagrcd.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.785993329168-eoavknahqfr5d56itcp24hg4jnegmdo8</string>
+	<string>com.googleusercontent.apps.785993329168-tkpb1b04vtfhlpmneul0eibp3muagrcd</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>785993329168-9fmllhvqldchum8q3s6b5fcdphr9uoc4.apps.googleusercontent.com</string>
+	<string>785993329168-iqv3g1ctl0k13u0ngj0ncsddtojmpkb2.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyBZzUIq1ODM3oVnOmKlSdoTiYZneXjjraY</string>
 	<key>GCM_SENDER_ID</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.summittrack</string>
+	<string>com.dct.summittrack</string>
 	<key>PROJECT_ID</key>
 	<string>summittrack-10481</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,7 +31,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:785993329168:ios:78152ff9e916b9771cf895</string>
+	<string>1:785993329168:ios:db14d968863e14181cf895</string>
 	<key>DATABASE_URL</key>
 	<string>https://summittrack-10481-default-rtdb.asia-southeast1.firebasedatabase.app</string>
 </dict>
