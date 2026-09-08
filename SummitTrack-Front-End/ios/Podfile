@@ -45,7 +45,7 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
 
-    # 1. BoringSSL-GRPC fix para sa Xcode 16
+    # 1. BoringSSL-GRPC fix
     if target.name == 'BoringSSL-GRPC'
       target.source_build_phase.files.each do |file|
         if file.settings && file.settings['COMPILER_FLAGS']
@@ -62,11 +62,15 @@ post_install do |installer|
       config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
       config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
 
-      # 2. Huwag gawing fatal error ang non-modular include
+      # 2. Fix para sa gRPC basic_seq.h C++ standard issue sa modernong Clang
+      config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++14'
+      config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+
+      # 3. Huwag gawing fatal error ang non-modular include
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
       config.build_settings['CLANG_WARN_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'NO'
 
-      # 3. Suppress lahat ng fatal warnings sa compilation
+      # 4. Suppress compiler warnings
       ['OTHER_CFLAGS', 'OTHER_CPLUSPLUSFLAGS'].each do |setting|
         flags = config.build_settings[setting] || '$(inherited)'
         if flags.is_a?(Array)
@@ -79,7 +83,7 @@ post_install do |installer|
     end
   end
 
-  # 4. Tanggalin ang module map references sa Pods umbrella project targets na nag-i-insist sa gRPC
+  # 5. Modular inclusion sa project targets
   installer.aggregate_targets.each do |aggregate_target|
     aggregate_target.user_project.native_targets.each do |target|
       target.build_configurations.each do |config|
