@@ -73,7 +73,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<!-- Google Reversed Client ID para sa iOS Sign-In callback -->
-				<string>com.googleusercontent.apps.785993329168-eoavknahqfr5d56itcp24hg4jnegmdo8</string>
+				<string>com.googleusercontent.apps.785993329168-tkpb1b04vtfhlpmneul0eibp3muagrcd</string>
 				<!-- Custom App Scheme para sa Deep Linking -->
 				<string>summittrack</string>
 			</array>
