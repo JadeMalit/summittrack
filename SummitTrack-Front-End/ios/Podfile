@@ -34,10 +34,6 @@ flutter_ios_podfile_setup
 target 'Runner' do
   use_frameworks! :linkage => :static
 
-  # I-force ang gRPC sa fixed version na compatible sa modernong Xcode
-  pod 'gRPC-Core', '~> 1.62.0'
-  pod 'gRPC-C++', '~> 1.62.0'
-
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
   target 'RunnerTests' do
@@ -49,7 +45,7 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
 
-    # BoringSSL-GRPC fix
+    # 1. BoringSSL-GRPC fix
     if target.name == 'BoringSSL-GRPC'
       target.source_build_phase.files.each do |file|
         if file.settings && file.settings['COMPILER_FLAGS']
@@ -66,8 +62,6 @@ post_install do |installer|
       config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
       config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
 
-      config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'gnu++17'
-      config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
       config.build_settings['CLANG_WARN_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'NO'
 
@@ -81,6 +75,15 @@ post_install do |installer|
         config.build_settings[setting] = "#{flags} -Wno-error=non-modular-include-in-framework-module -Wno-non-modular-include-in-framework-module"
       end
     end
+  end
+
+  # 2. Patch para sa sirang template syntax sa gRPC-Core basic_seq.h
+  basic_seq_path = File.join(installer.sandbox.root, 'gRPC-Core/src/core/lib/promise/detail/basic_seq.h')
+  if File.exist?(basic_seq_path)
+    content = File.read(basic_seq_path)
+    patched = content.gsub('template <template <typename> class F>', 'template <template <typename...> class F>')
+                     .gsub('template Poll<T>', 'Poll<T>')
+    File.write(basic_seq_path, patched)
   end
 
   installer.aggregate_targets.each do |aggregate_target|
