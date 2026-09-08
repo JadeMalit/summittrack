@@ -40,7 +40,6 @@ target 'Runner' do
     inherit! :search_paths
   end
 end
-
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
@@ -54,6 +53,16 @@ post_install do |installer|
         '$(inherited)',
         'FIREBASE_ANALYTICS_COLLECTION_ENABLED=1',
       ]
+
+      # Tanggalin ang unsupported -G flag para sa Xcode 16 Clang compiler
+      ['OTHER_CFLAGS', 'OTHER_CPLUSPLUSFLAGS'].each do |setting|
+        flags = config.build_settings[setting]
+        if flags.is_a?(String)
+          config.build_settings[setting] = flags.gsub('-G', '').strip
+        elsif flags.is_a?(Array)
+          config.build_settings[setting] = flags.reject { |f| f == '-G' }
+        end
+      end
     end
   end
 end
