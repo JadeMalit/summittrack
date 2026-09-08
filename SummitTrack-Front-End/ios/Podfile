@@ -32,7 +32,7 @@ require File.expand_path(
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  use_modular_headers!
+  use_frameworks! :linkage => :static
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
@@ -62,17 +62,28 @@ post_install do |installer|
       config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
       config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
 
-      # Payagan ang non-modular includes sa bawat pod target
+      # 2. Huwag gawing fatal error ang non-modular include
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+      config.build_settings['CLANG_WARN_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'NO'
 
-      # Tanggalin ang anumang -G flag
+      # 3. Suppress lahat ng fatal warnings sa compilation
       ['OTHER_CFLAGS', 'OTHER_CPLUSPLUSFLAGS'].each do |setting|
-        val = config.build_settings[setting]
-        if val.is_a?(String)
-          config.build_settings[setting] = val.gsub(/(^|\s)-G(\s|$)/, ' ').strip
-        elsif val.is_a?(Array)
-          config.build_settings[setting] = val.reject { |flag| flag == '-G' }
+        flags = config.build_settings[setting] || '$(inherited)'
+        if flags.is_a?(Array)
+          flags = flags.reject { |f| f == '-G' }
+        else
+          flags = flags.to_s.gsub(/(^|\s)-G(\s|$)/, ' ').strip
         end
+        config.build_settings[setting] = "#{flags} -Wno-error=non-modular-include-in-framework-module -Wno-non-modular-include-in-framework-module"
+      end
+    end
+  end
+
+  # 4. Tanggalin ang module map references sa Pods umbrella project targets na nag-i-insist sa gRPC
+  installer.aggregate_targets.each do |aggregate_target|
+    aggregate_target.user_project.native_targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
       end
     end
   end
