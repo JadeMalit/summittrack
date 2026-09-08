@@ -34,6 +34,15 @@ flutter_ios_podfile_setup
 target 'Runner' do
   use_frameworks! :linkage => :static
 
+  # 1. Puwersahing modular headers ang lahat ng Firebase pods para mawala ang non-modular include errors
+  pod 'FirebaseCore', :modular_headers => true
+  pod 'FirebaseFirestore', :modular_headers => true
+  pod 'FirebaseAuth', :modular_headers => true
+  pod 'FirebaseFunctions', :modular_headers => true
+  pod 'FirebaseStorage', :modular_headers => true
+  pod 'FirebaseMessaging', :modular_headers => true
+  pod 'FirebaseDatabase', :modular_headers => true
+
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
   target 'RunnerTests' do
@@ -45,7 +54,7 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
 
-    # 1. Tanggalin ang sirang -GCC_WARN_INHIBIT_ALL_WARNINGS / -G sa BoringSSL-GRPC
+    # BoringSSL-GRPC fix para sa Xcode 16
     if target.name == 'BoringSSL-GRPC'
       target.source_build_phase.files.each do |file|
         if file.settings && file.settings['COMPILER_FLAGS']
@@ -62,23 +71,19 @@ post_install do |installer|
       config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
       config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
 
-      # 2. Solusyon sa Lexical/Preprocessor non-modular header issue
+      # Solusyon sa modular header errors
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
-      
-      # I-disable ang module definition sa pods na nagiging sanhi ng header boundary error
-      if target.name.start_with?('firebase_') || target.name == 'Firebase'
-        config.build_settings['DEFINES_MODULE'] = 'NO'
-      end
+      config.build_settings['DEFINES_MODULE'] = 'YES'
 
-      # Tanggalin ang -G flag at i-suppress ang non-modular include fatal error
       ['OTHER_CFLAGS', 'OTHER_CPLUSPLUSFLAGS'].each do |setting|
-        current_flags = config.build_settings[setting] || '$(inherited)'
-        if current_flags.is_a?(Array)
-          current_flags = current_flags.reject { |flag| flag == '-G' }.join(' ')
+        val = config.build_settings[setting]
+        if val.is_a?(String)
+          config.build_settings[setting] = "#{val.gsub(/(^|\s)-G(\s|$)/, ' ').strip} -Wno-error=non-modular-include-in-framework-module"
+        elsif val.is_a?(Array)
+          config.build_settings[setting] = val.reject { |flag| flag == '-G' } + ['-Wno-error=non-modular-include-in-framework-module']
         else
-          current_flags = current_flags.to_s.gsub(/(^|\s)-G(\s|$)/, ' ').strip
+          config.build_settings[setting] = '$(inherited) -Wno-error=non-modular-include-in-framework-module'
         end
-        config.build_settings[setting] = "#{current_flags} -Wno-error=non-modular-include-in-framework-module -Wno-non-modular-include-in-framework-module".strip
       end
     end
   end
