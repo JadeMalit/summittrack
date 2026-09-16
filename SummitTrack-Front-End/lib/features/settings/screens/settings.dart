@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/layout/app_responsive.dart';
+import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_controller.dart';
@@ -116,6 +117,7 @@ class _SettingsBody extends StatefulWidget {
 
 class _SettingsBodyState extends State<_SettingsBody> {
   bool _isNotificationActionProcessing = false;
+  bool _isDeletingAccount = false;
 
   @override
   void initState() {
@@ -127,6 +129,82 @@ class _SettingsBodyState extends State<_SettingsBody> {
     unawaited(
       HikeNotificationService.instance.refreshNotificationEnabledState(),
     );
+  }
+
+  Future<void> _handleDeleteAccount(BuildContext context) async {
+    if (_isDeletingAccount) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          title: const Text('Delete Account'),
+          content: const Text(
+            'Are you sure you want to permanently delete your SummitTrack account and data? This action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogCtx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogCtx).pop(true),
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() {
+      _isDeletingAccount = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await user.delete();
+
+        if (!mounted) return;
+        widget.onShowSnack(context, 'Account deleted successfully.');
+
+        Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
+          AppRoutes.login,
+          (route) => false,
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        if (mounted) {
+          widget.onShowSnack(
+            context,
+            'For security purposes, please sign out and sign in again before deleting your account.',
+          );
+        }
+      } else {
+        if (mounted) {
+          widget.onShowSnack(
+            context,
+            'Failed to delete account: ${e.message}',
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        widget.onShowSnack(context, 'An unexpected error occurred: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDeletingAccount = false;
+        });
+      }
+    }
   }
 
   @override
@@ -230,6 +308,27 @@ class _SettingsBodyState extends State<_SettingsBody> {
                 title: 'About',
                 subtitle: 'App details and version information',
                 onTap: () => _showAboutSheet(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _SettingsGroup(
+            children: [
+              _SettingsTileShell(
+                onTap: _isDeletingAccount ? null : () => _handleDeleteAccount(context),
+                leading: _isDeletingAccount
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.red),
+                      )
+                    : const Icon(Icons.delete_forever_rounded, color: Colors.red),
+                title: 'Delete Account',
+                subtitle: 'Permanently remove your account and data',
+                trailing: const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Colors.red,
+                ),
               ),
             ],
           ),
@@ -398,7 +497,6 @@ class _SettingsBodyState extends State<_SettingsBody> {
                   '🚨 Emergency SOS Feature',
                   'In case of emergencies on the trail, trigger the SOS button to broadcast your last known coordinates and status to designated contacts.',
                 ),
-               
               ],
             );
           },
@@ -471,7 +569,7 @@ class _SettingsBodyState extends State<_SettingsBody> {
                 _buildHelpItem(
                   colors,
                   '🛡️ Permission Controls',
-                  'You have full control over background location tracking, notifications, and camera/gallery access through your device system settings.',
+                  'You have full control over notifications and device permissions through your device system settings.',
                 ),
                 _buildHelpItem(
                   colors,
