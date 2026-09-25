@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -839,9 +839,9 @@ class _SignInScreenState extends State<SignInScreen>
                                           ),
                                         ),
                                       ),
-                                if (!loading &&
-                                    !isOfflineMode &&
-                                    !Platform.isIOS) ...[
+
+                                /// GOOGLE SIGN IN - ITINATAGO SA IOS PARA COMPLIANT SA GUIDELINE 4.8
+                                if (!loading && !isOfflineMode && !Platform.isIOS) ...[
                                   const SizedBox(height: 14),
                                   FadeTransition(
                                     opacity: _fadeAnimation,

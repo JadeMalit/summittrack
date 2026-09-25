@@ -58,7 +58,21 @@ android {
         versionName = flutter.versionName
         manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = googleMapsApiKey.get()
 
-        // TINANGGAL ANG NDK ABI RESTRICTION PARA SA PLAY STORE BUNDLE (.AAB)
+        ndk {
+            // Pinapanatili lamang ang physical device ABIs
+            abiFilters.addAll(setOf("armeabi-v7a", "arm64-v8a"))
+        }
+    }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+        jniLibs {
+            // Inilagay sa true para sa 16 KB page alignment ng .so binaries
+            useLegacyPackaging = true
+            pickFirsts += listOf("**/*.so")
+        }
     }
 
     buildTypes {
@@ -78,7 +92,6 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
-// 🟢 SAFE ZONE: AndroidX blocker lang ang tinira natin para iwas AAR Metadata error.
 rootProject.allprojects {
     configurations.all {
         resolutionStrategy {
