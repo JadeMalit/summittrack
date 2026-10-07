@@ -1,5 +1,5 @@
+
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -842,30 +842,26 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     ),
                                   ),
                                 ),
+                          const SizedBox(height: 14),
+                          FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 300),
+                              child: GoogleAuthButton(
+                                isBusy: _isBusy,
+                                nextRoute: AppRoutes.home,
+                                onAuthFlowStart: RegistrationAuthFlow.start,
+                                onAuthFlowFinish: RegistrationAuthFlow.finish,
+                                onLoadingChanged: (isLoading) {
+                                  if (_isGoogleLoading == isLoading) {
+                                    return;
+                                  }
 
-                          /// GOOGLE SIGN IN - ITINATAGO SA IOS PARA COMPLIANT SA GUIDELINE 4.8
-                          if (!Platform.isIOS) ...[
-                            const SizedBox(height: 14),
-                            FadeTransition(
-                              opacity: _fadeAnimation,
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(maxWidth: 300),
-                                child: GoogleAuthButton(
-                                  isBusy: _isBusy,
-                                  nextRoute: AppRoutes.home,
-                                  onAuthFlowStart: RegistrationAuthFlow.start,
-                                  onAuthFlowFinish: RegistrationAuthFlow.finish,
-                                  onLoadingChanged: (isLoading) {
-                                    if (_isGoogleLoading == isLoading) {
-                                      return;
-                                    }
-
-                                    setState(() => _isGoogleLoading = isLoading);
-                                  },
-                                ),
+                                  setState(() => _isGoogleLoading = isLoading);
+                                },
                               ),
                             ),
-                          ],
+                          ),
                         ],
                       ),
                     ),
@@ -879,3 +875,4 @@ class _SignUpScreenState extends State<SignUpScreen>
     );
   }
 }
+
