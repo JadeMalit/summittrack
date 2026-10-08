@@ -393,11 +393,7 @@ class _SettingsBodyState extends State<_SettingsBody> {
                   '☀️ Weather Forecasts',
                   'Access real-time meteorological conditions and extended multi-day forecasts before beginning your climb to evaluate trail safety.',
                 ),
-                _buildHelpItem(
-                  colors,
-                  '🚨 Emergency SOS Feature',
-                  'In case of emergencies on the trail, trigger the SOS button to broadcast your last known coordinates and status to designated contacts.',
-                ),
+  
                
               ],
             );
